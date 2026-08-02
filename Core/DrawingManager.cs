@@ -1,4 +1,5 @@
 ﻿using Inventor;
+using System.Collections.Generic;
 
 namespace AI_CAD_ENGINEER.Core;
 
@@ -23,6 +24,16 @@ public class DrawingManager
 
             Sheet sheet = drawingDocument.ActiveSheet;
 
+            ViewOrientationTypeEnum mainOrientation =
+                SelectMainViewOrientation(
+                    modelDocument,
+                    sheet,
+                    out string mainOrientationName);
+
+            Console.WriteLine();
+            Console.WriteLine(
+                $"Выбран главный вид: {mainOrientationName}");
+
             const double viewGap = 2.5;
 
             Point2d temporaryBasePosition =
@@ -35,19 +46,19 @@ public class DrawingManager
                     (Inventor._Document)modelDocument,
                     temporaryBasePosition,
                     1.0,
-                    ViewOrientationTypeEnum.kFrontViewOrientation,
+                    mainOrientation,
                     DrawingViewStyleEnum
                         .kHiddenLineRemovedDrawingViewStyle);
 
-            Point2d temporaryTopPosition =
+            Point2d temporaryUpperPosition =
                 _inventor.TransientGeometry.CreatePoint2d(
                     baseView.Center.X,
                     baseView.Center.Y - baseView.Height - viewGap);
 
-            DrawingView topView =
+            DrawingView upperView =
                 sheet.DrawingViews.AddProjectedView(
                     baseView,
-                    temporaryTopPosition,
+                    temporaryUpperPosition,
                     DrawingViewStyleEnum
                         .kHiddenLineRemovedDrawingViewStyle);
 
@@ -68,7 +79,7 @@ public class DrawingManager
             double selectedScale =
                 CalculateGostScale(
                     baseView,
-                    topView,
+                    upperView,
                     sideView,
                     sheet,
                     viewGap);
@@ -79,7 +90,7 @@ public class DrawingManager
 
             ArrangeViews(
                 baseView,
-                topView,
+                upperView,
                 sideView,
                 sheet,
                 viewGap);
@@ -87,17 +98,220 @@ public class DrawingManager
             drawingDocument.Update();
             drawingDocument.Activate();
 
+            Console.WriteLine(
+                $"Выбран масштаб: {FormatScale(selectedScale)}");
+
             return true;
         }
-        catch
+        catch (Exception exception)
         {
+            Console.WriteLine();
+            Console.WriteLine(
+                $"Ошибка Inventor API: {exception.Message}");
+
             return false;
         }
     }
 
+    private ViewOrientationTypeEnum SelectMainViewOrientation(
+        Document modelDocument,
+        Sheet sheet,
+        out string selectedOrientationName)
+    {
+        ViewOrientationTypeEnum[] orientations =
+        {
+            ViewOrientationTypeEnum.kFrontViewOrientation,
+            ViewOrientationTypeEnum.kBackViewOrientation,
+            ViewOrientationTypeEnum.kTopViewOrientation,
+            ViewOrientationTypeEnum.kBottomViewOrientation,
+            ViewOrientationTypeEnum.kLeftViewOrientation,
+            ViewOrientationTypeEnum.kRightViewOrientation
+        };
+
+        string[] orientationNames =
+        {
+            "Front",
+            "Back",
+            "Top",
+            "Bottom",
+            "Left",
+            "Right"
+        };
+
+        double bestScore = double.MinValue;
+
+        ViewOrientationTypeEnum bestOrientation =
+            ViewOrientationTypeEnum.kFrontViewOrientation;
+
+        selectedOrientationName = "Front";
+
+        Console.WriteLine();
+        Console.WriteLine("Оценка стандартных проекций:");
+        Console.WriteLine("--------------------------------");
+
+        for (int index = 0;
+             index < orientations.Length;
+             index++)
+        {
+            Point2d temporaryPosition =
+                _inventor.TransientGeometry.CreatePoint2d(
+                    sheet.Width / 2,
+                    sheet.Height / 2);
+
+            DrawingView temporaryView =
+                sheet.DrawingViews.AddBaseView(
+                    (Inventor._Document)modelDocument,
+                    temporaryPosition,
+                    1.0,
+                    orientations[index],
+                    DrawingViewStyleEnum
+                        .kHiddenLineRemovedDrawingViewStyle);
+
+            temporaryView.Parent.Parent.Update();
+
+            ViewStatistics statistics =
+                CollectViewStatistics(temporaryView);
+
+            double score =
+                CalculateViewScore(statistics);
+
+            Console.WriteLine(
+                $"{orientationNames[index]}: {score:F2}");
+
+            Console.WriteLine(
+                $"  Кривые: {statistics.CurveCount}");
+
+            Console.WriteLine(
+                $"  Линии: {statistics.LineCount}");
+
+            Console.WriteLine(
+                $"  Окружности: {statistics.CircleCount}");
+
+            Console.WriteLine(
+                $"  Дуги: {statistics.ArcCount}");
+
+            Console.WriteLine(
+                $"  Эллиптические дуги: " +
+                $"{statistics.EllipticalArcCount}");
+
+            Console.WriteLine(
+                $"  Площадь: {statistics.Area:F2}");
+
+            Console.WriteLine();
+
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestOrientation = orientations[index];
+                selectedOrientationName =
+                    orientationNames[index];
+            }
+
+            temporaryView.Delete();
+        }
+
+        Console.WriteLine("--------------------------------");
+
+        return bestOrientation;
+    }
+
+    private static ViewStatistics CollectViewStatistics(
+        DrawingView drawingView)
+    {
+        ViewStatistics statistics = new()
+        {
+            Width = drawingView.Width,
+            Height = drawingView.Height,
+            Area = drawingView.Width * drawingView.Height
+        };
+
+        if (drawingView.Height > 0)
+        {
+            statistics.AspectRatio =
+                drawingView.Width / drawingView.Height;
+        }
+
+        DrawingCurvesEnumerator? curves =
+            drawingView.DrawingCurves[null];
+
+        if (curves == null)
+        {
+            return statistics;
+        }
+
+        statistics.CurveCount = curves.Count;
+
+        foreach (DrawingCurve curve in curves)
+        {
+            foreach (DrawingCurveSegment segment
+                     in curve.Segments)
+            {
+                statistics.SegmentCount++;
+
+                string geometryType =
+                    segment.GeometryType.ToString();
+
+                switch (geometryType)
+                {
+                    case "kLineSegmentCurve2d":
+                        statistics.LineCount++;
+                        break;
+
+                    case "kCircleCurve2d":
+                        statistics.CircleCount++;
+                        break;
+
+                    case "kCircularArcCurve2d":
+                        statistics.ArcCount++;
+                        break;
+
+                    case "kEllipticalArcCurve2d":
+                        statistics.EllipticalArcCount++;
+                        break;
+
+                    default:
+                        statistics.OtherGeometryCount++;
+                        break;
+                }
+            }
+        }
+
+        return statistics;
+    }
+
+    private static double CalculateViewScore(
+        ViewStatistics statistics)
+    {
+        double score = 0;
+
+        // Базовая информативность проекции.
+        score += statistics.LineCount;
+        score += statistics.ArcCount * 2.0;
+        score += statistics.EllipticalArcCount * 2.0;
+
+        // Окружности часто показывают отверстия,
+        // поэтому получают повышенный вес.
+        score += statistics.CircleCount * 8.0;
+
+        // Небольшой бонус за площадь проекции.
+        score += statistics.Area * 0.05;
+
+        // Штраф за очень вытянутые проекции.
+        if (statistics.AspectRatio > 8.0)
+        {
+            score *= 0.75;
+        }
+        else if (statistics.AspectRatio > 12.0)
+        {
+            score *= 0.50;
+        }
+
+        return score;
+    }
+
     private void ArrangeViews(
         DrawingView baseView,
-        DrawingView topView,
+        DrawingView upperView,
         DrawingView sideView,
         Sheet sheet,
         double viewGap)
@@ -105,19 +319,20 @@ public class DrawingManager
         const double leftMargin = 2.0;
         const double rightMargin = 2.0;
         const double topMargin = 2.0;
-
-        // Внизу оставляем увеличенный запас
-        // для основной надписи и будущих размеров.
         const double bottomReservedArea = 6.0;
 
         double workingLeft = leftMargin;
         double workingBottom = bottomReservedArea;
 
         double workingWidth =
-            sheet.Width - leftMargin - rightMargin;
+            sheet.Width -
+            leftMargin -
+            rightMargin;
 
         double workingHeight =
-            sheet.Height - topMargin - bottomReservedArea;
+            sheet.Height -
+            topMargin -
+            bottomReservedArea;
 
         double groupWidth =
             baseView.Width +
@@ -125,7 +340,7 @@ public class DrawingManager
             sideView.Width;
 
         double groupHeight =
-            topView.Height +
+            upperView.Height +
             viewGap +
             baseView.Height;
 
@@ -142,14 +357,16 @@ public class DrawingManager
                 (workingHeight - groupHeight) / 2);
 
         double baseCenterX =
-            groupLeft + baseView.Width / 2;
+            groupLeft +
+            baseView.Width / 2;
 
-        double topCenterY =
-            groupBottom + topView.Height / 2;
+        double upperCenterY =
+            groupBottom +
+            upperView.Height / 2;
 
         double baseCenterY =
             groupBottom +
-            topView.Height +
+            upperView.Height +
             viewGap +
             baseView.Height / 2;
 
@@ -159,10 +376,10 @@ public class DrawingManager
             viewGap +
             sideView.Width / 2;
 
-        topView.Position =
+        upperView.Position =
             _inventor.TransientGeometry.CreatePoint2d(
                 baseCenterX,
-                topCenterY);
+                upperCenterY);
 
         baseView.Position =
             _inventor.TransientGeometry.CreatePoint2d(
@@ -177,7 +394,7 @@ public class DrawingManager
 
     private static double CalculateGostScale(
         DrawingView baseView,
-        DrawingView topView,
+        DrawingView upperView,
         DrawingView sideView,
         Sheet sheet,
         double viewGap)
@@ -188,16 +405,22 @@ public class DrawingManager
         const double bottomReservedArea = 6.0;
 
         double availableWidth =
-            sheet.Width - leftMargin - rightMargin;
+            sheet.Width -
+            leftMargin -
+            rightMargin;
 
         double availableHeight =
-            sheet.Height - topMargin - bottomReservedArea;
+            sheet.Height -
+            topMargin -
+            bottomReservedArea;
 
         double viewsWidthAtScaleOne =
-            baseView.Width + sideView.Width;
+            baseView.Width +
+            sideView.Width;
 
         double viewsHeightAtScaleOne =
-            baseView.Height + topView.Height;
+            baseView.Height +
+            upperView.Height;
 
         if (viewsWidthAtScaleOne <= 0 ||
             viewsHeightAtScaleOne <= 0)
@@ -258,5 +481,42 @@ public class DrawingManager
         }
 
         return 0.001;
+    }
+
+    private static string FormatScale(double scale)
+    {
+        if (scale >= 1.0)
+        {
+            return $"{scale:0.###}:1";
+        }
+
+        double denominator = 1.0 / scale;
+
+        return $"1:{denominator:0.###}";
+    }
+
+    private sealed class ViewStatistics
+    {
+        public double Width { get; set; }
+
+        public double Height { get; set; }
+
+        public double Area { get; set; }
+
+        public double AspectRatio { get; set; }
+
+        public int CurveCount { get; set; }
+
+        public int SegmentCount { get; set; }
+
+        public int LineCount { get; set; }
+
+        public int CircleCount { get; set; }
+
+        public int ArcCount { get; set; }
+
+        public int EllipticalArcCount { get; set; }
+
+        public int OtherGeometryCount { get; set; }
     }
 }
