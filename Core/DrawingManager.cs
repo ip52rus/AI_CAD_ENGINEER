@@ -11,7 +11,7 @@ public class DrawingManager
         _inventor = inventor;
     }
 
-    public bool CreateEmptyDrawing()
+    public bool CreateDrawingWithBaseView(Document modelDocument)
     {
         try
         {
@@ -20,6 +20,20 @@ public class DrawingManager
                     DocumentTypeEnum.kDrawingDocumentObject,
                     "",
                     true);
+
+            Sheet sheet = drawingDocument.ActiveSheet;
+
+            Point2d viewPosition =
+                _inventor.TransientGeometry.CreatePoint2d(
+                    sheet.Width / 2,
+                    sheet.Height / 2);
+
+            sheet.DrawingViews.AddBaseView(
+                (Inventor._Document)modelDocument,
+                viewPosition,
+                0.1,
+                ViewOrientationTypeEnum.kFrontViewOrientation,
+                DrawingViewStyleEnum.kHiddenLineRemovedDrawingViewStyle);
 
             drawingDocument.Activate();
 

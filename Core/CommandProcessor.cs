@@ -20,7 +20,10 @@ public class CommandProcessor
             return;
         }
 
-        if (_inventorManager.GetActiveDocument() == null)
+        Inventor.Document? activeDocument =
+            _inventorManager.GetActiveDocument();
+
+        if (activeDocument == null)
         {
             Console.WriteLine("В Inventor нет открытого документа.");
             return;
@@ -44,13 +47,15 @@ public class CommandProcessor
 
         DrawingManager drawingManager = new(inventor);
 
-        if (drawingManager.CreateEmptyDrawing())
+        if (drawingManager.CreateDrawingWithBaseView(activeDocument))
         {
-            Console.WriteLine("Пустой чертёж успешно создан.");
+            Console.WriteLine(
+                "Чертёж с базовым видом успешно создан.");
         }
         else
         {
-            Console.WriteLine("Не удалось создать пустой чертёж.");
+            Console.WriteLine(
+                "Не удалось создать чертёж с базовым видом.");
         }
     }
 }
