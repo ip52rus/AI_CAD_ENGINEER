@@ -47,15 +47,15 @@ public class CommandProcessor
 
         DrawingManager drawingManager = new(inventor);
 
-        if (drawingManager.CreateDrawingWithBaseView(activeDocument))
+        if (drawingManager.CreateDrawingWithViews(activeDocument))
         {
             Console.WriteLine(
-                "Чертёж с базовым видом успешно создан.");
+                "Чертёж с тремя видами успешно создан.");
         }
         else
         {
             Console.WriteLine(
-                "Не удалось создать чертёж с базовым видом.");
+                "Не удалось создать чертёж с тремя видами.");
         }
     }
 }
