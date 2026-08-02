@@ -33,7 +33,24 @@ public class CommandProcessor
             return;
         }
 
-        Console.WriteLine("Команда распознана.");
-        Console.WriteLine("Активная деталь готова к созданию чертежа.");
+        Inventor.Application? inventor =
+            _inventorManager.GetInventorApplication();
+
+        if (inventor == null)
+        {
+            Console.WriteLine("Подключение к Inventor отсутствует.");
+            return;
+        }
+
+        DrawingManager drawingManager = new(inventor);
+
+        if (drawingManager.CreateEmptyDrawing())
+        {
+            Console.WriteLine("Пустой чертёж успешно создан.");
+        }
+        else
+        {
+            Console.WriteLine("Не удалось создать пустой чертёж.");
+        }
     }
 }

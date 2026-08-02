@@ -22,12 +22,6 @@ public class Application
 
         Console.WriteLine("Успешно подключились к Autodesk Inventor.");
         Console.WriteLine();
-        Console.WriteLine("Откройте документ в Inventor.");
-        Console.WriteLine("После открытия документа вернитесь в консоль");
-        Console.WriteLine("и нажмите Enter для продолжения...");
-        Console.ReadLine();
-
-        Console.WriteLine();
 
         if (inventorManager.GetActiveDocument() == null)
         {

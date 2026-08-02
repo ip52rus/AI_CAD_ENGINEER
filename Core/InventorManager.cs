@@ -21,7 +21,9 @@ public class InventorManager
     public bool Connect()
     {
         if (TryConnectToRunningInventor())
+        {
             return true;
+        }
 
         return StartNewInventor();
     }
@@ -35,7 +37,9 @@ public class InventorManager
                 out Guid clsid);
 
             if (result != 0)
+            {
                 return false;
+            }
 
             result = GetActiveObject(
                 ref clsid,
@@ -43,7 +47,9 @@ public class InventorManager
                 out object activeObject);
 
             if (result != 0)
+            {
                 return false;
+            }
 
             _inventor = activeObject as Inventor.Application;
 
@@ -63,14 +69,18 @@ public class InventorManager
                 Type.GetTypeFromProgID("Inventor.Application");
 
             if (inventorType == null)
+            {
                 return false;
+            }
 
             _inventor =
                 Activator.CreateInstance(inventorType)
                 as Inventor.Application;
 
             if (_inventor == null)
+            {
                 return false;
+            }
 
             _inventor.Visible = true;
 
@@ -82,10 +92,17 @@ public class InventorManager
         }
     }
 
+    public Inventor.Application? GetInventorApplication()
+    {
+        return _inventor;
+    }
+
     public Document? GetActiveDocument()
     {
         if (_inventor == null)
+        {
             return null;
+        }
 
         return _inventor.ActiveDocument;
     }
@@ -95,7 +112,9 @@ public class InventorManager
         Document? document = GetActiveDocument();
 
         if (document == null)
+        {
             return "Документ не открыт.";
+        }
 
         return document.DisplayName;
     }
@@ -105,7 +124,9 @@ public class InventorManager
         Document? document = GetActiveDocument();
 
         if (document == null)
+        {
             return null;
+        }
 
         return document.DocumentType;
     }
