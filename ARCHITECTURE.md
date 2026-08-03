@@ -1,250 +1,361 @@
-# AI CAD ENGINEER Architecture
+# AI CAD ENGINEER
 
-## Overview
+# ARCHITECTURE
 
-AI CAD ENGINEER is an engineering decision engine.
-
-The project is built around one idea:
-
-> Engineering decisions must be independent from any CAD system.
-
-Inventor is only used as:
-
-- geometry source
-- drawing generator
-
-All engineering decisions are made inside the Engineering layer.
-
----
-
-# High Level Architecture
+Версия документа:
 
 ```
-                    User
-                      │
-                      ▼
-              CommandProcessor
-                      │
-                      ▼
-              EngineeringBrain
-                      │
-      ┌───────────────┼────────────────┐
-      │               │                │
-      ▼               ▼                ▼
- Import          Engineering      Drawing
-      │               │                │
-      ▼               ▼                ▼
- Inventor      Decision Engine   Inventor API
+v0.11.0
 ```
 
 ---
 
-# Layers
+# Общая архитектура
 
-## Import
+AI CAD ENGINEER строится как многоуровневая инженерная система.
 
-Responsible for obtaining information from CAD.
+Главный принцип:
 
-Contains:
+> Каждый модуль отвечает только за одну инженерную задачу.
 
-- ModelAnalyzer
-- HoleAnalyzer
-- ViewCandidateGenerator
-
-Responsibilities:
-
-- Read Inventor model
-- Read geometry
-- Read features
-- Produce engineering models
-
-Must NOT:
-
-- make engineering decisions
-- create drawings
-- print reports
+Модули не должны смешивать анализ модели, принятие решений и построение чертежа.
 
 ---
 
-## Engineering.Models
+# Общая схема
 
-Contains project domain objects.
+```
+                    Autodesk Inventor
+                           │
+                           ▼
+                     Import Layer
+                           │
+                           ▼
+                   Engineering Layer
+                           │
+      ┌────────────────────┼────────────────────┐
+      ▼                    ▼                    ▼
+  Analysis             Research             Decision
+      │                    │                    │
+      └────────────────────┼────────────────────┘
+                           ▼
+                     Drawing Layer
+                           │
+                           ▼
+                  Infrastructure Layer
+                           │
+                           ▼
+                         Reports
+```
 
-Examples:
+---
+
+# Import Layer
+
+Назначение:
+
+получение информации из Autodesk Inventor.
+
+Содержит:
+
+- подключение к Inventor
+- создание DrawingDocument
+- получение геометрии
+- получение Feature
+- получение Face
+- получение Edge
+- получение HoleFeature
+- создание DrawingView
+
+Import Layer не принимает инженерных решений.
+
+---
+
+# Engineering Layer
+
+Основная подсистема проекта.
+
+Именно здесь программа становится "инженером".
+
+Включает несколько независимых направлений.
+
+---
+
+# Analysis
+
+Отвечает за анализ модели.
+
+Выполняет:
+
+- анализ отверстий
+- анализ листового металла
+- анализ фасок
+- анализ скруглений
+- анализ объёма
+- анализ площади
+- анализ центра масс
+- анализ габаритов
+- анализ видов
+- вычисление информативности вида
+
+Результат:
+
+инженерское описание модели.
+
+---
+
+# Research
+
+Исследование уже построенного чертежа.
+
+Используется после создания DrawingView.
+
+Определяет:
+
+- DrawingCurve
+- линии
+- окружности
+- дуги
+- реальные размеры вида
+- кандидатов размеров
+- физические оси вида
+
+Создаёт инженерные отчёты.
+
+---
+
+# Decision
+
+Самая важная подсистема проекта.
+
+Здесь принимаются инженерные решения.
+
+На сегодняшний день реализованы:
+
+## Engineering Brain
+
+Принимает решения:
+
+- главный вид
+- необходимость размеров
+- необходимость центровых линий
+- необходимость разрезов
+
+---
+
+## Dimension Decision Engine
+
+Работает полностью независимо от Drawing.
+
+Этапы:
+
+```
+Dimension Candidates
+        │
+        ▼
+Role Resolver
+        │
+        ▼
+Classification Engine
+        │
+        ▼
+Decision Result
+```
+
+Результат:
+
+готовый набор размеров для построения.
+
+---
+
+# Drawing Layer
+
+Не принимает решений.
+
+Получает готовый план.
+
+Выполняет:
+
+- создание видов
+- выбор масштаба
+- размещение видов
+- создание центровых
+- нанесение размеров
+
+Drawing Layer ничего не анализирует.
+
+Он только строит.
+
+---
+
+# Infrastructure
+
+Сервисная подсистема.
+
+Включает:
+
+- Reporting
+- File System
+- сохранение отчётов
+
+---
+
+# Поток данных
+
+Полный путь обработки модели.
+
+```
+3D Model
+
+↓
+
+Import
+
+↓
+
+Part Analysis
+
+↓
+
+Engineering Brain
+
+↓
+
+Drawing Plan
+
+↓
+
+Drawing Views
+
+↓
+
+Geometry Research
+
+↓
+
+Dimension Candidates
+
+↓
+
+Decision Engine
+
+↓
+
+Required Dimensions
+
+↓
+
+Drawing Generator
+
+↓
+
+Drawing
+```
+
+---
+
+# Основные инженерные объекты
+
+На текущий момент.
+
+## Analysis
 
 - PartAnalysis
+- HoleAnalysis
 - ViewStatistics
-- ViewCandidate
+
+---
+
+## Decision
+
 - DrawingPlan
-
-These classes contain data only.
-
----
-
-## Engineering.Analysis
-
-Responsible for analysing engineering data.
-
-Examples:
-
-- ViewAnalyzer
-- ViewScoreCalculator
-- ViewNecessityAnalyzer
-
-Responsibilities:
-
-- analyse geometry
-- calculate statistics
-- calculate scores
-
-Must NOT:
-
-- create drawings
-- communicate with Inventor
-- decide engineering strategy
-
----
-
-## Engineering.Decision
-
-Responsible for engineering decisions.
-
-Contains:
-
-- EngineeringBrain
-
-Future:
-
-- Knowledge Base
-- Rule Engine
-
-Responsibilities:
-
-- choose main view
-- choose scale
-- choose additional views
-- determine sections
-- determine dimensions
-- determine centerlines
+- DimensionCandidate
+- DimensionDecisionResult
+- ViewAxisMapping
 
 ---
 
 ## Drawing
 
-Responsible only for drawing creation.
-
-Contains:
-
-- DrawingManager
-
-Responsibilities:
-
-- create drawing document
-- create drawing views
-- arrange views
-- create dimensions
-- create sections
-
-Must NOT:
-
-- analyse geometry
-- choose engineering strategy
+- OverallDimensionGenerator
+- CenterAnnotationGenerator
 
 ---
 
-## Infrastructure
+# Основные принципы
 
-Responsible for technical services.
+## Single Responsibility
 
-Future:
-
-- ConsoleReporter
-- Logger
-- Configuration
-- Export
-- PDF
-- HTML
-
-Infrastructure must never contain engineering logic.
+Каждый модуль отвечает только за одну задачу.
 
 ---
 
-# Data Flow
+## Engineering First
+
+Сначала принимается инженерное решение.
+
+Только потом строится чертёж.
+
+---
+
+## Reporting First
+
+Каждый этап должен иметь собственный отчёт.
+
+Это позволяет анализировать работу системы.
+
+---
+
+## Масштабируемость
+
+Новая инженерная логика должна добавляться через новые модули Decision.
+
+Без изменения существующего Drawing Layer.
+
+---
+
+# План развития архитектуры
+
+Следующий крупный слой:
 
 ```
-3D Model
-    │
-    ▼
-Import
-    │
-    ▼
-PartAnalysis
-    │
-    ▼
-ViewCandidateGenerator
-    │
-    ▼
-ViewCandidate[]
-    │
-    ▼
-EngineeringBrain
-    │
-    ▼
-DrawingPlan
-    │
-    ▼
-DrawingManager
-    │
-    ▼
-Inventor Drawing
+Geometry
 ```
 
----
+После v0.12 структура станет:
 
-# Dependency Rules
-
-Allowed:
-
+```
 Import
-    ↓
-Engineering
 
-Engineering
-    ↓
+↓
+
+Geometry
+
+↓
+
+Analysis
+
+↓
+
+Research
+
+↓
+
+Decision
+
+↓
+
 Drawing
 
-Drawing
-    ↓
-Inventor
+↓
 
-Forbidden:
+Infrastructure
+```
 
-Drawing → Engineering Analysis
-
-Engineering → Inventor API
-
-Models → Inventor API
-
-Infrastructure → Engineering Decisions
+Geometry станет источником инженерных объектов для всей системы.
 
 ---
 
-# Design Principles
+# Цель архитектуры
 
-Every class should have a single responsibility.
-
-Business logic must never depend on Inventor.
-
-Engineering decisions must be separated from drawing generation.
-
-Data models must remain independent.
-
-All future CAD systems should use the same Engineering layer.
-
----
-
-# Long-term Goal
-
-The Engineering layer should become completely CAD-independent.
-
-Only the Import and Drawing layers should know anything about Autodesk Inventor.
+Создать масштабируемую инженерную платформу, способную автоматически выпускать конструкторскую документацию уровня опытного инженера-конструктора по требованиям ЕСКД.

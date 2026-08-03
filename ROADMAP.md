@@ -1,242 +1,251 @@
 # AI CAD ENGINEER
 
-## Vision
-
-AI CAD ENGINEER — интеллектуальная инженерная система, автоматически создающая профессиональные чертежи по ЕСКД на основе 3D-модели.
-
-Цель проекта — не автоматизация Inventor, а создание инженерного ядра, принимающего решения так же, как опытный инженер-конструктор.
+# ROADMAP
 
 ---
 
-# Architecture
+# Статус проекта
+
+Текущая версия:
 
 ```
-3D Model
-    │
-    ▼
-Import
-    │
-    ▼
-Engineering Models
-    │
-    ▼
-Engineering Analysis
-    │
-    ▼
-Engineering Decision
-    │
-    ▼
-Drawing Plan
-    │
-    ▼
-Drawing Engine
-    │
-    ▼
-Inventor Drawing
+v0.11.0
 ```
 
 ---
 
-# Completed
+# Завершённые версии
 
-## v0.1
+## ✅ v0.1
 
-- Connection to Autodesk Inventor
-- Command processor
-- Automatic drawing creation
+Основа проекта
 
----
-
-## v0.2
-
-- Automatic projection generation
-- Automatic scale selection
+- подключение к Inventor
+- создание первого чертежа
+- анализ модели
+- выбор главного вида
 
 ---
 
-## v0.3
+## ✅ v0.2
 
-- View analysis
-- Projection statistics
+View Analyzer
 
----
-
-## v0.4
-
-- View scoring
-- Intelligent main view selection
+- анализ шести стандартных видов
+- оценка информативности
+- автоматический выбор главного вида
 
 ---
 
-## v0.5
+## ✅ v0.3
 
-- View necessity analysis
-- Engineering report
+Drawing Generator
 
----
-
-## v0.6
-
-- Improved view scoring
-- Better layout algorithm
+- создание трёх видов
+- автоматический масштаб
+- автоматическое размещение
 
 ---
 
-## v0.7
+## ✅ v0.4
 
-- Hole analysis
-- Part analysis
-- Sheet metal support
-- Feature recognition
+Center Annotation
 
----
-
-## v0.8
-
-- Accurate hole detection
-- Hole diameter
-- Hole depth
-- Through-hole recognition
-- Multiple hole instances
-- Model analysis
+- центровые линии
+- центровые метки
 
 ---
 
-## v0.9
+## ✅ v0.5
 
-### Architecture Refactoring
+Hole Analysis
 
-Completed:
-
-- Engineering layer
-- Drawing layer
-- Import layer
-- EngineeringBrain
-- DrawingPlan
-- ViewCandidate
-- ViewCandidateGenerator
-- Separation of responsibilities
+- анализ отверстий
+- анализ листового металла
 
 ---
 
-# Current Version
+## ✅ v0.6
 
-## v0.10
+Geometry Research
 
-### Engineering Pipeline
-
-Completed
-
-- EngineeringBrain
-- ViewCandidateGenerator
-- DrawingPlan
-- ViewCandidate
-
-In Progress
-
-- Reporting layer
-- ConsoleReporter
-- Remove Console.WriteLine() from business logic
+- исследование DrawingView
+- анализ DrawingCurve
+- поиск габаритов
 
 ---
 
-# Next Versions
+## ✅ v0.7
 
-## v0.11
+Dimension Candidates
 
-Engineering Knowledge
-
-Planned:
-
-- Knowledge Base
-- Rule Engine
-- Main View Rule
-- Scale Rule
-- Centerline Rule
-- Section Rule
-- Dimension Rule
+- поиск кандидатов размеров
+- анализ физических осей
 
 ---
 
-## v0.12
+## ✅ v0.8
+
+Role Resolver
+
+- Length
+- Width
+- Height
+
+---
+
+## ✅ v0.9
+
+Dimension Classification
+
+- Required
+- Duplicate
+- Optional
+
+---
+
+## ✅ v0.10
+
+Reporting
+
+- отчёты исследований
+- отчёты решений
+
+---
+
+## ✅ v0.11
+
+Dimension Decision Engine
+
+- DimensionDecisionCoordinator
+- DimensionDecisionResult
+- классификация размеров
+- исключение дублей
+- передача только Required размеров
+- физические оси видов
+- инженерная архитектура Decision Layer
+
+---
+
+# Текущая разработка
+
+## 🚧 v0.12
+
+Engineering Feature Graph
+
+Планируется:
+
+- FeatureNode
+- FeatureGraph
+- FeatureExtractor
+- GeometryAnalyzer
+
+Поддержка:
+
+- Hole
+- Pocket
+- Boss
+- Slot
+- Chamfer
+- Fillet
+- Bend
+- Flange
+
+Результат:
+
+полное инженерное описание детали.
+
+---
+
+## 🔵 v0.13
+
+Engineering Dimension Graph
+
+Будут реализованы:
+
+- полный поиск всех размерных кандидатов
+- граф зависимостей размеров
+- инженерные базы
+- размерные цепочки
+
+---
+
+## 🔵 v0.14
+
+Dimension Decision Engine 2.0
+
+Добавится:
+
+- Redundant
+- Reference
+- Recommended
+- Grouped
+
+Инженерные правила ЕСКД.
+
+---
+
+## 🔵 v0.15
 
 Automatic Dimensioning
 
-Planned:
+Автоматическое нанесение:
 
-- Centerlines
-- Hole dimensions
-- Linear dimensions
-- Radius dimensions
-- Diameter dimensions
-
----
-
-## v0.13
-
-Section Generator
-
-Planned:
-
-- Full Section
-- Half Section
-- Local Section
-- Broken-out Section
+- отверстий
+- радиусов
+- фасок
+- пазов
+- вырезов
+- гибов
 
 ---
 
-## v0.14
+## 🔵 v0.16
 
-Sheet Metal Intelligence
+Automatic Sections
 
-Planned:
+Автоматическое построение:
 
-- Bend recognition
-- Sheet thickness analysis
-- Bend direction
-- Flat Pattern support
-
----
-
-## v0.15
-
-Weldments
-
-Planned:
-
-- Weld symbols
-- Weld tables
-- Weld annotations
+- разрезов
+- сечений
+- местных разрезов
 
 ---
 
-# Version 1.0
+## 🔵 v0.17
+
+Assembly Drawings
+
+Поддержка сборок.
+
+---
+
+## 🔵 v0.18
+
+Specification Generator
+
+Автоматическое создание спецификаций.
+
+---
+
+## 🔵 v0.19
+
+Sheet Metal
+
+Полная поддержка листового металла.
+
+---
+
+## 🔵 v1.0
 
 AI CAD ENGINEER
 
-Goals
+Первая стабильная версия.
 
-- Automatic drawing generation
-- ESKD compliance
-- Intelligent engineering decisions
-- Automatic dimension placement
-- Automatic centerlines
-- Automatic sections
-- Technical requirements
-- Title block filling
-- Production-ready documentation
+Полностью автоматическое создание конструкторской документации по ЕСКД.
 
 ---
 
-# Long-term Vision
+# Главная цель проекта
 
-Future support:
-
-- Autodesk Inventor
-- SolidWorks
-- Fusion 360
-- STEP AP242
-- NX
-- CATIA
-
-The engineering core must remain independent of any CAD system.
+Создать интеллектуальную инженерную систему, которая принимает инженерные решения аналогично опытному инженеру-конструктору и автоматически выпускает комплект конструкторской документации.
