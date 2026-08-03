@@ -2,7 +2,8 @@
 
 public class PartAnalysis
 {
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } =
+        string.Empty;
 
     // Размеры модели вдоль координатных осей Inventor.
     public double SizeX { get; set; }
@@ -32,11 +33,14 @@ public class PartAnalysis
     public double CenterOfMassZ { get; set; }
 
     // Единственный источник информации об отверстиях.
-    public HoleAnalysisResult HoleAnalysis { get; set; } = new();
+    public HoleAnalysisResult HoleAnalysis { get; set; } =
+        new();
 
-    public List<ChamferInfo> Chamfers { get; } = new();
+    public List<ChamferInfo> Chamfers { get; } =
+        new();
 
-    public List<FilletInfo> Fillets { get; } = new();
+    public List<FilletInfo> Fillets { get; } =
+        new();
 
     public int HoleCount =>
         HoleAnalysis.PhysicalHoleCount;
@@ -50,7 +54,8 @@ public class PartAnalysis
 
 public class HoleInfo
 {
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } =
+        string.Empty;
 
     public double Diameter { get; set; }
 
@@ -60,18 +65,29 @@ public class HoleInfo
 
     public bool IsThreaded { get; set; }
 
-    public string ThreadDesignation { get; set; } = string.Empty;
+    public string ThreadDesignation { get; set; } =
+        string.Empty;
 
     public double CenterX { get; set; }
 
     public double CenterY { get; set; }
 
     public double CenterZ { get; set; }
+
+    public ModelAxis Axis { get; set; } =
+        ModelAxis.Undefined;
+
+    public double AxisDirectionX { get; set; }
+
+    public double AxisDirectionY { get; set; }
+
+    public double AxisDirectionZ { get; set; }
 }
 
 public class ChamferInfo
 {
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } =
+        string.Empty;
 
     public double Distance { get; set; }
 
@@ -80,7 +96,8 @@ public class ChamferInfo
 
 public class FilletInfo
 {
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } =
+        string.Empty;
 
     public double Radius { get; set; }
 }

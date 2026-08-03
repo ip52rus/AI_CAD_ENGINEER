@@ -1,5 +1,6 @@
 ﻿using AI_CAD_ENGINEER.Engineering.Analysis;
 using AI_CAD_ENGINEER.Engineering.Decision;
+using AI_CAD_ENGINEER.Engineering.Geometry;
 using AI_CAD_ENGINEER.Engineering.Models;
 using AI_CAD_ENGINEER.Engineering.Research;
 using AI_CAD_ENGINEER.Import.Inventor;
@@ -47,6 +48,12 @@ public class DrawingManager
     private readonly DrawingGeometryResearch
         _drawingGeometryResearch;
 
+    private readonly FeatureGraphFactory
+        _featureGraphFactory;
+
+    private readonly FeatureGraphCoordinator
+        _featureGraphCoordinator;
+
     public DrawingManager(
         Inventor.Application inventor)
     {
@@ -93,6 +100,12 @@ public class DrawingManager
 
         _drawingGeometryResearch =
             new DrawingGeometryResearch();
+
+        _featureGraphFactory =
+            new FeatureGraphFactory();
+
+        _featureGraphCoordinator =
+            new FeatureGraphCoordinator();
     }
 
     public bool CreateDrawingWithViews(
@@ -109,6 +122,11 @@ public class DrawingManager
         {
             ValidateModelDocument(
                 modelDocument);
+
+            FeatureGraph featureGraph =
+                CreateFeatureGraph(
+                    modelDocument,
+                    partAnalysis);
 
             DrawingDocument drawingDocument =
                 (DrawingDocument)_inventor.Documents.Add(
@@ -177,6 +195,9 @@ public class DrawingManager
 
             PrintAxisMappings(
                 axisMappings);
+
+            PrintFeatureGraphSummary(
+                featureGraph);
 
             const double viewGap =
                 2.5;
@@ -308,6 +329,79 @@ public class DrawingManager
 
             return false;
         }
+    }
+
+    private FeatureGraph CreateFeatureGraph(
+        Document modelDocument,
+        PartAnalysis partAnalysis)
+    {
+        FeatureGraph featureGraph =
+            _featureGraphFactory.Build(
+                partAnalysis);
+
+        featureGraph.Metadata.SourceDocumentName =
+            modelDocument.DisplayName;
+
+        featureGraph.Metadata.SourceDocumentPath =
+            modelDocument.FullFileName;
+
+        featureGraph.RefreshMetadata();
+
+        _featureGraphCoordinator.SaveReport(
+            featureGraph);
+
+        return featureGraph;
+    }
+
+    private static void PrintFeatureGraphSummary(
+        FeatureGraph featureGraph)
+    {
+        ArgumentNullException.ThrowIfNull(
+            featureGraph);
+
+        featureGraph.RefreshMetadata();
+
+        Console.WriteLine();
+        Console.WriteLine(
+            "========================================");
+
+        Console.WriteLine(
+            "СВОДКА ENGINEERING FEATURE GRAPH");
+
+        Console.WriteLine(
+            "========================================");
+
+        Console.WriteLine(
+            $"Документ: " +
+            $"{featureGraph.Metadata.SourceDocumentName}");
+
+        Console.WriteLine(
+            $"Узлов: " +
+            $"{featureGraph.Metadata.NodeCount}");
+
+        Console.WriteLine(
+            $"Связей: " +
+            $"{featureGraph.Metadata.RelationshipCount}");
+
+        if (featureGraph.Metadata.FeatureCounts.Count == 0)
+        {
+            Console.WriteLine(
+                "Инженерные элементы не обнаружены.");
+        }
+        else
+        {
+            foreach (KeyValuePair<FeatureType, int> entry
+                     in featureGraph.Metadata.FeatureCounts
+                         .OrderBy(
+                             item => item.Key))
+            {
+                Console.WriteLine(
+                    $"{entry.Key}: {entry.Value}");
+            }
+        }
+
+        Console.WriteLine(
+            "========================================");
     }
 
     private void CreateOverallDimensions(
