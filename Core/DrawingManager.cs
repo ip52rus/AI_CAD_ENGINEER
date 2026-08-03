@@ -1,15 +1,23 @@
 ﻿using Inventor;
-using System.Collections.Generic;
 
 namespace AI_CAD_ENGINEER.Core;
 
 public class DrawingManager
 {
     private readonly Inventor.Application _inventor;
+    private readonly ViewAnalyzer _viewAnalyzer;
+    private readonly ViewScoreCalculator _viewScoreCalculator;
+    private readonly ViewNecessityAnalyzer _viewNecessityAnalyzer;
+    private readonly ViewDecisionReport _viewDecisionReport;
 
     public DrawingManager(Inventor.Application inventor)
     {
         _inventor = inventor;
+
+        _viewAnalyzer = new ViewAnalyzer();
+        _viewScoreCalculator = new ViewScoreCalculator();
+        _viewNecessityAnalyzer = new ViewNecessityAnalyzer();
+        _viewDecisionReport = new ViewDecisionReport();
     }
 
     public bool CreateDrawingWithViews(Document modelDocument)
@@ -53,7 +61,9 @@ public class DrawingManager
             Point2d temporaryUpperPosition =
                 _inventor.TransientGeometry.CreatePoint2d(
                     baseView.Center.X,
-                    baseView.Center.Y - baseView.Height - viewGap);
+                    baseView.Center.Y -
+                    baseView.Height -
+                    viewGap);
 
             DrawingView upperView =
                 sheet.DrawingViews.AddProjectedView(
@@ -64,7 +74,9 @@ public class DrawingManager
 
             Point2d temporarySidePosition =
                 _inventor.TransientGeometry.CreatePoint2d(
-                    baseView.Center.X + baseView.Width + viewGap,
+                    baseView.Center.X +
+                    baseView.Width +
+                    viewGap,
                     baseView.Center.Y);
 
             DrawingView sideView =
@@ -96,6 +108,13 @@ public class DrawingManager
                 viewGap);
 
             drawingDocument.Update();
+
+            PrintDecisionReport(
+                mainOrientationName,
+                baseView,
+                upperView,
+                sideView);
+
             drawingDocument.Activate();
 
             Console.WriteLine(
@@ -170,34 +189,15 @@ public class DrawingManager
             temporaryView.Parent.Parent.Update();
 
             ViewStatistics statistics =
-                CollectViewStatistics(temporaryView);
+                _viewAnalyzer.Analyze(temporaryView);
 
             double score =
-                CalculateViewScore(statistics);
+                _viewScoreCalculator.Calculate(statistics);
 
-            Console.WriteLine(
-                $"{orientationNames[index]}: {score:F2}");
-
-            Console.WriteLine(
-                $"  Кривые: {statistics.CurveCount}");
-
-            Console.WriteLine(
-                $"  Линии: {statistics.LineCount}");
-
-            Console.WriteLine(
-                $"  Окружности: {statistics.CircleCount}");
-
-            Console.WriteLine(
-                $"  Дуги: {statistics.ArcCount}");
-
-            Console.WriteLine(
-                $"  Эллиптические дуги: " +
-                $"{statistics.EllipticalArcCount}");
-
-            Console.WriteLine(
-                $"  Площадь: {statistics.Area:F2}");
-
-            Console.WriteLine();
+            PrintOrientationStatistics(
+                orientationNames[index],
+                statistics,
+                score);
 
             if (score > bestScore)
             {
@@ -215,98 +215,81 @@ public class DrawingManager
         return bestOrientation;
     }
 
-    private static ViewStatistics CollectViewStatistics(
-        DrawingView drawingView)
+    private static void PrintOrientationStatistics(
+        string orientationName,
+        ViewStatistics statistics,
+        double score)
     {
-        ViewStatistics statistics = new()
-        {
-            Width = drawingView.Width,
-            Height = drawingView.Height,
-            Area = drawingView.Width * drawingView.Height
-        };
+        Console.WriteLine(
+            $"{orientationName}: {score:F2}");
 
-        if (drawingView.Height > 0)
-        {
-            statistics.AspectRatio =
-                drawingView.Width / drawingView.Height;
-        }
+        Console.WriteLine(
+            $"  Кривые: {statistics.CurveCount}");
 
-        DrawingCurvesEnumerator? curves =
-            drawingView.DrawingCurves[null];
+        Console.WriteLine(
+            $"  Линии: {statistics.LineCount}");
 
-        if (curves == null)
-        {
-            return statistics;
-        }
+        Console.WriteLine(
+            $"  Окружности: {statistics.CircleCount}");
 
-        statistics.CurveCount = curves.Count;
+        Console.WriteLine(
+            $"  Дуги: {statistics.ArcCount}");
 
-        foreach (DrawingCurve curve in curves)
-        {
-            foreach (DrawingCurveSegment segment
-                     in curve.Segments)
-            {
-                statistics.SegmentCount++;
+        Console.WriteLine(
+            $"  Эллиптические дуги: " +
+            $"{statistics.EllipticalArcCount}");
 
-                string geometryType =
-                    segment.GeometryType.ToString();
+        Console.WriteLine(
+            $"  Площадь: {statistics.Area:F2}");
 
-                switch (geometryType)
-                {
-                    case "kLineSegmentCurve2d":
-                        statistics.LineCount++;
-                        break;
-
-                    case "kCircleCurve2d":
-                        statistics.CircleCount++;
-                        break;
-
-                    case "kCircularArcCurve2d":
-                        statistics.ArcCount++;
-                        break;
-
-                    case "kEllipticalArcCurve2d":
-                        statistics.EllipticalArcCount++;
-                        break;
-
-                    default:
-                        statistics.OtherGeometryCount++;
-                        break;
-                }
-            }
-        }
-
-        return statistics;
+        Console.WriteLine();
     }
 
-    private static double CalculateViewScore(
-        ViewStatistics statistics)
+    private void PrintDecisionReport(
+        string mainOrientationName,
+        DrawingView baseView,
+        DrawingView upperView,
+        DrawingView sideView)
     {
-        double score = 0;
+        ViewStatistics mainStatistics =
+            _viewAnalyzer.Analyze(baseView);
 
-        // Базовая информативность проекции.
-        score += statistics.LineCount;
-        score += statistics.ArcCount * 2.0;
-        score += statistics.EllipticalArcCount * 2.0;
+        ViewStatistics upperStatistics =
+            _viewAnalyzer.Analyze(upperView);
 
-        // Окружности часто показывают отверстия,
-        // поэтому получают повышенный вес.
-        score += statistics.CircleCount * 8.0;
+        ViewStatistics sideStatistics =
+            _viewAnalyzer.Analyze(sideView);
 
-        // Небольшой бонус за площадь проекции.
-        score += statistics.Area * 0.05;
+        double mainScore =
+            _viewScoreCalculator.Calculate(mainStatistics);
 
-        // Штраф за очень вытянутые проекции.
-        if (statistics.AspectRatio > 8.0)
-        {
-            score *= 0.75;
-        }
-        else if (statistics.AspectRatio > 12.0)
-        {
-            score *= 0.50;
-        }
+        double upperScore =
+            _viewScoreCalculator.Calculate(upperStatistics);
 
-        return score;
+        double sideScore =
+            _viewScoreCalculator.Calculate(sideStatistics);
+
+        ViewNecessityResult necessityResult =
+            _viewNecessityAnalyzer.Analyze(
+                mainStatistics,
+                upperStatistics,
+                sideStatistics,
+                mainScore,
+                upperScore,
+                sideScore);
+
+        string report =
+            _viewDecisionReport.Build(
+                mainOrientationName,
+                mainStatistics,
+                upperStatistics,
+                sideStatistics,
+                mainScore,
+                upperScore,
+                sideScore,
+                necessityResult);
+
+        Console.WriteLine(report);
     }
 
     private void ArrangeViews(
@@ -490,33 +473,9 @@ public class DrawingManager
             return $"{scale:0.###}:1";
         }
 
-        double denominator = 1.0 / scale;
+        double denominator =
+            1.0 / scale;
 
         return $"1:{denominator:0.###}";
-    }
-
-    private sealed class ViewStatistics
-    {
-        public double Width { get; set; }
-
-        public double Height { get; set; }
-
-        public double Area { get; set; }
-
-        public double AspectRatio { get; set; }
-
-        public int CurveCount { get; set; }
-
-        public int SegmentCount { get; set; }
-
-        public int LineCount { get; set; }
-
-        public int CircleCount { get; set; }
-
-        public int ArcCount { get; set; }
-
-        public int EllipticalArcCount { get; set; }
-
-        public int OtherGeometryCount { get; set; }
     }
 }
