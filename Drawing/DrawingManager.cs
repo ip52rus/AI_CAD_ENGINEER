@@ -1,5 +1,7 @@
 ﻿using AI_CAD_ENGINEER.Engineering.Analysis;
+using AI_CAD_ENGINEER.Engineering.Decision;
 using AI_CAD_ENGINEER.Engineering.Models;
+using AI_CAD_ENGINEER.Import.Inventor;
 using Inventor;
 
 namespace AI_CAD_ENGINEER.Drawing;
@@ -7,22 +9,43 @@ namespace AI_CAD_ENGINEER.Drawing;
 public class DrawingManager
 {
     private readonly Inventor.Application _inventor;
+    private readonly ViewCandidateGenerator _viewCandidateGenerator;
+    private readonly EngineeringBrain _engineeringBrain;
     private readonly ViewAnalyzer _viewAnalyzer;
     private readonly ViewScoreCalculator _viewScoreCalculator;
     private readonly ViewNecessityAnalyzer _viewNecessityAnalyzer;
     private readonly ViewDecisionReport _viewDecisionReport;
+    private readonly CenterAnnotationGenerator _centerlineGenerator;
 
     public DrawingManager(Inventor.Application inventor)
     {
         _inventor = inventor;
 
-        _viewAnalyzer = new ViewAnalyzer();
-        _viewScoreCalculator = new ViewScoreCalculator();
-        _viewNecessityAnalyzer = new ViewNecessityAnalyzer();
-        _viewDecisionReport = new ViewDecisionReport();
+        _viewCandidateGenerator =
+            new ViewCandidateGenerator(inventor);
+
+        _engineeringBrain =
+            new EngineeringBrain();
+
+        _viewAnalyzer =
+            new ViewAnalyzer();
+
+        _viewScoreCalculator =
+            new ViewScoreCalculator();
+
+        _viewNecessityAnalyzer =
+            new ViewNecessityAnalyzer();
+
+        _viewDecisionReport =
+            new ViewDecisionReport();
+
+        _centerlineGenerator =
+            new CenterAnnotationGenerator();
     }
 
-    public bool CreateDrawingWithViews(Document modelDocument)
+    public bool CreateDrawingWithViews(
+        Document modelDocument,
+        PartAnalysis partAnalysis)
     {
         try
         {
@@ -32,17 +55,43 @@ public class DrawingManager
                     "",
                     true);
 
-            Sheet sheet = drawingDocument.ActiveSheet;
+            Sheet sheet =
+                drawingDocument.ActiveSheet;
+
+            List<ViewCandidate> candidates =
+                _viewCandidateGenerator.Generate(
+                    modelDocument,
+                    sheet);
+
+            DrawingPlan drawingPlan =
+                _engineeringBrain.CreateDrawingPlan(
+                    partAnalysis,
+                    candidates);
 
             ViewOrientationTypeEnum mainOrientation =
-                SelectMainViewOrientation(
-                    modelDocument,
-                    sheet,
-                    out string mainOrientationName);
+                ConvertToInventorOrientation(
+                    drawingPlan.MainView);
+
+            string mainOrientationName =
+                GetOrientationName(
+                    drawingPlan.MainView);
 
             Console.WriteLine();
             Console.WriteLine(
-                $"Выбран главный вид: {mainOrientationName}");
+                $"EngineeringBrain выбрал главный вид: " +
+                $"{mainOrientationName}");
+
+            Console.WriteLine(
+                $"Центровые линии требуются: " +
+                $"{(drawingPlan.NeedCenterlines ? "да" : "нет")}");
+
+            Console.WriteLine(
+                $"Размеры требуются: " +
+                $"{(drawingPlan.NeedDimensions ? "да" : "нет")}");
+
+            Console.WriteLine(
+                $"Разрез требуется: " +
+                $"{(drawingPlan.NeedSection ? "да" : "нет")}");
 
             const double viewGap = 2.5;
 
@@ -98,7 +147,11 @@ public class DrawingManager
                     sheet,
                     viewGap);
 
-            baseView.Scale = selectedScale;
+            drawingPlan.Scale =
+                selectedScale;
+
+            baseView.Scale =
+                selectedScale;
 
             drawingDocument.Update();
 
@@ -111,6 +164,19 @@ public class DrawingManager
 
             drawingDocument.Update();
 
+            if (drawingPlan.NeedCenterlines)
+            {
+                _centerlineGenerator.Create(
+                    baseView,
+                    upperView,
+                    sideView);
+
+                drawingDocument.Update();
+
+                Console.WriteLine(
+                    "Автоматические центровые линии созданы.");
+            }
+
             PrintDecisionReport(
                 mainOrientationName,
                 baseView,
@@ -120,7 +186,8 @@ public class DrawingManager
             drawingDocument.Activate();
 
             Console.WriteLine(
-                $"Выбран масштаб: {FormatScale(selectedScale)}");
+                $"Выбран масштаб: " +
+                $"{FormatScale(drawingPlan.Scale)}");
 
             return true;
         }
@@ -134,117 +201,68 @@ public class DrawingManager
         }
     }
 
-    private ViewOrientationTypeEnum SelectMainViewOrientation(
-        Document modelDocument,
-        Sheet sheet,
-        out string selectedOrientationName)
+    private static ViewOrientationTypeEnum
+        ConvertToInventorOrientation(
+            StandardViewOrientation orientation)
     {
-        ViewOrientationTypeEnum[] orientations =
+        return orientation switch
         {
-            ViewOrientationTypeEnum.kFrontViewOrientation,
-            ViewOrientationTypeEnum.kBackViewOrientation,
-            ViewOrientationTypeEnum.kTopViewOrientation,
-            ViewOrientationTypeEnum.kBottomViewOrientation,
-            ViewOrientationTypeEnum.kLeftViewOrientation,
-            ViewOrientationTypeEnum.kRightViewOrientation
+            StandardViewOrientation.Front =>
+                ViewOrientationTypeEnum
+                    .kFrontViewOrientation,
+
+            StandardViewOrientation.Back =>
+                ViewOrientationTypeEnum
+                    .kBackViewOrientation,
+
+            StandardViewOrientation.Top =>
+                ViewOrientationTypeEnum
+                    .kTopViewOrientation,
+
+            StandardViewOrientation.Bottom =>
+                ViewOrientationTypeEnum
+                    .kBottomViewOrientation,
+
+            StandardViewOrientation.Left =>
+                ViewOrientationTypeEnum
+                    .kLeftViewOrientation,
+
+            StandardViewOrientation.Right =>
+                ViewOrientationTypeEnum
+                    .kRightViewOrientation,
+
+            _ =>
+                ViewOrientationTypeEnum
+                    .kFrontViewOrientation
         };
-
-        string[] orientationNames =
-        {
-            "Front",
-            "Back",
-            "Top",
-            "Bottom",
-            "Left",
-            "Right"
-        };
-
-        double bestScore = double.MinValue;
-
-        ViewOrientationTypeEnum bestOrientation =
-            ViewOrientationTypeEnum.kFrontViewOrientation;
-
-        selectedOrientationName = "Front";
-
-        Console.WriteLine();
-        Console.WriteLine("Оценка стандартных проекций:");
-        Console.WriteLine("--------------------------------");
-
-        for (int index = 0;
-             index < orientations.Length;
-             index++)
-        {
-            Point2d temporaryPosition =
-                _inventor.TransientGeometry.CreatePoint2d(
-                    sheet.Width / 2,
-                    sheet.Height / 2);
-
-            DrawingView temporaryView =
-                sheet.DrawingViews.AddBaseView(
-                    (Inventor._Document)modelDocument,
-                    temporaryPosition,
-                    1.0,
-                    orientations[index],
-                    DrawingViewStyleEnum
-                        .kHiddenLineRemovedDrawingViewStyle);
-
-            temporaryView.Parent.Parent.Update();
-
-            ViewStatistics statistics =
-                _viewAnalyzer.Analyze(temporaryView);
-
-            double score =
-                _viewScoreCalculator.Calculate(statistics);
-
-            PrintOrientationStatistics(
-                orientationNames[index],
-                statistics,
-                score);
-
-            if (score > bestScore)
-            {
-                bestScore = score;
-                bestOrientation = orientations[index];
-                selectedOrientationName =
-                    orientationNames[index];
-            }
-
-            temporaryView.Delete();
-        }
-
-        Console.WriteLine("--------------------------------");
-
-        return bestOrientation;
     }
 
-    private static void PrintOrientationStatistics(
-        string orientationName,
-        ViewStatistics statistics,
-        double score)
+    private static string GetOrientationName(
+        StandardViewOrientation orientation)
     {
-        Console.WriteLine(
-            $"{orientationName}: {score:F2}");
+        return orientation switch
+        {
+            StandardViewOrientation.Front =>
+                "Front",
 
-        Console.WriteLine(
-            $"  Кривые: {statistics.CurveCount}");
+            StandardViewOrientation.Back =>
+                "Back",
 
-        Console.WriteLine(
-            $"  Линии: {statistics.LineCount}");
+            StandardViewOrientation.Top =>
+                "Top",
 
-        Console.WriteLine(
-            $"  Окружности: {statistics.CircleCount}");
+            StandardViewOrientation.Bottom =>
+                "Bottom",
 
-        Console.WriteLine(
-            $"  Дуги: {statistics.ArcCount}");
+            StandardViewOrientation.Left =>
+                "Left",
 
-        Console.WriteLine(
-            $"  Эллиптические дуги: " +
-            $"{statistics.EllipticalArcCount}");
+            StandardViewOrientation.Right =>
+                "Right",
 
-        Console.WriteLine(
-            $"  Площадь: {statistics.Area:F2}");
-
-        Console.WriteLine();
+            _ =>
+                "Front"
+        };
     }
 
     private void PrintDecisionReport(
@@ -263,13 +281,16 @@ public class DrawingManager
             _viewAnalyzer.Analyze(sideView);
 
         double mainScore =
-            _viewScoreCalculator.Calculate(mainStatistics);
+            _viewScoreCalculator.Calculate(
+                mainStatistics);
 
         double upperScore =
-            _viewScoreCalculator.Calculate(upperStatistics);
+            _viewScoreCalculator.Calculate(
+                upperStatistics);
 
         double sideScore =
-            _viewScoreCalculator.Calculate(sideStatistics);
+            _viewScoreCalculator.Calculate(
+                sideStatistics);
 
         ViewNecessityResult necessityResult =
             _viewNecessityAnalyzer.Analyze(
@@ -306,8 +327,11 @@ public class DrawingManager
         const double topMargin = 2.0;
         const double bottomReservedArea = 6.0;
 
-        double workingLeft = leftMargin;
-        double workingBottom = bottomReservedArea;
+        double workingLeft =
+            leftMargin;
+
+        double workingBottom =
+            bottomReservedArea;
 
         double workingWidth =
             sheet.Width -
@@ -468,7 +492,8 @@ public class DrawingManager
         return 0.001;
     }
 
-    private static string FormatScale(double scale)
+    private static string FormatScale(
+        double scale)
     {
         if (scale >= 1.0)
         {

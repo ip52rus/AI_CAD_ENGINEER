@@ -1,78 +1,242 @@
 # AI CAD ENGINEER
 
-## Roadmap
+## Vision
+
+AI CAD ENGINEER — интеллектуальная инженерная система, автоматически создающая профессиональные чертежи по ЕСКД на основе 3D-модели.
+
+Цель проекта — не автоматизация Inventor, а создание инженерного ядра, принимающего решения так же, как опытный инженер-конструктор.
+
+---
+
+# Architecture
+
+```
+3D Model
+    │
+    ▼
+Import
+    │
+    ▼
+Engineering Models
+    │
+    ▼
+Engineering Analysis
+    │
+    ▼
+Engineering Decision
+    │
+    ▼
+Drawing Plan
+    │
+    ▼
+Drawing Engine
+    │
+    ▼
+Inventor Drawing
+```
 
 ---
 
 # Completed
 
-## v0.1.0
+## v0.1
+
 - Connection to Autodesk Inventor
+- Command processor
+- Automatic drawing creation
 
-## v0.2.0
-- Create empty drawing
+---
 
-## v0.3.0
-- Create base drawing view
+## v0.2
 
-## v0.4.0
-- Automatic GOST scale selection
+- Automatic projection generation
+- Automatic scale selection
 
-## v0.5.0
-- Automatic three-view drawing layout
+---
 
-## v0.6.0
-- Automatic main view selection
+## v0.3
+
 - View analysis
-- Projection scoring
-- Intelligent main view detection
+- Projection statistics
+
+---
+
+## v0.4
+
+- View scoring
+- Intelligent main view selection
+
+---
+
+## v0.5
+
+- View necessity analysis
+- Engineering report
+
+---
+
+## v0.6
+
+- Improved view scoring
+- Better layout algorithm
+
+---
+
+## v0.7
+
+- Hole analysis
+- Part analysis
+- Sheet metal support
+- Feature recognition
+
+---
+
+## v0.8
+
+- Accurate hole detection
+- Hole diameter
+- Hole depth
+- Through-hole recognition
+- Multiple hole instances
+- Model analysis
+
+---
+
+## v0.9
+
+### Architecture Refactoring
+
+Completed:
+
+- Engineering layer
+- Drawing layer
+- Import layer
+- EngineeringBrain
+- DrawingPlan
+- ViewCandidate
+- ViewCandidateGenerator
+- Separation of responsibilities
 
 ---
 
 # Current Version
 
-v0.6.0
+## v0.10
+
+### Engineering Pipeline
+
+Completed
+
+- EngineeringBrain
+- ViewCandidateGenerator
+- DrawingPlan
+- ViewCandidate
+
+In Progress
+
+- Reporting layer
+- ConsoleReporter
+- Remove Console.WriteLine() from business logic
 
 ---
 
-# Next Version
+# Next Versions
 
-## v0.7.0
+## v0.11
 
-Automatic selection of the minimum required number of drawing views.
+Engineering Knowledge
 
-Goals:
+Planned:
 
-- Detect whether 1, 2 or 3 views are sufficient.
-- Avoid unnecessary views.
-- Follow ESKD principles.
-- Reduce drawing complexity.
-
----
-
-# Future
-
-### Automatic section views
-
-### Automatic detail views
-
-### Automatic dimension placement
-
-### Automatic sheet size selection
-
-### Automatic title block filling
-
-### Automatic drawing generation for assemblies
-
-### Automatic PDF export
-
-### AI assistant
-
-### Full ESKD compliance
+- Knowledge Base
+- Rule Engine
+- Main View Rule
+- Scale Rule
+- Centerline Rule
+- Section Rule
+- Dimension Rule
 
 ---
 
-# Long-term Goal
+## v0.12
 
-Generate complete manufacturing drawings from Inventor models
-according to GOST / ESKD with minimal human intervention.
+Automatic Dimensioning
+
+Planned:
+
+- Centerlines
+- Hole dimensions
+- Linear dimensions
+- Radius dimensions
+- Diameter dimensions
+
+---
+
+## v0.13
+
+Section Generator
+
+Planned:
+
+- Full Section
+- Half Section
+- Local Section
+- Broken-out Section
+
+---
+
+## v0.14
+
+Sheet Metal Intelligence
+
+Planned:
+
+- Bend recognition
+- Sheet thickness analysis
+- Bend direction
+- Flat Pattern support
+
+---
+
+## v0.15
+
+Weldments
+
+Planned:
+
+- Weld symbols
+- Weld tables
+- Weld annotations
+
+---
+
+# Version 1.0
+
+AI CAD ENGINEER
+
+Goals
+
+- Automatic drawing generation
+- ESKD compliance
+- Intelligent engineering decisions
+- Automatic dimension placement
+- Automatic centerlines
+- Automatic sections
+- Technical requirements
+- Title block filling
+- Production-ready documentation
+
+---
+
+# Long-term Vision
+
+Future support:
+
+- Autodesk Inventor
+- SolidWorks
+- Fusion 360
+- STEP AP242
+- NX
+- CATIA
+
+The engineering core must remain independent of any CAD system.

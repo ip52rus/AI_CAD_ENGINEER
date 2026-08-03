@@ -8,23 +8,28 @@ public class CommandProcessor
 {
     private readonly InventorManager _inventorManager;
 
-    public CommandProcessor(InventorManager inventorManager)
+    public CommandProcessor(
+        InventorManager inventorManager)
     {
-        _inventorManager = inventorManager;
+        _inventorManager =
+            inventorManager;
     }
 
-    public void Process(string? command)
+    public void Process(
+        string? command)
     {
         if (!string.Equals(
                 command,
                 "Создай чертежи",
                 StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine("Неизвестная команда.");
+            Console.WriteLine(
+                "Неизвестная команда.");
+
             return;
         }
 
-        Inventor.Document? activeDocument =
+        global::Inventor.Document? activeDocument =
             _inventorManager.GetActiveDocument();
 
         if (activeDocument == null)
@@ -38,12 +43,13 @@ public class CommandProcessor
         if (!_inventorManager.IsPart())
         {
             Console.WriteLine(
-                "Команда пока поддерживается только для деталей.");
+                "Команда пока поддерживается " +
+                "только для деталей.");
 
             return;
         }
 
-        Inventor.Application? inventor =
+        global::Inventor.Application? inventor =
             _inventorManager.GetInventorApplication();
 
         if (inventor == null)
@@ -54,14 +60,19 @@ public class CommandProcessor
             return;
         }
 
+        PartAnalysis partAnalysis;
+
         try
         {
-            ModelAnalyzer modelAnalyzer = new();
+            ModelAnalyzer modelAnalyzer =
+                new();
 
-            PartAnalysis partAnalysis =
-                modelAnalyzer.Analyze(activeDocument);
+            partAnalysis =
+                modelAnalyzer.Analyze(
+                    activeDocument);
 
-            modelAnalyzer.PrintReport(partAnalysis);
+            modelAnalyzer.PrintReport(
+                partAnalysis);
         }
         catch (Exception exception)
         {
@@ -78,15 +89,22 @@ public class CommandProcessor
         DrawingManager drawingManager =
             new(inventor);
 
-        if (drawingManager.CreateDrawingWithViews(activeDocument))
+        bool drawingCreated =
+            drawingManager.CreateDrawingWithViews(
+                activeDocument,
+                partAnalysis);
+
+        if (drawingCreated)
         {
             Console.WriteLine(
-                "Чертёж с тремя видами успешно создан.");
+                "Чертёж с тремя видами " +
+                "успешно создан.");
         }
         else
         {
             Console.WriteLine(
-                "Не удалось создать чертёж с тремя видами.");
+                "Не удалось создать чертёж " +
+                "с тремя видами.");
         }
     }
 }
