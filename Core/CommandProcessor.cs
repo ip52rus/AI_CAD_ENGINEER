@@ -1,18 +1,23 @@
 ﻿using AI_CAD_ENGINEER.Drawing;
 using AI_CAD_ENGINEER.Engineering.Models;
 using AI_CAD_ENGINEER.Import.Inventor;
+using AI_CAD_ENGINEER.Infrastructure.Reporting;
 
 namespace AI_CAD_ENGINEER.Core;
 
 public class CommandProcessor
 {
     private readonly InventorManager _inventorManager;
+    private readonly ConsoleReporter _consoleReporter;
 
     public CommandProcessor(
         InventorManager inventorManager)
     {
         _inventorManager =
             inventorManager;
+
+        _consoleReporter =
+            new ConsoleReporter();
     }
 
     public void Process(
@@ -71,7 +76,7 @@ public class CommandProcessor
                 modelAnalyzer.Analyze(
                     activeDocument);
 
-            modelAnalyzer.PrintReport(
+            _consoleReporter.WritePartAnalysis(
                 partAnalysis);
         }
         catch (Exception exception)

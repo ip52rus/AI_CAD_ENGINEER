@@ -1,5 +1,14 @@
 ﻿using AI_CAD_ENGINEER.Engineering.Models;
-using Inventor;
+
+using InventorBox = global::Inventor.Box;
+using InventorDocument = global::Inventor.Document;
+using InventorMassProperties = global::Inventor.MassProperties;
+using InventorPartComponentDefinition =
+    global::Inventor.PartComponentDefinition;
+using InventorPartDocument =
+    global::Inventor.PartDocument;
+using InventorPoint =
+    global::Inventor.Point;
 
 namespace AI_CAD_ENGINEER.Import.Inventor;
 
@@ -9,25 +18,29 @@ public class ModelAnalyzer
 
     public ModelAnalyzer()
     {
-        _holeAnalyzer = new HoleAnalyzer();
+        _holeAnalyzer =
+            new HoleAnalyzer();
     }
 
-    public PartAnalysis Analyze(Document document)
+    public PartAnalysis Analyze(
+        InventorDocument document)
     {
-        if (document is not PartDocument partDocument)
+        ArgumentNullException.ThrowIfNull(document);
+
+        if (document is not InventorPartDocument partDocument)
         {
             throw new ArgumentException(
                 "Документ не является деталью.",
                 nameof(document));
         }
 
-        PartComponentDefinition componentDefinition =
+        InventorPartComponentDefinition componentDefinition =
             partDocument.ComponentDefinition;
 
-        Box rangeBox =
+        InventorBox rangeBox =
             componentDefinition.RangeBox;
 
-        MassProperties massProperties =
+        InventorMassProperties massProperties =
             componentDefinition.MassProperties;
 
         const double centimetersToMillimeters = 10.0;
@@ -56,24 +69,34 @@ public class ModelAnalyzer
         Array.Sort(sortedDimensions);
         Array.Reverse(sortedDimensions);
 
-        double length = sortedDimensions[0];
-        double width = sortedDimensions[1];
-        double height = sortedDimensions[2];
-
-        Point centerOfMass =
+        InventorPoint centerOfMass =
             massProperties.CenterOfMass;
+
+        HoleAnalysisResult holeAnalysis =
+            _holeAnalyzer.Analyze(partDocument);
 
         PartAnalysis analysis = new()
         {
-            Name = partDocument.DisplayName,
+            Name =
+                partDocument.DisplayName,
 
-            SizeX = sizeX,
-            SizeY = sizeY,
-            SizeZ = sizeZ,
+            SizeX =
+                sizeX,
 
-            Length = length,
-            Width = width,
-            Height = height,
+            SizeY =
+                sizeY,
+
+            SizeZ =
+                sizeZ,
+
+            Length =
+                sortedDimensions[0],
+
+            Width =
+                sortedDimensions[1],
+
+            Height =
+                sortedDimensions[2],
 
             Volume =
                 massProperties.Volume *
@@ -93,78 +116,12 @@ public class ModelAnalyzer
 
             CenterOfMassZ =
                 centerOfMass.Z *
-                centimetersToMillimeters
+                centimetersToMillimeters,
+
+            HoleAnalysis =
+                holeAnalysis
         };
 
-        List<HoleInfo> holes =
-            _holeAnalyzer.Analyze(partDocument);
-
-        analysis.Holes.AddRange(holes);
-
         return analysis;
-    }
-
-    public void PrintReport(PartAnalysis analysis)
-    {
-        Console.WriteLine();
-        Console.WriteLine("========================================");
-        Console.WriteLine("АНАЛИЗ 3D-МОДЕЛИ");
-        Console.WriteLine("========================================");
-        Console.WriteLine();
-
-        Console.WriteLine($"Деталь: {analysis.Name}");
-        Console.WriteLine();
-
-        Console.WriteLine("Размеры по осям Inventor:");
-
-        Console.WriteLine(
-            $"  X: {analysis.SizeX:F2} мм");
-
-        Console.WriteLine(
-            $"  Y: {analysis.SizeY:F2} мм");
-
-        Console.WriteLine(
-            $"  Z: {analysis.SizeZ:F2} мм");
-
-        Console.WriteLine();
-
-        Console.WriteLine("Инженерные габариты:");
-
-        Console.WriteLine(
-            $"  Длина: {analysis.Length:F2} мм");
-
-        Console.WriteLine(
-            $"  Ширина: {analysis.Width:F2} мм");
-
-        Console.WriteLine(
-            $"  Высота: {analysis.Height:F2} мм");
-
-        Console.WriteLine();
-
-        Console.WriteLine(
-            $"Объём: {analysis.Volume:F2} mm3");
-
-        Console.WriteLine(
-            $"Площадь поверхности: " +
-            $"{analysis.SurfaceArea:F2} mm2");
-
-        Console.WriteLine(
-            $"Центр масс: " +
-            $"X={analysis.CenterOfMassX:F2}; " +
-            $"Y={analysis.CenterOfMassY:F2}; " +
-            $"Z={analysis.CenterOfMassZ:F2} мм");
-
-        Console.WriteLine();
-
-        Console.WriteLine(
-            $"Фактических отверстий: {analysis.HoleCount}");
-
-        Console.WriteLine(
-            $"Фаски: {analysis.ChamferCount}");
-
-        Console.WriteLine(
-            $"Скругления: {analysis.FilletCount}");
-
-        Console.WriteLine("========================================");
     }
 }

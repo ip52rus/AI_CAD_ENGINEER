@@ -4,7 +4,7 @@ public class PartAnalysis
 {
     public string Name { get; set; } = string.Empty;
 
-    // Габариты модели вдоль координатных осей Inventor.
+    // Размеры модели вдоль координатных осей Inventor.
     public double SizeX { get; set; }
 
     public double SizeY { get; set; }
@@ -31,17 +31,21 @@ public class PartAnalysis
 
     public double CenterOfMassZ { get; set; }
 
-    public List<HoleInfo> Holes { get; } = new();
+    // Единственный источник информации об отверстиях.
+    public HoleAnalysisResult HoleAnalysis { get; set; } = new();
 
     public List<ChamferInfo> Chamfers { get; } = new();
 
     public List<FilletInfo> Fillets { get; } = new();
 
-    public int HoleCount => Holes.Count;
+    public int HoleCount =>
+        HoleAnalysis.PhysicalHoleCount;
 
-    public int ChamferCount => Chamfers.Count;
+    public int ChamferCount =>
+        Chamfers.Count;
 
-    public int FilletCount => Fillets.Count;
+    public int FilletCount =>
+        Fillets.Count;
 }
 
 public class HoleInfo

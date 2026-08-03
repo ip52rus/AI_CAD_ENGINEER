@@ -1,112 +1,102 @@
 ﻿using AI_CAD_ENGINEER.Engineering.Models;
-using Inventor;
+
+using InventorHoleFeature = global::Inventor.HoleFeature;
+using InventorHoleFeatures = global::Inventor.HoleFeatures;
+using InventorPartComponentDefinition =
+    global::Inventor.PartComponentDefinition;
+using InventorPartDocument = global::Inventor.PartDocument;
+using InventorPartFeatureExtentEnum =
+    global::Inventor.PartFeatureExtentEnum;
+using InventorPoint = global::Inventor.Point;
+using InventorSheetMetalComponentDefinition =
+    global::Inventor.SheetMetalComponentDefinition;
+using InventorSketchPoint = global::Inventor.SketchPoint;
 
 namespace AI_CAD_ENGINEER.Import.Inventor;
 
 public class HoleAnalyzer
 {
     private const double CentimetersToMillimeters = 10.0;
-
-    // Допуск нужен из-за возможных погрешностей double.
     private const double ComparisonToleranceMillimeters = 0.01;
 
-    public List<HoleInfo> Analyze(
-        PartDocument partDocument)
+    public HoleAnalysisResult Analyze(
+        InventorPartDocument partDocument)
     {
-        List<HoleInfo> holes = new();
+        ArgumentNullException.ThrowIfNull(partDocument);
 
-        PartComponentDefinition componentDefinition =
+        InventorPartComponentDefinition componentDefinition =
             partDocument.ComponentDefinition;
 
-        HoleFeatures holeFeatures =
+        InventorHoleFeatures holeFeatures =
             componentDefinition.Features.HoleFeatures;
 
-        double? sheetMetalThicknessMillimeters =
+        double? sheetMetalThickness =
             TryGetSheetMetalThickness(partDocument);
 
-        Console.WriteLine();
-        Console.WriteLine("========================================");
-        Console.WriteLine("АНАЛИЗ ОТВЕРСТИЙ");
-        Console.WriteLine("========================================");
-        Console.WriteLine();
-
-        if (sheetMetalThicknessMillimeters.HasValue)
+        HoleAnalysisResult result = new()
         {
-            Console.WriteLine(
-                $"Толщина листового металла: " +
-                $"{sheetMetalThicknessMillimeters.Value:F2} мм");
+            IsSheetMetal =
+                sheetMetalThickness.HasValue,
 
-            Console.WriteLine();
-        }
+            SheetMetalThickness =
+                sheetMetalThickness,
 
-        if (holeFeatures.Count == 0)
+            FeatureCount =
+                holeFeatures.Count
+        };
+
+        foreach (InventorHoleFeature holeFeature in holeFeatures)
         {
-            Console.WriteLine("Отверстий не найдено.");
-            Console.WriteLine("========================================");
-            Console.WriteLine();
-
-            return holes;
-        }
-
-        int totalPhysicalHoles = 0;
-
-        foreach (HoleFeature holeFeature in holeFeatures)
-        {
-            int centerPointCount =
-                holeFeature.HoleCenterPoints.Count;
-
-            double diameterMillimeters =
+            double diameter =
                 TryGetDiameterMillimeters(holeFeature);
 
-            double depthMillimeters =
+            double depth =
                 TryGetDepthMillimeters(holeFeature);
 
             bool hasThroughAllExtent =
                 TryIsThroughAllExtent(holeFeature);
 
             bool passesThroughSheetMetal =
-                sheetMetalThicknessMillimeters.HasValue &&
-                depthMillimeters +
-                ComparisonToleranceMillimeters >=
-                sheetMetalThicknessMillimeters.Value;
+                sheetMetalThickness.HasValue &&
+                depth + ComparisonToleranceMillimeters >=
+                sheetMetalThickness.Value;
 
             bool isThroughHole =
                 hasThroughAllExtent ||
                 passesThroughSheetMetal;
 
-            Console.WriteLine(
-                $"Операция: {holeFeature.Name}");
-
-            Console.WriteLine(
-                $"  Диаметр: {diameterMillimeters:F2} мм");
-
-            Console.WriteLine(
-                $"  Заданная глубина: {depthMillimeters:F2} мм");
-
-            Console.WriteLine(
-                $"  Тип завершения Through All: " +
-                $"{(hasThroughAllExtent ? "да" : "нет")}");
-
-            if (sheetMetalThicknessMillimeters.HasValue)
+            HoleFeatureAnalysis featureAnalysis = new()
             {
-                Console.WriteLine(
-                    $"  Проходит через толщину листа: " +
-                    $"{(passesThroughSheetMetal ? "да" : "нет")}");
-            }
+                Name =
+                    holeFeature.Name,
 
-            Console.WriteLine(
-                $"  Итоговый тип: " +
-                $"{(isThroughHole ? "сквозное" : "глухое")}");
+                Diameter =
+                    diameter,
 
-            Console.WriteLine(
-                $"  Фактических отверстий: {centerPointCount}");
+                Depth =
+                    depth,
+
+                HasThroughAllExtent =
+                    hasThroughAllExtent,
+
+                PassesThroughSheetMetal =
+                    passesThroughSheetMetal,
+
+                IsThroughHole =
+                    isThroughHole,
+
+                PhysicalHoleCount =
+                    holeFeature.HoleCenterPoints.Count
+            };
+
+            result.Features.Add(featureAnalysis);
 
             int pointIndex = 1;
 
-            foreach (SketchPoint centerPoint
+            foreach (InventorSketchPoint centerPoint
                      in holeFeature.HoleCenterPoints)
             {
-                Point centerPoint3d =
+                InventorPoint centerPoint3d =
                     centerPoint.Geometry3d;
 
                 HoleInfo holeInfo = new()
@@ -115,10 +105,10 @@ public class HoleAnalyzer
                         $"{holeFeature.Name}_{pointIndex}",
 
                     Diameter =
-                        diameterMillimeters,
+                        diameter,
 
                     Depth =
-                        depthMillimeters,
+                        depth,
 
                     IsThroughHole =
                         isThroughHole,
@@ -136,48 +126,22 @@ public class HoleAnalyzer
                         CentimetersToMillimeters
                 };
 
-                holes.Add(holeInfo);
-
-                string depthText =
-                    holeInfo.IsThroughHole
-                        ? "сквозное"
-                        : $"глубина {holeInfo.Depth:F2} мм";
-
-                Console.WriteLine(
-                    $"  {pointIndex}. " +
-                    $"Диаметр: {holeInfo.Diameter:F2} мм; " +
-                    $"{depthText}; " +
-                    $"центр: " +
-                    $"X={holeInfo.CenterX:F2}; " +
-                    $"Y={holeInfo.CenterY:F2}; " +
-                    $"Z={holeInfo.CenterZ:F2} мм");
+                result.Holes.Add(holeInfo);
 
                 pointIndex++;
-                totalPhysicalHoles++;
             }
-
-            Console.WriteLine();
         }
 
-        Console.WriteLine(
-            $"Операций HoleFeature: {holeFeatures.Count}");
-
-        Console.WriteLine(
-            $"Фактических отверстий: {totalPhysicalHoles}");
-
-        Console.WriteLine("========================================");
-        Console.WriteLine();
-
-        return holes;
+        return result;
     }
 
     private static double? TryGetSheetMetalThickness(
-        PartDocument partDocument)
+        InventorPartDocument partDocument)
     {
         try
         {
             if (partDocument.ComponentDefinition
-                is not SheetMetalComponentDefinition
+                is not InventorSheetMetalComponentDefinition
                 sheetMetalDefinition)
             {
                 return null;
@@ -187,20 +151,14 @@ public class HoleAnalyzer
                 sheetMetalDefinition.Thickness.Value *
                 CentimetersToMillimeters;
         }
-        catch (Exception exception)
+        catch
         {
-            Console.WriteLine(
-                "Не удалось получить толщину листового металла.");
-
-            Console.WriteLine(
-                $"Причина: {exception.Message}");
-
             return null;
         }
     }
 
     private static double TryGetDiameterMillimeters(
-        HoleFeature holeFeature)
+        InventorHoleFeature holeFeature)
     {
         try
         {
@@ -208,21 +166,14 @@ public class HoleAnalyzer
                 holeFeature.HoleDiameter.Value *
                 CentimetersToMillimeters;
         }
-        catch (Exception exception)
+        catch
         {
-            Console.WriteLine(
-                $"Операция {holeFeature.Name}: " +
-                "диаметр получить не удалось.");
-
-            Console.WriteLine(
-                $"Причина: {exception.Message}");
-
             return 0;
         }
     }
 
     private static double TryGetDepthMillimeters(
-        HoleFeature holeFeature)
+        InventorHoleFeature holeFeature)
     {
         try
         {
@@ -230,37 +181,23 @@ public class HoleAnalyzer
                 holeFeature.Depth *
                 CentimetersToMillimeters;
         }
-        catch (Exception exception)
+        catch
         {
-            Console.WriteLine(
-                $"Операция {holeFeature.Name}: " +
-                "глубину получить не удалось.");
-
-            Console.WriteLine(
-                $"Причина: {exception.Message}");
-
             return 0;
         }
     }
 
     private static bool TryIsThroughAllExtent(
-        HoleFeature holeFeature)
+        InventorHoleFeature holeFeature)
     {
         try
         {
             return
                 holeFeature.ExtentType ==
-                PartFeatureExtentEnum.kThroughAllExtent;
+                InventorPartFeatureExtentEnum.kThroughAllExtent;
         }
-        catch (Exception exception)
+        catch
         {
-            Console.WriteLine(
-                $"Операция {holeFeature.Name}: " +
-                "тип завершения получить не удалось.");
-
-            Console.WriteLine(
-                $"Причина: {exception.Message}");
-
             return false;
         }
     }
