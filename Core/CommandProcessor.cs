@@ -1,4 +1,8 @@
-﻿namespace AI_CAD_ENGINEER.Core;
+﻿using AI_CAD_ENGINEER.Drawing;
+using AI_CAD_ENGINEER.Engineering.Models;
+using AI_CAD_ENGINEER.Import.Inventor;
+
+namespace AI_CAD_ENGINEER.Core;
 
 public class CommandProcessor
 {

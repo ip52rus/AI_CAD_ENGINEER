@@ -1,6 +1,7 @@
-﻿using System.Text;
+﻿using AI_CAD_ENGINEER.Engineering.Models;
+using System.Text;
 
-namespace AI_CAD_ENGINEER.Core;
+namespace AI_CAD_ENGINEER.Engineering.Analysis;
 
 public class ViewDecisionReport
 {

@@ -1,6 +1,7 @@
-﻿using Inventor;
+﻿using AI_CAD_ENGINEER.Engineering.Models;
+using Inventor;
 
-namespace AI_CAD_ENGINEER.Core;
+namespace AI_CAD_ENGINEER.Import.Inventor;
 
 public class HoleAnalyzer
 {

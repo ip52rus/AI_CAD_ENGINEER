@@ -1,4 +1,6 @@
-﻿namespace AI_CAD_ENGINEER.Core;
+﻿using AI_CAD_ENGINEER.Engineering.Models;
+
+namespace AI_CAD_ENGINEER.Engineering.Analysis;
 
 public class ViewScoreCalculator
 {

@@ -1,4 +1,4 @@
-﻿namespace AI_CAD_ENGINEER.Core;
+﻿namespace AI_CAD_ENGINEER.Engineering.Models;
 
 public class PartAnalysis
 {
