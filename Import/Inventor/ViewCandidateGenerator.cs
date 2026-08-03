@@ -1,10 +1,12 @@
-﻿using AI_CAD_ENGINEER.Engineering.Analysis;
+﻿using System.Runtime.InteropServices;
+using AI_CAD_ENGINEER.Engineering.Analysis;
 using AI_CAD_ENGINEER.Engineering.Decision;
 using AI_CAD_ENGINEER.Engineering.Models;
 
 using InventorApplication = global::Inventor.Application;
 using InventorDocument = global::Inventor.Document;
 using InventorDocumentInternal = global::Inventor._Document;
+using DrawingDocument = global::Inventor.DrawingDocument;
 using DrawingView = global::Inventor.DrawingView;
 using DrawingViewStyleEnum = global::Inventor.DrawingViewStyleEnum;
 using Point2d = global::Inventor.Point2d;
@@ -23,100 +25,227 @@ public class ViewCandidateGenerator
     public ViewCandidateGenerator(
         InventorApplication inventor)
     {
-        _inventor = inventor;
-        _viewAnalyzer = new ViewAnalyzer();
-        _scoreCalculator = new ViewScoreCalculator();
+        ArgumentNullException.ThrowIfNull(inventor);
+
+        _inventor =
+            inventor;
+
+        _viewAnalyzer =
+            new ViewAnalyzer();
+
+        _scoreCalculator =
+            new ViewScoreCalculator();
     }
 
     public List<ViewCandidate> Generate(
         InventorDocument modelDocument,
         Sheet sheet)
     {
-        List<ViewCandidate> candidates = new();
+        ArgumentNullException.ThrowIfNull(
+            modelDocument);
 
-        ViewOrientationTypeEnum[] inventorOrientations =
-        {
-            ViewOrientationTypeEnum.kFrontViewOrientation,
-            ViewOrientationTypeEnum.kBackViewOrientation,
-            ViewOrientationTypeEnum.kTopViewOrientation,
-            ViewOrientationTypeEnum.kBottomViewOrientation,
-            ViewOrientationTypeEnum.kLeftViewOrientation,
-            ViewOrientationTypeEnum.kRightViewOrientation
-        };
+        ArgumentNullException.ThrowIfNull(
+            sheet);
 
-        StandardViewOrientation[] standardOrientations =
-        {
-            StandardViewOrientation.Front,
-            StandardViewOrientation.Back,
-            StandardViewOrientation.Top,
-            StandardViewOrientation.Bottom,
-            StandardViewOrientation.Left,
-            StandardViewOrientation.Right
-        };
+        DrawingDocument drawingDocument =
+            (DrawingDocument)sheet.Parent;
 
-        string[] orientationNames =
-        {
-            "Front",
-            "Back",
-            "Top",
-            "Bottom",
-            "Left",
-            "Right"
-        };
+        List<ViewCandidate> candidates =
+            new();
+
+        ViewOrientationDefinition[] orientations =
+        [
+            new(
+                ViewOrientationTypeEnum
+                    .kFrontViewOrientation,
+                StandardViewOrientation.Front,
+                "Front"),
+
+            new(
+                ViewOrientationTypeEnum
+                    .kBackViewOrientation,
+                StandardViewOrientation.Back,
+                "Back"),
+
+            new(
+                ViewOrientationTypeEnum
+                    .kTopViewOrientation,
+                StandardViewOrientation.Top,
+                "Top"),
+
+            new(
+                ViewOrientationTypeEnum
+                    .kBottomViewOrientation,
+                StandardViewOrientation.Bottom,
+                "Bottom"),
+
+            new(
+                ViewOrientationTypeEnum
+                    .kLeftViewOrientation,
+                StandardViewOrientation.Left,
+                "Left"),
+
+            new(
+                ViewOrientationTypeEnum
+                    .kRightViewOrientation,
+                StandardViewOrientation.Right,
+                "Right")
+        ];
 
         Console.WriteLine();
-        Console.WriteLine("Оценка стандартных проекций:");
-        Console.WriteLine("--------------------------------");
+        Console.WriteLine(
+            "Оценка стандартных проекций:");
 
-        for (int index = 0;
-             index < inventorOrientations.Length;
-             index++)
+        Console.WriteLine(
+            "--------------------------------");
+
+        foreach (ViewOrientationDefinition orientation
+                 in orientations)
         {
-            Point2d temporaryPosition =
-                _inventor.TransientGeometry.CreatePoint2d(
-                    sheet.Width / 2,
-                    sheet.Height / 2);
+            DrawingView? temporaryView =
+                null;
 
-            DrawingView temporaryView =
-                sheet.DrawingViews.AddBaseView(
-                    (InventorDocumentInternal)modelDocument,
-                    temporaryPosition,
-                    1.0,
-                    inventorOrientations[index],
-                    DrawingViewStyleEnum
-                        .kHiddenLineRemovedDrawingViewStyle);
-
-            sheet.Parent.Update();
-
-            ViewStatistics statistics =
-                _viewAnalyzer.Analyze(temporaryView);
-
-            double score =
-                _scoreCalculator.Calculate(statistics);
-
-            ViewCandidate candidate = new()
+            try
             {
-                Orientation =
-                    standardOrientations[index],
+                Console.WriteLine(
+                    $"Анализ проекции {orientation.Name}:");
 
-                OrientationName =
-                    orientationNames[index],
+                Console.WriteLine(
+                    "  Создание временного вида...");
 
-                Statistics =
-                    statistics,
+                Point2d temporaryPosition =
+                    _inventor.TransientGeometry
+                        .CreatePoint2d(
+                            sheet.Width / 2.0,
+                            sheet.Height / 2.0);
 
-                Score =
-                    score
-            };
+                temporaryView =
+                    sheet.DrawingViews.AddBaseView(
+                        (InventorDocumentInternal)modelDocument,
+                        temporaryPosition,
+                        1.0,
+                        orientation.InventorOrientation,
+                        DrawingViewStyleEnum
+                            .kHiddenLineRemovedDrawingViewStyle);
 
-            candidates.Add(candidate);
+                Console.WriteLine(
+                    "  Временный вид создан.");
 
-            PrintCandidate(candidate);
+                Console.WriteLine(
+                    "  Обновление чертежа...");
 
-            temporaryView.Delete();
+                drawingDocument.Update();
+
+                Console.WriteLine(
+                    "  Чертёж обновлён.");
+
+                Console.WriteLine(
+                    "  Анализ геометрии...");
+
+                ViewStatistics statistics =
+                    _viewAnalyzer.Analyze(
+                        temporaryView);
+
+                Console.WriteLine(
+                    "  Геометрия проанализирована.");
+
+                double score =
+                    _scoreCalculator.Calculate(
+                        statistics);
+
+                ViewCandidate candidate =
+                    new()
+                    {
+                        Orientation =
+                            orientation.StandardOrientation,
+
+                        OrientationName =
+                            orientation.Name,
+
+                        Statistics =
+                            statistics,
+
+                        Score =
+                            score
+                    };
+
+                candidates.Add(
+                    candidate);
+
+                PrintCandidate(
+                    candidate);
+            }
+            catch (COMException exception)
+            {
+                Console.WriteLine(
+                    $"  Ошибка COM для проекции " +
+                    $"{orientation.Name}:");
+
+                Console.WriteLine(
+                    $"  {exception.Message}");
+
+                Console.WriteLine(
+                    $"  HRESULT: " +
+                    $"0x{exception.HResult:X8}");
+
+                Console.WriteLine();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(
+                    $"  Ошибка анализа проекции " +
+                    $"{orientation.Name}:");
+
+                Console.WriteLine(
+                    $"  {exception.Message}");
+
+                Console.WriteLine();
+            }
+            finally
+            {
+                if (temporaryView != null)
+                {
+                    try
+                    {
+                        temporaryView.Delete();
+
+                        drawingDocument.Update();
+
+                        Console.WriteLine(
+                            "  Временный вид удалён.");
+
+                        Console.WriteLine();
+                    }
+                    catch (Exception exception)
+                    {
+                        Console.WriteLine(
+                            "  Не удалось удалить " +
+                            "временный вид:");
+
+                        Console.WriteLine(
+                            $"  {exception.Message}");
+
+                        Console.WriteLine();
+                    }
+                }
+            }
         }
 
-        Console.WriteLine("--------------------------------");
+        Console.WriteLine(
+            "--------------------------------");
+
+        if (candidates.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "Не удалось создать ни одной стандартной " +
+                "проекции. Подробности указаны выше в консоли.");
+        }
+
+        Console.WriteLine(
+            $"Успешно проанализировано проекций: " +
+            $"{candidates.Count}");
+
+        Console.WriteLine();
 
         return candidates;
     }
@@ -128,28 +257,61 @@ public class ViewCandidateGenerator
             candidate.Statistics;
 
         Console.WriteLine(
-            $"{candidate.OrientationName}: " +
+            $"  {candidate.OrientationName}: " +
             $"{candidate.Score:F2}");
 
         Console.WriteLine(
-            $"  Кривые: {statistics.CurveCount}");
+            $"    Кривые: " +
+            $"{statistics.CurveCount}");
 
         Console.WriteLine(
-            $"  Линии: {statistics.LineCount}");
+            $"    Линии: " +
+            $"{statistics.LineCount}");
 
         Console.WriteLine(
-            $"  Окружности: {statistics.CircleCount}");
+            $"    Окружности: " +
+            $"{statistics.CircleCount}");
 
         Console.WriteLine(
-            $"  Дуги: {statistics.ArcCount}");
+            $"    Дуги: " +
+            $"{statistics.ArcCount}");
 
         Console.WriteLine(
-            $"  Эллиптические дуги: " +
+            $"    Эллиптические дуги: " +
             $"{statistics.EllipticalArcCount}");
 
         Console.WriteLine(
-            $"  Площадь: {statistics.Area:F2}");
+            $"    Площадь: " +
+            $"{statistics.Area:F2}");
 
         Console.WriteLine();
+    }
+
+    private sealed class ViewOrientationDefinition
+    {
+        public ViewOrientationDefinition(
+            ViewOrientationTypeEnum inventorOrientation,
+            StandardViewOrientation standardOrientation,
+            string name)
+        {
+            InventorOrientation =
+                inventorOrientation;
+
+            StandardOrientation =
+                standardOrientation;
+
+            Name =
+                name;
+        }
+
+        public ViewOrientationTypeEnum
+            InventorOrientation
+        { get; }
+
+        public StandardViewOrientation
+            StandardOrientation
+        { get; }
+
+        public string Name { get; }
     }
 }
