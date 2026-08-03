@@ -25,7 +25,9 @@ public class CommandProcessor
 
         if (activeDocument == null)
         {
-            Console.WriteLine("В Inventor нет открытого документа.");
+            Console.WriteLine(
+                "В Inventor нет открытого документа.");
+
             return;
         }
 
@@ -33,6 +35,7 @@ public class CommandProcessor
         {
             Console.WriteLine(
                 "Команда пока поддерживается только для деталей.");
+
             return;
         }
 
@@ -41,11 +44,35 @@ public class CommandProcessor
 
         if (inventor == null)
         {
-            Console.WriteLine("Подключение к Inventor отсутствует.");
+            Console.WriteLine(
+                "Подключение к Inventor отсутствует.");
+
             return;
         }
 
-        DrawingManager drawingManager = new(inventor);
+        try
+        {
+            ModelAnalyzer modelAnalyzer = new();
+
+            PartAnalysis partAnalysis =
+                modelAnalyzer.Analyze(activeDocument);
+
+            modelAnalyzer.PrintReport(partAnalysis);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine();
+            Console.WriteLine(
+                "Не удалось выполнить анализ 3D-модели.");
+
+            Console.WriteLine(
+                $"Причина: {exception.Message}");
+
+            return;
+        }
+
+        DrawingManager drawingManager =
+            new(inventor);
 
         if (drawingManager.CreateDrawingWithViews(activeDocument))
         {
