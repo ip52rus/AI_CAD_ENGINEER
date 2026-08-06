@@ -1,0 +1,20 @@
+{
+  "phase": "v0.15 Phase 1",
+  "operation": "remove legacy architecture",
+  "targets": [
+    "Core/CommandProcessor.cs",
+    "Drawing",
+    "Engineering",
+    "Import/Inventor",
+    "Infrastructure/Reporting"
+  ],
+  "protected": [
+    "InventorControl",
+    "Core/Application.cs",
+    "Core/InventorManager.cs",
+    "Program.cs",
+    "AI_CAD_ENGINEER.csproj"
+  ],
+  "requires_branch": "cleanup/legacy-architecture",
+  "requires_clean_worktree": true
+}
