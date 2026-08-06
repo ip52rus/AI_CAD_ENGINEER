@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint before the Package 17B documentation sync:
+Current checkpoint before the Package 18B documentation sync:
 
 ```text
-059e57c v0.16 complete typed drawing table Eyes and diagnostics
+8980bf8 v0.17 complete CustomTables Eye
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 17A:
+Live command audit after Package 18A:
 
 ```text
-113 registered JSON commands
-113 unique registered JSON commands
+114 registered JSON commands
+114 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -194,6 +194,35 @@ Inventor API distinction:
 - CustomTables are not `Sheet.PartsLists`.
 - The runtime reads facts from Inventor API only; external LLM decides how to interpret those facts.
 
+## Package 18A status
+
+Package 18A added Drawing Text Objects Eye:
+
+```json
+{"command":"get_drawing_text_objects"}
+```
+
+Status: VERIFIED.
+
+Confirmed scope:
+
+- reads `Sheet.DrawingNotes.GeneralNotes`;
+- reads `Sheet.DrawingNotes.LeaderNotes`;
+- reads `Sheet.DrawingNotes.HoleThreadNotes`;
+- reads `Sheet.DrawingNotes.BendNotes`;
+- reads `Sheet.DrawingNotes.ChamferNotes`;
+- reads `Sheet.DrawingNotes.PunchNotes`;
+- reads `Sheet.Sketches` / `DrawingSketch.TextBoxes`;
+- reads `Sheet.SketchedSymbols`;
+- returns Inventor API facts, reference keys where available, selector snapshots, and diagnostics.
+
+Explicit non-scope:
+
+- no semantic text analysis;
+- no GOST interpretation;
+- no TT/TU recognition;
+- no engineering conclusions.
+
 ## Verified eyes
 
 Major verified read areas include:
@@ -206,6 +235,7 @@ Major verified read areas include:
 - `Sheet.RevisionTables` typed Eye;
 - drawing table collection diagnostics;
 - `Sheet.CustomTables` detailed typed Eye;
+- drawing text objects;
 - view and curve geometry;
 - model feature tree;
 - feature details;
@@ -223,19 +253,19 @@ Major verified read areas include:
 ## Known gaps
 
 - Typed detailed Eye for `Sheet.HoleTables` is not implemented yet.
-- Drawing Text / Notes capability needs a focused audit.
+- Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - Do not describe GOST `CustomTable` objects as `PartsList` objects.
 
 ## Next task
 
-Next capability audit:
+Next capability check:
 
 ```text
-Drawing Text / Notes Eye
+Capability Check — next engineering layer
 ```
 
 Goal:
 
-- check existing drawing text and note reading capabilities;
-- determine whether a new Eye is needed;
-- do not write code before the Capability Audit.
+- select the next capability boundary;
+- run an audit before implementation;
+- keep Runtime limited to Eyes and atomic Hands.

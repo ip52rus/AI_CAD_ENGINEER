@@ -217,6 +217,9 @@ public class InventorCommandDispatcher
     private readonly GetLeaderNotesCommand
         _getLeaderNotesCommand;
 
+    private readonly GetDrawingTextObjectsCommand
+        _getDrawingTextObjectsCommand;
+
     private readonly GetBalloonsCommand
         _getBalloonsCommand;
 
@@ -629,6 +632,10 @@ public class InventorCommandDispatcher
 
         _getLeaderNotesCommand =
             new GetLeaderNotesCommand(
+                inventor);
+
+        _getDrawingTextObjectsCommand =
+            new GetDrawingTextObjectsCommand(
                 inventor);
 
         _getBalloonsCommand =
@@ -1118,6 +1125,10 @@ public class InventorCommandDispatcher
 
                 "get_leader_notes" =>
                     _getLeaderNotesCommand.Execute(
+                        root),
+
+                "get_drawing_text_objects" =>
+                    _getDrawingTextObjectsCommand.Execute(
                         root),
 
                 "get_balloons" =>

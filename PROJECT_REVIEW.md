@@ -1,5 +1,34 @@
 # PROJECT REVIEW
 
+## Package 18B addendum — current checkpoint
+
+This addendum supersedes older command counts and next-step notes below where they conflict.
+
+Current live command inventory after Package 18A:
+
+```text
+114 registered JSON commands
+114 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+0 unregistered command classes
+```
+
+Package 18A status:
+
+- `get_drawing_text_objects` is VERIFIED.
+- It reads Inventor API drawing text-like objects as a typed Eye.
+- It covers DrawingNotes collections, DrawingSketch TextBoxes, and SketchedSymbols.
+- It does not perform semantic text analysis, GOST interpretation, TT/TU recognition, or engineering conclusions.
+
+Next recommended capability check:
+
+```text
+Capability Check — next engineering layer
+```
+
+Do not reintroduce EngineeringBrain, DrawingManager, Planning, Decision, or automatic engineering logic into the runtime.
+
 ## Package 16D addendum — current checkpoint
 
 This addendum supersedes older command counts and next-step notes below where they conflict.

@@ -205,6 +205,34 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 18A:
+
+```text
+Package 18A complete — Drawing Text Objects Eye checkpoint
+```
+
+Current confirmed drawing text command:
+
+```text
+get_drawing_text_objects
+```
+
+Current Package 18A status:
+
+- `get_drawing_text_objects` is VERIFIED;
+- drawing text object reading covers DrawingNotes collections, DrawingSketch TextBoxes, and SketchedSymbols;
+- the runtime still does not perform semantic text analysis, TT/TU recognition, GOST interpretation, or engineering interpretation.
+
+Next correct action:
+
+1. run a Capability Check for the next engineering-layer boundary;
+2. verify whether sufficient atomic Eyes/Hands already exist;
+3. inspect actual Inventor 2027 interop signatures before proposing new code;
+4. decide whether a new atomic Eye or Hand is needed;
+5. do not write implementation code until the audit proves a gap and the user authorizes implementation.
+
+The older Package 17A notes below are superseded by this addendum where they conflict.
+
 Current milestone:
 
 ```text

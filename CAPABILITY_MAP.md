@@ -1,6 +1,6 @@
 # CAPABILITY MAP
 
-Date: 2026-08-06
+Date: 2026-08-07
 
 Repository: `C:\AI_CAD_ENGINEER\AI_CAD_ENGINEER`
 
@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint before this documentation sync:
 
 ```text
-059e57c v0.16 complete typed drawing table Eyes and diagnostics
+8980bf8 v0.17 complete CustomTables Eye
 ```
 
 ## Ground rules
@@ -42,7 +42,8 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Drawing dimensions | PARTIAL | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | not separately recorded | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | angular/ordinate/baseline/chain/symmetric/chamfer dimensions and additional atomic format/read variants | P1 |
 | Hole/thread notes | IMPLEMENTED_UNTESTED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | not separately recorded | - | stable selector variants are still missing; current commands use indexes | P1 |
 | Basic drawing annotation Eyes | IMPLEMENTED_UNTESTED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | not recorded after Package 15A | - | Inventor PASS still required | P0 test when needed |
-| Drawing Text / Notes Eye | PARTIAL | `get_general_notes`, `get_leader_notes` | not separately recorded after Package 15A | - | capability requires focused audit before adding anything | P0 next audit |
+| Drawing Text Objects | VERIFIED | `get_drawing_text_objects` | `get_drawing_text_objects`, `get_drawing_text_objects` with `sheetName` | - | - | P0 maintained |
+| Drawing Text semantic analysis | MISSING | - | - | - | semantic text understanding, GOST interpretation, TT/TU recognition; belongs to external LLM, not Runtime | no Runtime priority |
 | Annotation summary and bounds | PARTIAL | `get_drawing_annotation_summary`, `get_annotation_bounds` | annotation summary recorded as verified area; exact PASS command not separately recorded | - | typed bounds for all annotation classes; current bounds coverage is incomplete | P1 |
 | Annotation collision/layout logic | EXPERIMENTAL | - | not applicable | `check_annotation_collisions`, `auto_resolve_annotation_collisions` | should not be expanded as Runtime coverage | no priority |
 | Surface texture symbols | MISSING | count only through `get_drawing_annotation_summary` | not separately recorded | - | typed Eye; atomic create/move/delete/format Hands | P2 |
@@ -81,12 +82,16 @@ Exact commands explicitly confirmed:
 {"command":"get_drawing_table_collections"}
 {"command":"get_drawing_table_collections","sheetName":"Лист:1"}
 {"command":"get_custom_tables"}
+{"command":"get_drawing_text_objects"}
+{"command":"get_drawing_text_objects","sheetName":"Лист:1"}
 {"command":"get_custom_tables","sheetName":"Лист:1"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
 
 `get_custom_tables` is verified for reading `Sheet.CustomTables`, including CustomTable metadata, columns, rows, cells, merged cells, and reference keys.
+
+`get_drawing_text_objects` is verified for reading DrawingNotes collections, DrawingSketch TextBoxes, and SketchedSymbols as Inventor API facts.
 
 ## Experimental commands
 
@@ -114,9 +119,26 @@ reference keys
 
 This is not a specification parser and not a PartsList reader.
 
+## Package 18 result
+
+Package 18A confirmed that `get_drawing_text_objects` reads drawing text-like objects as a typed Eye:
+
+```text
+Sheet.DrawingNotes.GeneralNotes
+Sheet.DrawingNotes.LeaderNotes
+Sheet.DrawingNotes.HoleThreadNotes
+Sheet.DrawingNotes.BendNotes
+Sheet.DrawingNotes.ChamferNotes
+Sheet.DrawingNotes.PunchNotes
+Sheet.Sketches / DrawingSketch.TextBoxes
+Sheet.SketchedSymbols
+```
+
+This is not semantic text analysis, TT/TU recognition, or GOST interpretation.
+
 ## Priority notes
 
-- P0: run the next audit for Drawing Text / Notes Eye.
+- P0: choose the next capability boundary and run an audit before implementation.
 - P1: continue atomic Drawing Views / Drawing Dimensions / HoleThreadNotes improvements only where audits confirmed gaps.
 - P2: add specialized annotation/table capabilities only after typed Eyes define reliable selector snapshots.
 

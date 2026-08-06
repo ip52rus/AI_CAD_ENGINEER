@@ -16,9 +16,11 @@ Current context:
 
 Current checkpoint context:
 
-- Package 17A is complete.
+- Package 18A is complete.
 - Package 17A added and verified:
   - `get_custom_tables`
+- Package 18A added and verified:
+  - `get_drawing_text_objects`
 - `get_custom_tables` reads Autodesk Inventor `Sheet.CustomTables` as a typed Eye:
   - CustomTable metadata;
   - Columns;
@@ -29,26 +31,25 @@ Current checkpoint context:
   - diagnostics.
 - CustomTables are not PartsLists.
 - Runtime returns Inventor API facts only; it does not classify a table as specification, BOM, or GOST.
+- `get_drawing_text_objects` reads DrawingNotes collections, DrawingSketch TextBoxes, and SketchedSymbols.
+- Runtime does not perform semantic text analysis, TT/TU recognition, GOST interpretation, or engineering conclusions.
 
 Next expected stage:
 
 ```text
-Capability Audit: Drawing Text / Notes Eye
+Capability Check — next engineering layer
 ```
 
-Required next audit:
+Required next check:
 
 1. Run `git status --short --branch`.
 2. Confirm the active branch and HEAD.
 3. Read `InventorCommandDispatcher.cs`.
-4. Search for existing commands that read drawing text and notes.
-5. Inspect relevant commands/support under:
-   - `InventorControl/Commands/Annotations`
-   - `InventorControl/Commands/DrawingStructure`
-   - `InventorControl/Commands/TitleBlock`
-6. Determine whether sufficient Drawing Text / Notes Eyes already exist.
+4. Identify the next capability boundary from current user instructions.
+5. Search for existing equivalent commands and support code.
+6. Inspect actual Inventor 2027 interop signatures before proposing code.
 7. If sufficient capability exists, do not write code.
-8. If a gap exists, report the exact missing atomic Eye and wait for implementation approval unless the user explicitly authorizes implementation in the same request.
+8. If a gap exists, report the exact missing atomic Eye/Hand and wait for implementation approval unless the user explicitly authorizes implementation in the same request.
 
 Do not implement code during documentation-only tasks.
 
