@@ -37,6 +37,9 @@ public class InventorCommandDispatcher
     private readonly DeleteDrawingViewCommand
         _deleteDrawingViewCommand;
 
+    private readonly CreateBaseViewCommand
+        _createBaseViewCommand;
+
     private readonly CreateProjectedViewCommand
         _createProjectedViewCommand;
 
@@ -208,6 +211,21 @@ public class InventorCommandDispatcher
     private readonly SetHoleThreadNoteFormatCommand
         _setHoleThreadNoteFormatCommand;
 
+    private readonly GetGeneralNotesCommand
+        _getGeneralNotesCommand;
+
+    private readonly GetLeaderNotesCommand
+        _getLeaderNotesCommand;
+
+    private readonly GetBalloonsCommand
+        _getBalloonsCommand;
+
+    private readonly GetCenterMarksCommand
+        _getCenterMarksCommand;
+
+    private readonly GetCenterlinesCommand
+        _getCenterlinesCommand;
+
     private readonly GetGeneralDimensionsDetailedCommand
         _getGeneralDimensionsDetailedCommand;
 
@@ -316,6 +334,15 @@ public class InventorCommandDispatcher
     private readonly GetDrawingTablesCommand
         _getDrawingTablesCommand;
 
+    private readonly GetDrawingTableCollectionsCommand
+        _getDrawingTableCollectionsCommand;
+
+    private readonly GetPartsListsCommand
+        _getPartsListsCommand;
+
+    private readonly GetRevisionTablesCommand
+        _getRevisionTablesCommand;
+
     public InventorCommandDispatcher(
         Inventor.Application inventor)
     {
@@ -359,6 +386,10 @@ public class InventorCommandDispatcher
 
         _deleteDrawingViewCommand =
             new DeleteDrawingViewCommand(
+                inventor);
+
+        _createBaseViewCommand =
+            new CreateBaseViewCommand(
                 inventor);
 
         _createProjectedViewCommand =
@@ -589,6 +620,26 @@ public class InventorCommandDispatcher
             new SetHoleThreadNoteFormatCommand(
                 inventor);
 
+        _getGeneralNotesCommand =
+            new GetGeneralNotesCommand(
+                inventor);
+
+        _getLeaderNotesCommand =
+            new GetLeaderNotesCommand(
+                inventor);
+
+        _getBalloonsCommand =
+            new GetBalloonsCommand(
+                inventor);
+
+        _getCenterMarksCommand =
+            new GetCenterMarksCommand(
+                inventor);
+
+        _getCenterlinesCommand =
+            new GetCenterlinesCommand(
+                inventor);
+
         _getGeneralDimensionsDetailedCommand =
             new GetGeneralDimensionsDetailedCommand(
                 inventor);
@@ -732,6 +783,18 @@ public class InventorCommandDispatcher
         _getDrawingTablesCommand =
             new GetDrawingTablesCommand(
                 inventor);
+
+        _getDrawingTableCollectionsCommand =
+            new GetDrawingTableCollectionsCommand(
+                inventor);
+
+        _getPartsListsCommand =
+            new GetPartsListsCommand(
+                inventor);
+
+        _getRevisionTablesCommand =
+            new GetRevisionTablesCommand(
+                inventor);
     }
 
     public string Execute(
@@ -808,6 +871,10 @@ public class InventorCommandDispatcher
 
                 "delete_drawing_view" =>
                     _deleteDrawingViewCommand.Execute(
+                        root),
+
+                "create_base_view" =>
+                    _createBaseViewCommand.Execute(
                         root),
 
                 "create_projected_view" =>
@@ -1038,6 +1105,26 @@ public class InventorCommandDispatcher
                     _setHoleThreadNoteFormatCommand.Execute(
                         root),
 
+                "get_general_notes" =>
+                    _getGeneralNotesCommand.Execute(
+                        root),
+
+                "get_leader_notes" =>
+                    _getLeaderNotesCommand.Execute(
+                        root),
+
+                "get_balloons" =>
+                    _getBalloonsCommand.Execute(
+                        root),
+
+                "get_center_marks" =>
+                    _getCenterMarksCommand.Execute(
+                        root),
+
+                "get_centerlines" =>
+                    _getCenterlinesCommand.Execute(
+                        root),
+
                 "get_general_dimensions_detailed" =>
                     _getGeneralDimensionsDetailedCommand.Execute(
                         root),
@@ -1180,6 +1267,18 @@ public class InventorCommandDispatcher
 
                 "get_drawing_tables" =>
                     _getDrawingTablesCommand.Execute(
+                        root),
+
+                "get_drawing_table_collections" =>
+                    _getDrawingTableCollectionsCommand.Execute(
+                        root),
+
+                "get_parts_lists" =>
+                    _getPartsListsCommand.Execute(
+                        root),
+
+                "get_revision_tables" =>
+                    _getRevisionTablesCommand.Execute(
                         root),
 
                 _ =>
