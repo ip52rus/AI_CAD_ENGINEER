@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint before this documentation sync:
 
 ```text
-8980bf8 v0.17 complete CustomTables Eye
+4fd8b75 v0.18 complete Drawing Text Objects Eye
 ```
 
 ## Ground rules
@@ -50,7 +50,8 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Weld symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Datum identifiers | MISSING | placeholder count only; no confirmed API coverage | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Datum target symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
-| Feature control frames | PARTIAL | count only through `get_drawing_annotation_summary` | not separately recorded | - | typed Eye; atomic create/move/delete/format Hands | P2 |
+| Feature Control Frames | VERIFIED | `get_feature_control_frames` | `get_feature_control_frames`, `get_feature_control_frames` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| GD&T semantic analysis | MISSING | - | - | - | tolerance interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Revision symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Sketched symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Parts Lists | VERIFIED | `get_parts_lists`, legacy aggregate coverage through `get_drawing_tables` | `get_parts_lists` verified for `Sheet.PartsLists`; tested sheet had `Sheet.PartsLists.Count = 0` | - | create/edit/delete/move/format parts list Hands are not confirmed | P1 maintained |
@@ -83,6 +84,8 @@ Exact commands explicitly confirmed:
 {"command":"get_drawing_table_collections","sheetName":"Лист:1"}
 {"command":"get_custom_tables"}
 {"command":"get_drawing_text_objects"}
+{"command":"get_feature_control_frames"}
+{"command":"get_feature_control_frames","sheetName":"Лист:1"}
 {"command":"get_drawing_text_objects","sheetName":"Лист:1"}
 {"command":"get_custom_tables","sheetName":"Лист:1"}
 ```
@@ -92,6 +95,8 @@ Exact commands explicitly confirmed:
 `get_custom_tables` is verified for reading `Sheet.CustomTables`, including CustomTable metadata, columns, rows, cells, merged cells, and reference keys.
 
 `get_drawing_text_objects` is verified for reading DrawingNotes collections, DrawingSketch TextBoxes, and SketchedSymbols as Inventor API facts.
+
+`get_feature_control_frames` is verified for reading `Sheet.FeatureControlFrames`, frame metadata, rows, tolerance fields, datum fields, reference keys, and diagnostics.
 
 ## Experimental commands
 
@@ -136,9 +141,24 @@ Sheet.SketchedSymbols
 
 This is not semantic text analysis, TT/TU recognition, or GOST interpretation.
 
+## Package 19 result
+
+Package 19A confirmed that `get_feature_control_frames` reads Autodesk Inventor `Sheet.FeatureControlFrames` as a typed Eye:
+
+```text
+FeatureControlFrame metadata
+FeatureControlFrameRows
+tolerance fields
+datum fields
+reference keys
+diagnostics
+```
+
+This is not tolerance interpretation, GOST validation, GD&T semantic analysis, or engineering analysis.
+
 ## Priority notes
 
-- P0: choose the next capability boundary and run an audit before implementation.
+- P0: continue the next drawing symbol capability check before implementation.
 - P1: continue atomic Drawing Views / Drawing Dimensions / HoleThreadNotes improvements only where audits confirmed gaps.
 - P2: add specialized annotation/table capabilities only after typed Eyes define reliable selector snapshots.
 

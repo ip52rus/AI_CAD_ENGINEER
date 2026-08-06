@@ -205,6 +205,34 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 19A:
+
+```text
+Package 19A complete — Feature Control Frames Eye checkpoint
+```
+
+Current confirmed drawing symbol command:
+
+```text
+get_feature_control_frames
+```
+
+Current Package 19A status:
+
+- `get_feature_control_frames` is VERIFIED;
+- feature control frame reading covers `Sheet.FeatureControlFrames`, frame metadata, rows, tolerance fields, datum fields, reference keys, and diagnostics;
+- the runtime still does not perform tolerance interpretation, GOST validation, GD&T semantic analysis, or engineering interpretation.
+
+Next correct action:
+
+1. run a Capability Check for the next drawing symbol layer;
+2. verify whether sufficient atomic Eyes/Hands already exist;
+3. inspect actual Inventor 2027 interop signatures before proposing new code;
+4. decide whether a new atomic Eye or Hand is needed;
+5. do not write implementation code until the audit proves a gap and the user authorizes implementation.
+
+The older Package 18A and Package 17A notes below are superseded by this addendum where they conflict.
+
 Current milestone addendum after Package 18A:
 
 ```text

@@ -3,10 +3,10 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`
-- Version/checkpoint before this commit: `8980bf8 v0.17 complete CustomTables Eye`
-- Latest completed package: Package 18A — Drawing Text Objects Eye
-- Current milestone: Drawing Text Objects Eye is implemented, built, registered, Inventor-validated, and marked `VERIFIED`
-- Live command inventory after Package 18A: `114 registered / 114 unique`, no duplicate command names, no unregistered command classes
+- Latest checkpoint before this commit: `4fd8b75 v0.18 complete Drawing Text Objects Eye`
+- Latest completed package: Package 19A — Feature Control Frames Eye
+- Current milestone: Feature Control Frames Eye is implemented, built, registered, Inventor-validated, and marked `VERIFIED`
+- Live command inventory after Package 19A: `115 registered / 115 unique`, no duplicate command names, no unregistered command classes
 
 ## Architecture Rules
 
@@ -30,6 +30,7 @@
 - CustomTables Discovery: `get_drawing_table_collections`.
 - CustomTables Detailed Reading: `get_custom_tables`.
 - Drawing Text Objects: `get_drawing_text_objects`.
+- Feature Control Frames Eye: `get_feature_control_frames`.
 
 ## Drawing Text Objects Coverage
 
@@ -46,13 +47,29 @@
 
 The command returns document/sheet metadata, `usedActiveSheet`, collection counts, items, reference keys where available, selector snapshots, and diagnostics.
 
+## Feature Control Frames Coverage
+
+`get_feature_control_frames` reads Inventor API facts from:
+
+- `Sheet.FeatureControlFrames`;
+- `FeatureControlFrame` metadata;
+- `FeatureControlFrameRows`;
+- tolerance fields;
+- datum fields;
+- reference keys;
+- diagnostics.
+
+The command does not interpret tolerances, validate GOST/ESKD compliance, or perform GD&T semantic analysis.
+
 ## Known Limitations
 
 - Semantic text understanding is not implemented in Runtime.
 - GOST interpretation is not implemented in Runtime.
 - TT/TU recognition is not implemented in Runtime.
+- GD&T semantic interpretation is outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
 - Typed detailed Eye for `Sheet.HoleTables` is still missing.
+- Surface texture symbols and welding symbols still need typed Eyes if selected by the next capability check.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`
@@ -66,7 +83,7 @@ The command returns document/sheet metadata, `usedActiveSheet`, collection count
 Next Capability Check:
 
 ```text
-Capability Check — next engineering layer
+Capability Check — next drawing symbol layer
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`, `CAPABILITY_MAP.md`, and this `CHAT_HANDOFF.md`. Then audit the live repository before proposing or writing code.

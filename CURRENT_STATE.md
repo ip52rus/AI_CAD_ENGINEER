@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint before the Package 18B documentation sync:
+Current checkpoint before the Package 19B documentation sync:
 
 ```text
-8980bf8 v0.17 complete CustomTables Eye
+4fd8b75 v0.18 complete Drawing Text Objects Eye
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 18A:
+Live command audit after Package 19A:
 
 ```text
-114 registered JSON commands
-114 unique registered JSON commands
+115 registered JSON commands
+115 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -223,6 +223,33 @@ Explicit non-scope:
 - no TT/TU recognition;
 - no engineering conclusions.
 
+## Package 19A status
+
+Package 19A added Feature Control Frames Eye:
+
+```json
+{"command":"get_feature_control_frames"}
+```
+
+Status: VERIFIED.
+
+Confirmed scope:
+
+- reads `Sheet.FeatureControlFrames`;
+- reads `FeatureControlFrame` metadata;
+- reads `FeatureControlFrameRows`;
+- returns tolerance fields as raw Inventor API strings;
+- returns datum reference fields as raw Inventor API strings;
+- returns reference keys where available;
+- returns selector snapshots and diagnostics.
+
+Explicit non-scope:
+
+- no tolerance interpretation;
+- no GOST validation;
+- no GD&T semantic analysis;
+- no engineering conclusions.
+
 ## Verified eyes
 
 Major verified read areas include:
@@ -236,6 +263,7 @@ Major verified read areas include:
 - drawing table collection diagnostics;
 - `Sheet.CustomTables` detailed typed Eye;
 - drawing text objects;
+- feature control frames;
 - view and curve geometry;
 - model feature tree;
 - feature details;
@@ -254,6 +282,7 @@ Major verified read areas include:
 
 - Typed detailed Eye for `Sheet.HoleTables` is not implemented yet.
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
+- GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - Do not describe GOST `CustomTable` objects as `PartsList` objects.
 
 ## Next task
@@ -261,7 +290,7 @@ Major verified read areas include:
 Next capability check:
 
 ```text
-Capability Check — next engineering layer
+Capability Check — next drawing symbol layer
 ```
 
 Goal:

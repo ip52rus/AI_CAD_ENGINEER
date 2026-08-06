@@ -1,5 +1,34 @@
 # PROJECT REVIEW
 
+## Package 19B addendum — current checkpoint
+
+This addendum supersedes older command counts and next-step notes below where they conflict.
+
+Current live command inventory after Package 19A:
+
+```text
+115 registered JSON commands
+115 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+0 unregistered command classes
+```
+
+Package 19A status:
+
+- `get_feature_control_frames` is VERIFIED.
+- It reads Inventor API `Sheet.FeatureControlFrames` as a typed Eye.
+- It covers FeatureControlFrame metadata, FeatureControlFrameRows, tolerance fields, datum fields, reference keys, and diagnostics.
+- It does not perform tolerance interpretation, GOST validation, GD&T semantic analysis, or engineering conclusions.
+
+Next recommended capability check:
+
+```text
+Capability Check — next drawing symbol layer
+```
+
+Do not reintroduce EngineeringBrain, DrawingManager, Planning, Decision, or automatic engineering logic into the runtime.
+
 ## Package 18B addendum — current checkpoint
 
 This addendum supersedes older command counts and next-step notes below where they conflict.

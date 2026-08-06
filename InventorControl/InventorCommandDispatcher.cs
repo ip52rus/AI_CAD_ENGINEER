@@ -220,6 +220,9 @@ public class InventorCommandDispatcher
     private readonly GetDrawingTextObjectsCommand
         _getDrawingTextObjectsCommand;
 
+    private readonly GetFeatureControlFramesCommand
+        _getFeatureControlFramesCommand;
+
     private readonly GetBalloonsCommand
         _getBalloonsCommand;
 
@@ -636,6 +639,10 @@ public class InventorCommandDispatcher
 
         _getDrawingTextObjectsCommand =
             new GetDrawingTextObjectsCommand(
+                inventor);
+
+        _getFeatureControlFramesCommand =
+            new GetFeatureControlFramesCommand(
                 inventor);
 
         _getBalloonsCommand =
@@ -1129,6 +1136,10 @@ public class InventorCommandDispatcher
 
                 "get_drawing_text_objects" =>
                     _getDrawingTextObjectsCommand.Execute(
+                        root),
+
+                "get_feature_control_frames" =>
+                    _getFeatureControlFramesCommand.Execute(
                         root),
 
                 "get_balloons" =>
