@@ -4,14 +4,12 @@
 
 AI CAD ENGINEER is a local bridge between an AI agent and Autodesk Inventor.
 
-The application must provide:
+The application provides:
 
-- **Eyes**: atomic read-only commands that expose useful Inventor data.
-- **Hands**: atomic write commands that perform one explicit action in Inventor.
+- **Eyes**: atomic read-only commands that expose Inventor data.
+- **Hands**: atomic write commands that perform one explicit Inventor action.
 
-The external AI agent performs engineering reasoning, chooses actions, analyzes geometry, and decides what to do next.
-
-The C# application must not replace the AI with embedded engineering decision logic.
+The external AI agent performs engineering reasoning, chooses actions, analyzes geometry, and decides what to do next. The C# runtime must not replace the AI with embedded engineering decision logic.
 
 ## 2. Non-negotiable architecture rule
 
@@ -26,12 +24,11 @@ Proceed only when the answer is yes.
 Do not implement in C#:
 
 - automatic engineering decisions;
-- automatic selection of required drawing views;
-- automatic selection of dimensions;
+- automatic selection of drawing views, dimensions, tables, notes, or formats;
 - automatic layout policies presented as final engineering decisions;
 - hidden planning systems that decide instead of the AI;
-- duplicate high-level "create the whole drawing" brains;
-- EngineeringBrain, AIDecision, Planning, DrawingManager, or similar runtime decision systems.
+- EngineeringBrain, AIDecision, Planning, DrawingManager, or similar runtime decision systems;
+- duplicate high-level "create the whole drawing" brains.
 
 Programmatic automation may be added only after explicit user approval and only where an AI cannot reliably perform the task through atomic tools.
 
@@ -58,18 +55,6 @@ CommandProcessor
 → EngineeringBrain
 → Analysis / Decision / Planning
 ```
-
-The following legacy directories were intentionally removed:
-
-```text
-Drawing/
-Engineering/
-Import/Inventor/
-Infrastructure/Reporting/
-Core/CommandProcessor.cs
-```
-
-Do not restore them unless the user explicitly requests it.
 
 ## 4. Mandatory pre-change audit
 
@@ -103,20 +88,6 @@ Every JSON command must perform exactly one of these:
 
 - one atomic read operation;
 - one atomic write operation.
-
-Examples of acceptable commands:
-
-```text
-get_surface_bodies
-get_face_edges
-get_drawing_views_detailed
-create_base_view
-move_drawing_view
-create_linear_dimension
-set_sheet_size
-```
-
-Avoid commands that combine analysis, planning, decision-making, and execution.
 
 Command requirements:
 
@@ -162,7 +133,7 @@ git status
 
 After code changes:
 
-1. Show the changed-file list.
+1. Show changed files.
 2. Show `git diff`.
 3. Build with classic Visual Studio MSBuild:
 
@@ -237,7 +208,7 @@ Rules:
 Current milestone:
 
 ```text
-Package 16 complete — typed drawing table Eyes and diagnostics checkpoint
+Package 17A complete — typed CustomTables Eye checkpoint
 ```
 
 Current confirmed drawing table commands:
@@ -246,6 +217,7 @@ Current confirmed drawing table commands:
 get_parts_lists
 get_revision_tables
 get_drawing_table_collections
+get_custom_tables
 ```
 
 Current status:
@@ -253,15 +225,17 @@ Current status:
 - `get_parts_lists` is VERIFIED for reading Inventor API `Sheet.PartsLists`;
 - `get_revision_tables` is VERIFIED;
 - `get_drawing_table_collections` is VERIFIED;
-- the tested GOST `Список деталей` table is exposed by Inventor as `Sheet.CustomTables` / `kCustomTableObject`, not as `Sheet.PartsLists`;
-- detailed reading of `Sheet.CustomTables` rows, columns, and cells is not implemented yet.
+- `get_custom_tables` is VERIFIED;
+- the tested GOST table is exposed by Inventor as `Sheet.CustomTables` / `kCustomTableObject`, not as `Sheet.PartsLists`;
+- detailed reading of `Sheet.CustomTables` metadata, columns, rows, cells, merged cells, and reference keys is implemented and verified;
+- the runtime still does not classify tables as specification, BOM, or GOST.
 
 Next correct action:
 
-1. run a Capability Audit for a typed CustomTables Eye;
-2. verify whether sufficient `Sheet.CustomTables` reading already exists;
-3. inspect actual Inventor 2027 interop signatures for `CustomTable`, `Rows`, `Columns`, and cells;
-4. decide whether a new `get_custom_tables` command is needed;
+1. run a Capability Audit for Drawing Text / Notes Eye;
+2. verify whether sufficient drawing text and note reading already exists;
+3. inspect actual Inventor 2027 interop signatures before proposing new code;
+4. decide whether a new atomic Eye is needed;
 5. do not write implementation code until the audit proves a gap and the user authorizes implementation.
 
 ## 12. Required response style for development tasks

@@ -337,6 +337,9 @@ public class InventorCommandDispatcher
     private readonly GetDrawingTableCollectionsCommand
         _getDrawingTableCollectionsCommand;
 
+    private readonly GetCustomTablesCommand
+        _getCustomTablesCommand;
+
     private readonly GetPartsListsCommand
         _getPartsListsCommand;
 
@@ -786,6 +789,10 @@ public class InventorCommandDispatcher
 
         _getDrawingTableCollectionsCommand =
             new GetDrawingTableCollectionsCommand(
+                inventor);
+
+        _getCustomTablesCommand =
+            new GetCustomTablesCommand(
                 inventor);
 
         _getPartsListsCommand =
@@ -1271,6 +1278,10 @@ public class InventorCommandDispatcher
 
                 "get_drawing_table_collections" =>
                     _getDrawingTableCollectionsCommand.Execute(
+                        root),
+
+                "get_custom_tables" =>
+                    _getCustomTablesCommand.Execute(
                         root),
 
                 "get_parts_lists" =>

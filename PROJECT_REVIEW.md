@@ -33,6 +33,35 @@ Typed CustomTables Eye
 
 Do not reintroduce EngineeringBrain, DrawingManager, Planning, Decision, or automatic engineering logic into the runtime.
 
+## Package 17B addendum — current checkpoint
+
+This addendum supersedes older command counts and next-step notes below where they conflict.
+
+Current live command inventory after Package 17A:
+
+```text
+113 registered JSON commands
+113 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+0 unregistered command classes
+```
+
+Package 17A status:
+
+- `get_custom_tables` is VERIFIED.
+- It reads Inventor API `Sheet.CustomTables` as a typed Eye.
+- It covers CustomTable metadata, Columns, Rows, Cells, MergedCells, and reference keys.
+- It does not classify tables as specification, BOM, GOST, or PartsList.
+
+Next recommended capability audit:
+
+```text
+Drawing Text / Notes Eye
+```
+
+Do not reintroduce EngineeringBrain, DrawingManager, Planning, Decision, or automatic engineering logic into the runtime.
+
 Дата анализа: 2026-08-06
 Рабочий каталог: `C:\AI_CAD_ENGINEER\AI_CAD_ENGINEER`
 Git-ветка: `cleanup/legacy-architecture`

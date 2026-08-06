@@ -16,18 +16,24 @@ Current context:
 
 Current checkpoint context:
 
-- Package 16 is closed.
-- Package 16A added and verified typed Eyes for:
-  - `get_parts_lists`
-  - `get_revision_tables`
-- Package 16C added and verified:
-  - `get_drawing_table_collections`
-- Inventor PASS confirmed that the visible GOST `Список деталей` table in `Sborka1.idw` is a `Sheet.CustomTables` / `kCustomTableObject`, not a `Sheet.PartsLists` object.
+- Package 17A is complete.
+- Package 17A added and verified:
+  - `get_custom_tables`
+- `get_custom_tables` reads Autodesk Inventor `Sheet.CustomTables` as a typed Eye:
+  - CustomTable metadata;
+  - Columns;
+  - Rows;
+  - Cells;
+  - MergedCells;
+  - reference keys;
+  - diagnostics.
+- CustomTables are not PartsLists.
+- Runtime returns Inventor API facts only; it does not classify a table as specification, BOM, or GOST.
 
 Next expected stage:
 
 ```text
-Capability Audit: typed CustomTables Eye
+Capability Audit: Drawing Text / Notes Eye
 ```
 
 Required next audit:
@@ -35,25 +41,15 @@ Required next audit:
 1. Run `git status --short --branch`.
 2. Confirm the active branch and HEAD.
 3. Read `InventorCommandDispatcher.cs`.
-4. Search for existing commands that read:
-   - `Sheet.CustomTables`
-   - `CustomTable`
-   - `Rows`
-   - `Columns`
-   - custom table cells.
-5. Inspect existing table support:
-   - `DrawingStructureReadSupport.cs`
-   - `TableReadSupport.cs`
-   - `GetDrawingTableCollectionsCommand.cs`
-   - `GetPartsListsCommand.cs`
-   - `GetRevisionTablesCommand.cs`
-   - `GetDrawingTablesCommand.cs`
-6. Determine whether a sufficient typed CustomTables Eye already exists.
-7. If it exists, do not write code.
-8. If it does not exist, report the exact gap and wait for approval before implementation unless the user explicitly authorized implementation in the same request.
+4. Search for existing commands that read drawing text and notes.
+5. Inspect relevant commands/support under:
+   - `InventorControl/Commands/Annotations`
+   - `InventorControl/Commands/DrawingStructure`
+   - `InventorControl/Commands/TitleBlock`
+6. Determine whether sufficient Drawing Text / Notes Eyes already exist.
+7. If sufficient capability exists, do not write code.
+8. If a gap exists, report the exact missing atomic Eye and wait for implementation approval unless the user explicitly authorizes implementation in the same request.
 
 Do not implement code during documentation-only tasks.
 
 Do not update `CURRENT_STATE.md` or `CAPABILITY_MAP.md` until a capability has Build PASS and Inventor PASS.
-
-Do not describe GOST `CustomTable` objects as `PartsList` objects.

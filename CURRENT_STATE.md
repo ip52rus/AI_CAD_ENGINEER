@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint before the Package 16D documentation sync:
+Current checkpoint before the Package 17B documentation sync:
 
 ```text
-a07b8fe docs: add Capability Map after Package 15A
+059e57c v0.16 complete typed drawing table Eyes and diagnostics
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Packages 13A, 15A, 16A, and 16C:
+Live command audit after Package 17A:
 
 ```text
-112 registered JSON commands
-112 unique registered JSON commands
+113 registered JSON commands
+113 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -95,7 +95,7 @@ Status:
 
 - implemented and registered;
 - uses explicit `Inventor._Document` cast required by `DrawingViews.AddBaseView`;
-- included in the latest successful MSBuild checkpoint;
+- included in successful MSBuild checkpoints;
 - Inventor PASS is not recorded in this document.
 
 ## Package 15A status
@@ -113,7 +113,7 @@ Package 15A added basic Drawing Annotation Eyes:
 Status:
 
 - implemented and registered;
-- included in the latest successful MSBuild checkpoint;
+- included in successful MSBuild checkpoints;
 - Inventor PASS is not recorded in this document.
 
 ## Package 16A status
@@ -129,21 +129,6 @@ Status:
 
 - `get_revision_tables`: VERIFIED.
 - `get_parts_lists`: VERIFIED for reading Autodesk Inventor API objects exposed through `Sheet.PartsLists`.
-
-Confirmed Inventor results:
-
-- `get_revision_tables` found one `RevisionTable` titled `ЖУРНАЛ ИЗМЕНЕНИЙ`;
-- revision table metadata, columns, rows, and cells were read;
-- no `sheetName` uses `DrawingDocument.ActiveSheet`;
-- explicit `sheetName` selects the requested sheet;
-- invalid `sheetName` returns a structured error;
-- on the tested drawing sheet, `Sheet.PartsLists.Count = 0`;
-- `get_parts_lists` returned `count = 0`;
-- `get_drawing_annotation_summary.annotations.partsListCount = 0`;
-- legacy `get_drawing_tables.tables.partsListCount = 0`;
-- document save and `Document.Update` did not change the result;
-- diagnostics were empty;
-- no defect in the `get_parts_lists` implementation was proven.
 
 Important distinction:
 
@@ -165,10 +150,7 @@ Confirmed on `Sborka1.idw`, `Лист:1`:
 - `HoleTables.rawCount = 0`, `HoleTables.itemCount = 0`;
 - `PartsLists.rawCount = 0`, `PartsLists.itemCount = 0`;
 - `RevisionTables.rawCount = 1`, `RevisionTables.itemCount = 1`;
-- `rawCount` matched `itemCount`;
-- diagnostics were empty;
-- call without `sheetName` returned `usedActiveSheet = true`;
-- call with `sheetName` returned `usedActiveSheet = false`.
+- diagnostics were empty.
 
 Confirmed cause of the visual mismatch:
 
@@ -184,6 +166,34 @@ columnCount: 7
 
 It is not a `Sheet.PartsLists` object.
 
+## Package 17A status
+
+Package 17A added a typed CustomTables Eye:
+
+```json
+{"command":"get_custom_tables"}
+```
+
+Status: VERIFIED.
+
+Confirmed scope:
+
+- reads `Sheet.CustomTables`;
+- reads `CustomTable` metadata;
+- reads reference keys;
+- reads `Columns` / `Column`;
+- reads `Rows` / `Row`;
+- reads `Cell` values;
+- reads merged cell ranges through `MergedCells`;
+- preserves diagnostics for getter, count, enumeration, and property failures;
+- does not classify a table as specification, BOM, GOST, or PartsList.
+
+Inventor API distinction:
+
+- CustomTables are `Sheet.CustomTables`.
+- CustomTables are not `Sheet.PartsLists`.
+- The runtime reads facts from Inventor API only; external LLM decides how to interpret those facts.
+
 ## Verified eyes
 
 Major verified read areas include:
@@ -195,6 +205,7 @@ Major verified read areas include:
 - `Sheet.PartsLists` typed Eye;
 - `Sheet.RevisionTables` typed Eye;
 - drawing table collection diagnostics;
+- `Sheet.CustomTables` detailed typed Eye;
 - view and curve geometry;
 - model feature tree;
 - feature details;
@@ -211,8 +222,8 @@ Major verified read areas include:
 
 ## Known gaps
 
-- Detailed row/column/cell reading for `Sheet.CustomTables` is not implemented yet.
 - Typed detailed Eye for `Sheet.HoleTables` is not implemented yet.
+- Drawing Text / Notes capability needs a focused audit.
 - Do not describe GOST `CustomTable` objects as `PartsList` objects.
 
 ## Next task
@@ -220,12 +231,11 @@ Major verified read areas include:
 Next capability audit:
 
 ```text
-Typed CustomTables Eye
+Drawing Text / Notes Eye
 ```
 
 Goal:
 
-- check whether sufficient `Sheet.CustomTables` reading already exists;
-- inspect actual Inventor 2027 API for custom table columns, rows, and cells;
-- decide whether a new `get_custom_tables` command is needed;
-- do not write code until the audit confirms a real gap.
+- check existing drawing text and note reading capabilities;
+- determine whether a new Eye is needed;
+- do not write code before the Capability Audit.

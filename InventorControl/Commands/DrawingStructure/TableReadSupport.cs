@@ -927,6 +927,689 @@ internal static class TableReadSupport
             diagnostics);
     }
 
+    public static TableReadResult ReadCustomTablesDetailed(
+        DrawingDocument drawingDocument,
+        Sheet sheet)
+    {
+        List<object> items =
+            new();
+
+        List<object> diagnostics =
+            new();
+
+        CustomTables? customTables =
+            ReadProperty(
+                diagnostics,
+                "Sheet.CustomTables",
+                () => sheet.CustomTables);
+
+        if (customTables == null)
+        {
+            return new TableReadResult(
+                0,
+                items,
+                diagnostics);
+        }
+
+        _ =
+            ReadNullableInt32(
+                diagnostics,
+                "Sheet.CustomTables.Count",
+                () => customTables.Count);
+
+        int index =
+            0;
+
+        try
+        {
+            foreach (CustomTable customTable
+                     in customTables)
+            {
+                index++;
+
+                items.Add(
+                    ReadCustomTableDetailed(
+                        drawingDocument,
+                        customTable,
+                        index));
+            }
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                diagnostics,
+                "Sheet.CustomTables.Enumeration",
+                exception);
+        }
+
+        return new TableReadResult(
+            items.Count,
+            items,
+            diagnostics);
+    }
+
+    private static object ReadCustomTableDetailed(
+        DrawingDocument drawingDocument,
+        CustomTable customTable,
+        int index)
+    {
+        List<object> diagnostics =
+            new();
+
+        string title =
+            ReadString(
+                ReadProperty(
+                    diagnostics,
+                    "Title",
+                    () => customTable.Title));
+
+        object? position =
+            ReadPoint2d(
+                ReadProperty(
+                    diagnostics,
+                    "Position",
+                    () => customTable.Position),
+                diagnostics,
+                "Position");
+
+        object? rangeBox =
+            ReadBox2d(
+                ReadProperty(
+                    diagnostics,
+                    "RangeBox",
+                    () => customTable.RangeBox),
+                diagnostics,
+                "RangeBox");
+
+        object? referenceKey =
+            ReadReferenceKey(
+                drawingDocument,
+                diagnostics,
+                keyContext =>
+                {
+                    Array referenceKeyArray =
+                        Array.CreateInstance(
+                            typeof(byte),
+                            0);
+
+                    customTable.GetReferenceKey(
+                        ref referenceKeyArray,
+                        keyContext);
+
+                    return referenceKeyArray;
+                });
+
+        GenericTableColumnRead columns =
+            ReadCustomTableColumns(
+                customTable,
+                diagnostics);
+
+        return new
+        {
+            index,
+            indexIsStable =
+                false,
+            objectTypeRaw =
+                ReadObjectTypeRaw(
+                    customTable.Type),
+            objectType =
+                ReadEnumName(
+                    customTable.Type),
+            title,
+            position,
+            rangeBox,
+            rowCount =
+                ReadNullableInt32(
+                    diagnostics,
+                    "Rows.Count",
+                    () => customTable.Rows.Count),
+            columnCount =
+                ReadNullableInt32(
+                    diagnostics,
+                    "Columns.Count",
+                    () => customTable.Columns.Count),
+            referenceKey,
+            columns =
+                columns.Items,
+            rows =
+                ReadCustomTableRows(
+                    customTable,
+                    columns.Columns,
+                    diagnostics),
+            mergedCells =
+                ReadCustomTableMergedCells(
+                    customTable,
+                    diagnostics),
+            selectorSnapshot =
+                new
+                {
+                    referenceKey,
+                    index,
+                    indexIsStable =
+                        false,
+                    title,
+                    position,
+                    rangeBox
+                },
+            propertyDiagnostics =
+                diagnostics
+        };
+    }
+
+    private static GenericTableColumnRead ReadCustomTableColumns(
+        CustomTable customTable,
+        List<object> tableDiagnostics)
+    {
+        List<GenericTableColumnInfo> columns =
+            new();
+
+        List<object> items =
+            new();
+
+        Columns? tableColumns =
+            ReadProperty(
+                tableDiagnostics,
+                "Columns",
+                () => customTable.Columns);
+
+        if (tableColumns == null)
+        {
+            return new GenericTableColumnRead(
+                columns,
+                items);
+        }
+
+        _ =
+            ReadNullableInt32(
+                tableDiagnostics,
+                "Columns.Count",
+                () => tableColumns.Count);
+
+        int index =
+            0;
+
+        try
+        {
+            foreach (Column column
+                     in tableColumns)
+            {
+                index++;
+
+                List<object> diagnostics =
+                    new();
+
+                string title =
+                    ReadString(
+                        ReadProperty(
+                            diagnostics,
+                            "Title",
+                            () => column.Title));
+
+                string internalTitle =
+                    ReadString(
+                        ReadProperty(
+                            diagnostics,
+                            "InternalTitle",
+                            () => column.InternalTitle));
+
+                columns.Add(
+                    new GenericTableColumnInfo(
+                        index,
+                        title,
+                        internalTitle));
+
+                object? titleJustification =
+                    ReadProperty(
+                        diagnostics,
+                        "TitleHorizontalJustification",
+                        () => column.TitleHorizontalJustification);
+
+                object? valueJustification =
+                    ReadProperty(
+                        diagnostics,
+                        "ValueHorizontalJustification",
+                        () => column.ValueHorizontalJustification);
+
+                items.Add(
+                    new
+                    {
+                        index,
+                        objectTypeRaw =
+                            ReadObjectTypeRaw(
+                                column.Type),
+                        objectType =
+                            ReadEnumName(
+                                column.Type),
+                        title,
+                        internalTitle,
+                        width =
+                            ReadNullableDouble(
+                                diagnostics,
+                                "Width",
+                                () => column.Width),
+                        titleHorizontalJustificationRaw =
+                            ReadEnumRaw(
+                                titleJustification),
+                        titleHorizontalJustification =
+                            ReadEnumName(
+                                titleJustification),
+                        valueHorizontalJustificationRaw =
+                            ReadEnumRaw(
+                                valueJustification),
+                        valueHorizontalJustification =
+                            ReadEnumName(
+                                valueJustification),
+                        propertyDiagnostics =
+                            diagnostics
+                    });
+            }
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                tableDiagnostics,
+                "Columns.Enumeration",
+                exception);
+        }
+
+        return new GenericTableColumnRead(
+            columns,
+            items);
+    }
+
+    private static List<object> ReadCustomTableRows(
+        CustomTable customTable,
+        IReadOnlyList<GenericTableColumnInfo> columns,
+        List<object> tableDiagnostics)
+    {
+        List<object> rows =
+            new();
+
+        Rows? tableRows =
+            ReadProperty(
+                tableDiagnostics,
+                "Rows",
+                () => customTable.Rows);
+
+        if (tableRows == null)
+        {
+            return rows;
+        }
+
+        _ =
+            ReadNullableInt32(
+                tableDiagnostics,
+                "Rows.Count",
+                () => tableRows.Count);
+
+        int rowIndex =
+            0;
+
+        try
+        {
+            foreach (Row row
+                     in tableRows)
+            {
+                rowIndex++;
+
+                rows.Add(
+                    ReadCustomTableRow(
+                        row,
+                        rowIndex,
+                        columns));
+            }
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                tableDiagnostics,
+                "Rows.Enumeration",
+                exception);
+        }
+
+        return rows;
+    }
+
+    private static object ReadCustomTableRow(
+        Row row,
+        int rowIndex,
+        IReadOnlyList<GenericTableColumnInfo> columns)
+    {
+        List<object> diagnostics =
+            new();
+
+        return new
+        {
+            index =
+                rowIndex,
+            indexIsStable =
+                false,
+            objectTypeRaw =
+                ReadObjectTypeRaw(
+                    row.Type),
+            objectType =
+                ReadEnumName(
+                    row.Type),
+            height =
+                ReadNullableDouble(
+                    diagnostics,
+                    "Height",
+                    () => row.Height),
+            visible =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "Visible",
+                    () => row.Visible),
+            cellCount =
+                ReadNullableInt32(
+                    diagnostics,
+                    "Count",
+                    () => row.Count),
+            cells =
+                ReadCustomTableCells(
+                    row,
+                    rowIndex,
+                    columns,
+                    diagnostics),
+            propertyDiagnostics =
+                diagnostics
+        };
+    }
+
+    private static List<object> ReadCustomTableCells(
+        Row row,
+        int rowIndex,
+        IReadOnlyList<GenericTableColumnInfo> columns,
+        List<object> rowDiagnostics)
+    {
+        List<object> cells =
+            new();
+
+        int columnIndex =
+            0;
+
+        try
+        {
+            foreach (Cell cell
+                     in row)
+            {
+                columnIndex++;
+
+                cells.Add(
+                    ReadCustomTableCell(
+                        cell,
+                        rowIndex,
+                        columnIndex,
+                        columns));
+            }
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                rowDiagnostics,
+                "Row.Cells",
+                exception);
+        }
+
+        return cells;
+    }
+
+    private static object ReadCustomTableCell(
+        Cell cell,
+        int fallbackRowIndex,
+        int fallbackColumnIndex,
+        IReadOnlyList<GenericTableColumnInfo> columns)
+    {
+        List<object> diagnostics =
+            new();
+
+        int? rowIndex =
+            ReadNullableInt32(
+                diagnostics,
+                "Row",
+                () => cell.Row);
+
+        int? columnIndex =
+            ReadNullableInt32(
+                diagnostics,
+                "Column",
+                () => cell.Column);
+
+        GenericTableColumnInfo? column =
+            FindGenericTableColumn(
+                columns,
+                columnIndex ??
+                fallbackColumnIndex);
+
+        return new
+        {
+            rowIndex =
+                rowIndex ??
+                fallbackRowIndex,
+            columnIndex =
+                columnIndex ??
+                fallbackColumnIndex,
+            columnTitle =
+                column?.Title
+                ?? string.Empty,
+            columnInternalTitle =
+                column?.InternalTitle
+                ?? string.Empty,
+            objectTypeRaw =
+                ReadObjectTypeRaw(
+                    cell.Type),
+            objectType =
+                ReadEnumName(
+                    cell.Type),
+            value =
+                ReadString(
+                    ReadProperty(
+                        diagnostics,
+                        "Value",
+                        () => cell.Value)),
+            isStatic =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "Static",
+                    () => cell.Static),
+            isMerged =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "IsMerged",
+                    () => cell.IsMerged),
+            mergedCell =
+                ReadMergedCell(
+                    ReadProperty(
+                        diagnostics,
+                        "MergedCell",
+                        () => cell.MergedCell),
+                    diagnostics,
+                    "MergedCell"),
+            propertyDiagnostics =
+                diagnostics
+        };
+    }
+
+    private static List<object> ReadCustomTableMergedCells(
+        CustomTable customTable,
+        List<object> tableDiagnostics)
+    {
+        List<object> mergedCells =
+            new();
+
+        MergedCellsEnumerator? mergedCellsEnumerator =
+            ReadProperty(
+                tableDiagnostics,
+                "MergedCells",
+                () => customTable.MergedCells);
+
+        if (mergedCellsEnumerator == null)
+        {
+            return mergedCells;
+        }
+
+        _ =
+            ReadNullableInt32(
+                tableDiagnostics,
+                "MergedCells.Count",
+                () => mergedCellsEnumerator.Count);
+
+        int index =
+            0;
+
+        try
+        {
+            foreach (MergedCell mergedCell
+                     in mergedCellsEnumerator)
+            {
+                index++;
+
+                mergedCells.Add(
+                    ReadMergedCellItem(
+                        mergedCell,
+                        index));
+            }
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                tableDiagnostics,
+                "MergedCells.Enumeration",
+                exception);
+        }
+
+        return mergedCells;
+    }
+
+    private static object ReadMergedCellItem(
+        MergedCell mergedCell,
+        int index)
+    {
+        List<object> diagnostics =
+            new();
+
+        return new
+        {
+            index,
+            objectTypeRaw =
+                ReadObjectTypeRaw(
+                    mergedCell.Type),
+            objectType =
+                ReadEnumName(
+                    mergedCell.Type),
+            startCell =
+                ReadCellCoordinate(
+                    ReadProperty(
+                        diagnostics,
+                        "StartCell",
+                        () => mergedCell.StartCell),
+                    diagnostics,
+                    "StartCell"),
+            endCell =
+                ReadCellCoordinate(
+                    ReadProperty(
+                        diagnostics,
+                        "EndCell",
+                        () => mergedCell.EndCell),
+                    diagnostics,
+                    "EndCell"),
+            propertyDiagnostics =
+                diagnostics
+        };
+    }
+
+    private static object? ReadMergedCell(
+        MergedCell? mergedCell,
+        List<object> diagnostics,
+        string propertyName)
+    {
+        if (mergedCell == null)
+        {
+            return null;
+        }
+
+        List<object> propertyDiagnostics =
+            new();
+
+        object result =
+            new
+            {
+                objectTypeRaw =
+                    ReadObjectTypeRaw(
+                        mergedCell.Type),
+                objectType =
+                    ReadEnumName(
+                        mergedCell.Type),
+                startCell =
+                    ReadCellCoordinate(
+                        ReadProperty(
+                            propertyDiagnostics,
+                            "StartCell",
+                            () => mergedCell.StartCell),
+                        propertyDiagnostics,
+                        "StartCell"),
+                endCell =
+                    ReadCellCoordinate(
+                        ReadProperty(
+                            propertyDiagnostics,
+                            "EndCell",
+                            () => mergedCell.EndCell),
+                        propertyDiagnostics,
+                        "EndCell"),
+                propertyDiagnostics
+            };
+
+        MergeDiagnostics(
+            diagnostics,
+            propertyName,
+            propertyDiagnostics);
+
+        return result;
+    }
+
+    private static object? ReadCellCoordinate(
+        Cell? cell,
+        List<object> diagnostics,
+        string propertyName)
+    {
+        if (cell == null)
+        {
+            return null;
+        }
+
+        List<object> propertyDiagnostics =
+            new();
+
+        object result =
+            new
+            {
+                rowIndex =
+                    ReadNullableInt32(
+                        propertyDiagnostics,
+                        "Row",
+                        () => cell.Row),
+                columnIndex =
+                    ReadNullableInt32(
+                        propertyDiagnostics,
+                        "Column",
+                        () => cell.Column),
+                value =
+                    ReadString(
+                        ReadProperty(
+                            propertyDiagnostics,
+                            "Value",
+                            () => cell.Value)),
+                propertyDiagnostics
+            };
+
+        MergeDiagnostics(
+            diagnostics,
+            propertyName,
+            propertyDiagnostics);
+
+        return result;
+    }
+
     private static object ReadPartsList(
         DrawingDocument drawingDocument,
         Sheet sheet,
@@ -3311,6 +3994,17 @@ internal static class TableReadSupport
                     index);
     }
 
+    private static GenericTableColumnInfo? FindGenericTableColumn(
+        IReadOnlyList<GenericTableColumnInfo> columns,
+        int index)
+    {
+        return columns
+            .FirstOrDefault(
+                column =>
+                    column.Index ==
+                    index);
+    }
+
     private static List<object> MergeDiagnostics(
         List<object> parentDiagnostics,
         string propertyName,
@@ -3506,3 +4200,12 @@ internal sealed record TableColumnRead(
 internal sealed record TableColumnInfo(
     int Index,
     string Title);
+
+internal sealed record GenericTableColumnRead(
+    List<GenericTableColumnInfo> Columns,
+    List<object> Items);
+
+internal sealed record GenericTableColumnInfo(
+    int Index,
+    string Title,
+    string InternalTitle);
