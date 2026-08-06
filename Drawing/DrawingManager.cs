@@ -1,10 +1,15 @@
-﻿using AI_CAD_ENGINEER.Engineering.Analysis;
+using AI_CAD_ENGINEER.Engineering.Analysis;
 using AI_CAD_ENGINEER.Engineering.Decision;
 using AI_CAD_ENGINEER.Engineering.Geometry;
 using AI_CAD_ENGINEER.Engineering.Models;
+using AI_CAD_ENGINEER.Engineering.Planning;
 using AI_CAD_ENGINEER.Engineering.Research;
+using AI_CAD_ENGINEER.Drawing.Executors;
 using AI_CAD_ENGINEER.Import.Inventor;
 using Inventor;
+
+using PlanningDimensionPlan =
+    AI_CAD_ENGINEER.Engineering.Planning.DimensionPlan;
 
 namespace AI_CAD_ENGINEER.Drawing;
 
@@ -45,6 +50,9 @@ public class DrawingManager
     private readonly DimensionDecisionCoordinator
         _dimensionDecisionCoordinator;
 
+    private readonly DimensionPlanBuilder
+        _dimensionPlanBuilder;
+
     private readonly DrawingGeometryResearch
         _drawingGeometryResearch;
 
@@ -54,6 +62,10 @@ public class DrawingManager
     private readonly FeatureGraphCoordinator
         _featureGraphCoordinator;
 
+    private readonly HoleGroupDimensionExecutor
+        _holeGroupDimensionExecutor;
+
+   
     public DrawingManager(
         Inventor.Application inventor)
     {
@@ -98,6 +110,9 @@ public class DrawingManager
         _dimensionDecisionCoordinator =
             new DimensionDecisionCoordinator();
 
+        _dimensionPlanBuilder =
+            new DimensionPlanBuilder();
+
         _drawingGeometryResearch =
             new DrawingGeometryResearch();
 
@@ -106,6 +121,11 @@ public class DrawingManager
 
         _featureGraphCoordinator =
             new FeatureGraphCoordinator();
+
+        _holeGroupDimensionExecutor =
+            new HoleGroupDimensionExecutor(
+                inventor);
+
     }
 
     public bool CreateDrawingWithViews(
@@ -294,8 +314,10 @@ public class DrawingManager
             if (drawingPlan.NeedDimensions)
             {
                 CreateOverallDimensions(
+                    modelDocument,
                     drawingDocument,
                     partAnalysis,
+                    featureGraph,
                     baseView,
                     upperView,
                     sideView,
@@ -353,6 +375,255 @@ public class DrawingManager
         return featureGraph;
     }
 
+    private void CreateOverallDimensions(
+        Document modelDocument,
+        DrawingDocument drawingDocument,
+        PartAnalysis partAnalysis,
+        FeatureGraph featureGraph,
+        DrawingView baseView,
+        DrawingView upperView,
+        DrawingView sideView,
+        ViewAxisMapping mainAxisMapping,
+        ViewAxisMapping verticalAxisMapping,
+        ViewAxisMapping sideAxisMapping)
+    {
+        List<DimensionCandidate> baseCandidates =
+            _overallDimensionGenerator
+                .GenerateCandidates(
+                    baseView,
+                    mainAxisMapping);
+
+        List<DimensionCandidate> upperCandidates =
+            _overallDimensionGenerator
+                .GenerateCandidates(
+                    upperView,
+                    verticalAxisMapping);
+
+        List<DimensionCandidate> sideCandidates =
+            _overallDimensionGenerator
+                .GenerateCandidates(
+                    sideView,
+                    sideAxisMapping);
+
+        Dictionary<string, List<DimensionCandidate>>
+            candidatesByView =
+                new()
+                {
+                    [baseView.Name] =
+                        baseCandidates,
+
+                    [upperView.Name] =
+                        upperCandidates,
+
+                    [sideView.Name] =
+                        sideCandidates
+                };
+
+        Dictionary<string, ViewAxisMapping>
+            viewMappings =
+                new()
+                {
+                    [baseView.Name] =
+                        mainAxisMapping,
+
+                    [upperView.Name] =
+                        verticalAxisMapping,
+
+                    [sideView.Name] =
+                        sideAxisMapping
+                };
+
+        Dictionary<string, List<DimensionCandidate>>
+            selectedByView =
+                _overallDimensionRoleResolver.Resolve(
+                    partAnalysis,
+                    candidatesByView);
+
+        DimensionDecisionResult decisionResult =
+            _dimensionDecisionCoordinator.Process(
+                candidatesByView,
+                selectedByView);
+
+        PrintDimensionDecisionSummary(
+            decisionResult);
+
+        PlanningDimensionPlan dimensionPlan =
+            _dimensionPlanBuilder.Build(
+                modelDocument.DisplayName,
+                modelDocument.FullFileName,
+                decisionResult,
+                featureGraph,
+                viewMappings);
+
+        PrintDimensionPlanAdapterSummary(
+    dimensionPlan);
+
+        Dictionary<string, List<DimensionCandidate>>
+            plannedCandidatesByView =
+                BuildPlannedCandidatesByView(
+                    dimensionPlan,
+                    baseView,
+                    upperView,
+                    sideView);
+
+        PrintOverallDimensionSelection(
+            plannedCandidatesByView);
+
+        Console.WriteLine();
+        Console.WriteLine(
+            "Создание размеров главного вида:");
+
+        _overallDimensionGenerator.Create(
+            baseView,
+            plannedCandidatesByView[
+                baseView.Name]);
+
+        drawingDocument.Update();
+
+        Console.WriteLine();
+        Console.WriteLine(
+            "Создание размеров вертикальной проекции:");
+
+        _overallDimensionGenerator.Create(
+            upperView,
+            plannedCandidatesByView[
+                upperView.Name]);
+
+        drawingDocument.Update();
+
+        Console.WriteLine();
+        Console.WriteLine(
+            "Создание размеров боковой проекции:");
+
+        _overallDimensionGenerator.Create(
+            sideView,
+            plannedCandidatesByView[
+                sideView.Name]);
+
+        drawingDocument.Update();
+
+        Console.WriteLine(
+            "Габаритные размеры созданы " +
+            "из Dimension Plan.");
+
+        _holeGroupDimensionExecutor.Execute(
+            drawingDocument,
+            dimensionPlan);
+
+        drawingDocument.Update();
+    }
+
+    private static Dictionary<
+        string,
+        List<DimensionCandidate>>
+        BuildPlannedCandidatesByView(
+            PlanningDimensionPlan dimensionPlan,
+            DrawingView baseView,
+            DrawingView upperView,
+            DrawingView sideView)
+    {
+        ArgumentNullException.ThrowIfNull(
+            dimensionPlan);
+
+        Dictionary<string, List<DimensionCandidate>>
+            result =
+                new()
+                {
+                    [baseView.Name] =
+                        new List<DimensionCandidate>(),
+
+                    [upperView.Name] =
+                        new List<DimensionCandidate>(),
+
+                    [sideView.Name] =
+                        new List<DimensionCandidate>()
+                };
+
+        foreach (OverallDimensionPlanItem item
+                 in dimensionPlan.OverallDimensions)
+        {
+            if (item.Candidate == null)
+            {
+                continue;
+            }
+
+            if (!result.TryGetValue(
+                    item.TargetViewName,
+                    out List<DimensionCandidate>? candidates))
+            {
+                Console.WriteLine(
+                    $"Предупреждение: вид " +
+                    $"\"{item.TargetViewName}\" отсутствует. " +
+                    $"Размер {item.Candidate.Value:F3} мм " +
+                    "не передан генератору.");
+
+                continue;
+            }
+
+            candidates.Add(
+                item.Candidate);
+        }
+
+        return result;
+    }
+
+    private static void PrintDimensionPlanAdapterSummary(
+        PlanningDimensionPlan dimensionPlan)
+    {
+        ArgumentNullException.ThrowIfNull(
+            dimensionPlan);
+
+        Console.WriteLine();
+        Console.WriteLine(
+            "========================================");
+
+        Console.WriteLine(
+            "DIMENSION PLAN ADAPTER");
+
+        Console.WriteLine(
+            "========================================");
+
+        Console.WriteLine(
+            $"Plan Id: {dimensionPlan.Id}");
+
+        Console.WriteLine(
+            $"Статус: {dimensionPlan.Status}");
+
+        Console.WriteLine(
+            $"Документ: " +
+            $"{dimensionPlan.SourceDocumentName}");
+
+        Console.WriteLine(
+            $"Габаритных размеров: " +
+            $"{dimensionPlan.OverallDimensions.Count}");
+
+        Console.WriteLine(
+            $"Одиночных отверстий: " +
+            $"{dimensionPlan.HoleDimensions.Count}");
+
+        Console.WriteLine(
+            $"Групп отверстий: " +
+            $"{dimensionPlan.HoleGroups.Count}");
+
+        Console.WriteLine(
+            $"Всего элементов: " +
+            $"{dimensionPlan.TotalItems}");
+
+        Console.WriteLine(
+            $"Ошибок валидации: " +
+            $"{dimensionPlan.ValidationErrors.Count}");
+
+        Console.WriteLine(
+            "Источник: DimensionDecisionResult");
+
+        Console.WriteLine(
+            "Назначение: переходный контракт между " +
+            "Decision Engine и Drawing.");
+
+        Console.WriteLine(
+            "========================================");
+    }
+
     private static void PrintFeatureGraphSummary(
         FeatureGraph featureGraph)
     {
@@ -402,103 +673,6 @@ public class DrawingManager
 
         Console.WriteLine(
             "========================================");
-    }
-
-    private void CreateOverallDimensions(
-        DrawingDocument drawingDocument,
-        PartAnalysis partAnalysis,
-        DrawingView baseView,
-        DrawingView upperView,
-        DrawingView sideView,
-        ViewAxisMapping mainAxisMapping,
-        ViewAxisMapping verticalAxisMapping,
-        ViewAxisMapping sideAxisMapping)
-    {
-        List<DimensionCandidate> baseCandidates =
-            _overallDimensionGenerator
-                .GenerateCandidates(
-                    baseView,
-                    mainAxisMapping);
-
-        List<DimensionCandidate> upperCandidates =
-            _overallDimensionGenerator
-                .GenerateCandidates(
-                    upperView,
-                    verticalAxisMapping);
-
-        List<DimensionCandidate> sideCandidates =
-            _overallDimensionGenerator
-                .GenerateCandidates(
-                    sideView,
-                    sideAxisMapping);
-
-        Dictionary<string, List<DimensionCandidate>>
-            candidatesByView =
-                new()
-                {
-                    [baseView.Name] =
-                        baseCandidates,
-
-                    [upperView.Name] =
-                        upperCandidates,
-
-                    [sideView.Name] =
-                        sideCandidates
-                };
-
-        Dictionary<string, List<DimensionCandidate>>
-            selectedByView =
-                _overallDimensionRoleResolver.Resolve(
-                    partAnalysis,
-                    candidatesByView);
-
-        DimensionDecisionResult decisionResult =
-            _dimensionDecisionCoordinator.Process(
-                candidatesByView,
-                selectedByView);
-
-        PrintDimensionDecisionSummary(
-            decisionResult);
-
-        PrintOverallDimensionSelection(
-            decisionResult.RequiredByView);
-
-        Console.WriteLine();
-        Console.WriteLine(
-            "Создание размеров главного вида:");
-
-        _overallDimensionGenerator.Create(
-            baseView,
-            decisionResult.RequiredByView[
-                baseView.Name]);
-
-        drawingDocument.Update();
-
-        Console.WriteLine();
-        Console.WriteLine(
-            "Создание размеров вертикальной проекции:");
-
-        _overallDimensionGenerator.Create(
-            upperView,
-            decisionResult.RequiredByView[
-                upperView.Name]);
-
-        drawingDocument.Update();
-
-        Console.WriteLine();
-        Console.WriteLine(
-            "Создание размеров боковой проекции:");
-
-        _overallDimensionGenerator.Create(
-            sideView,
-            decisionResult.RequiredByView[
-                sideView.Name]);
-
-        drawingDocument.Update();
-
-        Console.WriteLine(
-            "Габаритные размеры из результата " +
-            "Dimension Decision Engine созданы.");
     }
 
     private static void PrintDimensionDecisionSummary(
@@ -600,7 +774,7 @@ public class DrawingManager
             "========================================");
 
         Console.WriteLine(
-            "РАЗМЕРЫ, ПЕРЕДАННЫЕ ГЕНЕРАТОРУ");
+            "РАЗМЕРЫ ИЗ DIMENSION PLAN");
 
         Console.WriteLine(
             "========================================");
@@ -617,7 +791,7 @@ public class DrawingManager
             if (entry.Value.Count == 0)
             {
                 Console.WriteLine(
-                    "  Размеры не выбраны.");
+                    "  Размеры не запланированы.");
 
                 continue;
             }
