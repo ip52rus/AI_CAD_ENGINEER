@@ -16,13 +16,15 @@ Current context:
 
 Current checkpoint context:
 
-- Package 19A is complete.
+- Package 20A is complete.
 - Package 17A added and verified:
   - `get_custom_tables`
 - Package 18A added and verified:
   - `get_drawing_text_objects`
 - Package 19A added and verified:
   - `get_feature_control_frames`
+- Package 20A added and verified:
+  - `get_surface_texture_symbols`
 - `get_custom_tables` reads Autodesk Inventor `Sheet.CustomTables` as a typed Eye:
   - CustomTable metadata;
   - Columns;
@@ -35,13 +37,15 @@ Current checkpoint context:
 - Runtime returns Inventor API facts only; it does not classify a table as specification, BOM, or GOST.
 - `get_drawing_text_objects` reads DrawingNotes collections, DrawingSketch TextBoxes, and SketchedSymbols.
 - `get_feature_control_frames` reads `Sheet.FeatureControlFrames`, frame metadata, rows, tolerance fields, datum fields, reference keys, and diagnostics.
+- `get_surface_texture_symbols` reads `Sheet.SurfaceTextureSymbols`, SurfaceTextureSymbol metadata, roughness fields, production fields, sampling fields, definition data, reference keys, and diagnostics.
 - Runtime does not perform semantic text analysis, TT/TU recognition, GOST interpretation, or engineering conclusions.
 - Runtime does not perform tolerance interpretation, GOST validation, GD&T semantic analysis, or engineering conclusions.
+- Runtime does not perform roughness interpretation, surface texture semantic analysis, GOST validation, or engineering conclusions.
 
 Next expected stage:
 
 ```text
-Capability Check — next drawing symbol layer
+Capability Check - Welding Symbols Eye
 ```
 
 Required next check:

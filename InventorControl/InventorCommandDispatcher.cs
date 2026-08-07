@@ -223,6 +223,9 @@ public class InventorCommandDispatcher
     private readonly GetFeatureControlFramesCommand
         _getFeatureControlFramesCommand;
 
+    private readonly GetSurfaceTextureSymbolsCommand
+        _getSurfaceTextureSymbolsCommand;
+
     private readonly GetBalloonsCommand
         _getBalloonsCommand;
 
@@ -643,6 +646,10 @@ public class InventorCommandDispatcher
 
         _getFeatureControlFramesCommand =
             new GetFeatureControlFramesCommand(
+                inventor);
+
+        _getSurfaceTextureSymbolsCommand =
+            new GetSurfaceTextureSymbolsCommand(
                 inventor);
 
         _getBalloonsCommand =
@@ -1140,6 +1147,10 @@ public class InventorCommandDispatcher
 
                 "get_feature_control_frames" =>
                     _getFeatureControlFramesCommand.Execute(
+                        root),
+
+                "get_surface_texture_symbols" =>
+                    _getSurfaceTextureSymbolsCommand.Execute(
                         root),
 
                 "get_balloons" =>

@@ -1,5 +1,34 @@
 # PROJECT REVIEW
 
+## Package 20B addendum - current checkpoint
+
+This addendum supersedes older command counts and next-step notes below where they conflict.
+
+Current live command inventory after Package 20A:
+
+```text
+116 registered JSON commands
+116 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+0 unregistered command classes
+```
+
+Package 20A status:
+
+- `get_surface_texture_symbols` is VERIFIED.
+- It reads Inventor API `Sheet.SurfaceTextureSymbols` as a typed Eye.
+- It covers SurfaceTextureSymbol metadata, position, layer, style, leader, roughness fields, production fields, sampling fields, definition data, reference keys, and diagnostics.
+- It does not perform roughness interpretation, GOST validation, surface texture semantic analysis, or engineering conclusions.
+
+Next recommended capability check:
+
+```text
+Capability Check - Welding Symbols Eye
+```
+
+Do not reintroduce EngineeringBrain, DrawingManager, Planning, Decision, or automatic engineering logic into the runtime.
+
 ## Package 19B addendum — current checkpoint
 
 This addendum supersedes older command counts and next-step notes below where they conflict.

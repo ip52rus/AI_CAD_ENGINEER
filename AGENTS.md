@@ -205,6 +205,35 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 20A:
+
+```text
+Package 20A complete - Surface Texture Symbols Eye checkpoint
+```
+
+Current confirmed drawing symbol commands:
+
+```text
+get_feature_control_frames
+get_surface_texture_symbols
+```
+
+Current Package 20A status:
+
+- `get_surface_texture_symbols` is VERIFIED;
+- surface texture symbol reading covers `Sheet.SurfaceTextureSymbols`, SurfaceTextureSymbol metadata, position, layer, style, leader, roughness fields, production fields, sampling fields, definition data, reference keys, and diagnostics;
+- the runtime still does not perform roughness interpretation, GOST validation, surface texture semantic analysis, or engineering interpretation.
+
+Next correct action:
+
+1. run a Capability Check for Welding Symbols Eye;
+2. verify whether sufficient atomic Eyes/Hands already exist;
+3. inspect actual Inventor 2027 interop signatures before proposing new code;
+4. decide whether a new atomic Eye or Hand is needed;
+5. do not write implementation code until the audit proves a gap and the user authorizes implementation.
+
+The older Package 19A, Package 18A, and Package 17A notes below are superseded by this addendum where they conflict.
+
 Current milestone addendum after Package 19A:
 
 ```text
