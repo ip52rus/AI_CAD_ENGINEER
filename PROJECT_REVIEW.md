@@ -1,5 +1,17 @@
 # PROJECT REVIEW
 
+## Package 26 checkpoint - current state
+
+Package 26 closes the verified Auxiliary View pipeline. The current Drawing
+Generation Hands include `create_base_view`, `create_projected_view`,
+`create_section_line`, `create_section_view`, `create_detail_view`, and
+`create_auxiliary_view`.
+
+`create_auxiliary_view` uses `DrawingViews.AddAuxiliaryView()` with explicit
+parent view and orientation curve selector. Inventor may adjust the requested
+position; the actual returned position is preserved. Next capability:
+`add_drawing_view_break`.
+
 ## Package 25 checkpoint - current state
 
 Package 25 closes the verified Detail View generation pipeline. The current

@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 25 documentation sync:
+Current checkpoint after the Package 26 documentation sync:
 
 ```text
-v0.25 complete detail view pipeline
+v0.26 complete auxiliary view pipeline
 ```
 
 ## Runtime architecture
@@ -488,3 +488,27 @@ automatic positioning, attachment selection, engineering analysis, and GOST
 analysis remain outside Runtime.
 
 Next capability check: `create_auxiliary_view` Hand.
+
+## Package 26 checkpoint
+
+Package 26 complete: Auxiliary View Pipeline is VERIFIED.
+
+Verified Drawing View Hands:
+
+```text
+create_base_view
+create_projected_view
+create_section_line
+create_section_view
+create_detail_view
+create_auxiliary_view
+```
+
+`create_auxiliary_view` calls `DrawingViews.AddAuxiliaryView()` with an
+explicit parent view and orientation curve index. Inventor validation
+confirmed `kAuxiliaryDrawingViewType`, parent view `ВИД1`, curve index `22`, a
+reference key, `dirty = true`, and empty diagnostics. Inventor adjusted the
+requested position `(35, 20)` to approximately `(35, 15)`; this is recorded as
+API behavior and is not compensated by Runtime.
+
+Next capability: `add_drawing_view_break`.

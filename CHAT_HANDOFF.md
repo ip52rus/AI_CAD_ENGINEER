@@ -2,6 +2,18 @@
 
 ## Current State
 
+- Current checkpoint: `v0.26 complete auxiliary view pipeline`
+- Latest completed package: Package 26
+- Verified Drawing View Hands now include `create_auxiliary_view`.
+- Live command inventory after Package 26: `125 registered / 125 unique`, no duplicate command names.
+
+Inventor validated `create_auxiliary_view` as `kAuxiliaryDrawingViewType`
+with parent view `ВИД1`, orientation curve index `22`, a reference key,
+`dirty = true`, and empty diagnostics. Inventor adjusted requested position
+`(35,20)` to approximately `(35,15)`; Runtime does not compensate for this.
+
+Next capability: `add_drawing_view_break`.
+
 - Current checkpoint: `v0.25 complete detail view pipeline`
 - Latest completed package: Package 25
 - Verified pipeline: `create_drawing_document` → `create_base_view` → `create_detail_view`
@@ -205,7 +217,7 @@ The command does not choose templates automatically, generate drawings, create v
 - Drawing generation scenarios are outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
 - Typed detailed Eye for `Sheet.HoleTables` is still missing.
-- Drawing Generation Hands still missing: `create_auxiliary_view`, `add_drawing_view_break`.
+- Drawing Generation Hands still missing: `add_drawing_view_break`.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`

@@ -493,6 +493,19 @@ direction, analyze the model, or perform engineering/GOST decisions.
 Next correct action: run a Capability Audit for `create_detail_view` before
 writing code.
 
+## Current milestone addendum after Package 26
+
+```text
+Package 26 complete - Auxiliary View Pipeline checkpoint
+```
+
+`create_auxiliary_view` is a VERIFIED atomic Hand using
+`DrawingViews.AddAuxiliaryView()`. Runtime preserves Inventor's returned
+position and does not compensate for API adjustments or make placement,
+direction, scale, engineering, or GOST decisions.
+
+Next correct action: run a Capability Audit for `add_drawing_view_break`.
+
 ## Current milestone addendum after Package 25
 
 ```text
