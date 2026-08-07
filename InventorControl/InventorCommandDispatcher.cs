@@ -82,6 +82,9 @@ public class InventorCommandDispatcher
     private readonly CreateSectionViewCommand
         _createSectionViewCommand;
 
+    private readonly CreateDetailViewCommand
+        _createDetailViewCommand;
+
     private readonly ActivateDocumentCommand
         _activateDocumentCommand;
 
@@ -479,6 +482,10 @@ public class InventorCommandDispatcher
 
         _createSectionViewCommand =
             new CreateSectionViewCommand(
+                inventor);
+
+        _createDetailViewCommand =
+            new CreateDetailViewCommand(
                 inventor);
 
         _activateDocumentCommand =
@@ -1008,6 +1015,10 @@ public class InventorCommandDispatcher
 
                 "create_section_view" =>
                     _createSectionViewCommand.Execute(
+                        root),
+
+                "create_detail_view" =>
+                    _createDetailViewCommand.Execute(
                         root),
 
                 "activate_document" =>

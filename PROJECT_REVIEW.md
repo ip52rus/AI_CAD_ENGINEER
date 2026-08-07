@@ -1,5 +1,16 @@
 # PROJECT REVIEW
 
+## Package 25 checkpoint - current state
+
+Package 25 closes the verified Detail View generation pipeline. The current
+atomic Drawing Generation Hands include `create_drawing_document`,
+`create_base_view`, `create_section_line`, `create_section_view`, and
+`create_detail_view`.
+
+`create_detail_view` supports only an explicit circular fence through
+`DrawingViews.AddDetailView()`. The next capability check is
+`create_auxiliary_view` Hand.
+
 ## Package 24 checkpoint - current state
 
 Package 24 closes the verified Section View generation pipeline. The current

@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 23C documentation sync:
+Current checkpoint after the Package 25 documentation sync:
 
 ```text
-v0.23 complete create_drawing_document Hand
+v0.25 complete detail view pipeline
 ```
 
 ## Runtime architecture
@@ -464,3 +464,27 @@ not choose placement or direction, analyze the model, make engineering
 decisions, or perform GOST analysis.
 
 Next capability check: `create_detail_view` Hand.
+
+## Package 25 checkpoint
+
+Package 25 complete: Detail View Pipeline is VERIFIED.
+
+Verified Hand: `create_detail_view`.
+
+Verified pipeline:
+
+```text
+DrawingDocument → Base View → Detail View
+```
+
+The Hand uses `DrawingViews.AddDetailView()` and supports only circular detail
+fences. Inventor validation confirmed `DetailDrawingView`,
+`kDetailDrawingViewType`, scale `2 : 1`, a reference key, `dirty = true`, and
+empty diagnostics.
+
+Fence center, radius, scale, position, and parent view are supplied by the
+caller. Rectangular fences, automatic fence generation, automatic scale,
+automatic positioning, attachment selection, engineering analysis, and GOST
+analysis remain outside Runtime.
+
+Next capability check: `create_auxiliary_view` Hand.

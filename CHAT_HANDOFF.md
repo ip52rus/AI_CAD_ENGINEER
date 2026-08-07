@@ -2,6 +2,17 @@
 
 ## Current State
 
+- Current checkpoint: `v0.25 complete detail view pipeline`
+- Latest completed package: Package 25
+- Verified pipeline: `create_drawing_document` → `create_base_view` → `create_detail_view`
+- `create_detail_view` is verified through Inventor as a circular `DetailDrawingView`.
+- Live command inventory after Package 25: `124 registered / 124 unique`, no duplicate command names.
+
+The command uses `DrawingViews.AddDetailView()` with caller-provided parent view,
+position, circular fence center/radius, style, and optional scale. Rectangular
+fences and automatic placement, scale, attachment selection, or engineering
+analysis remain outside Runtime.
+
 - Current checkpoint: `v0.24 complete Section View Pipeline`
 - Latest completed package: Package 24
 - Verified pipeline: `create_drawing_document` → `create_base_view` → `create_section_line` → `create_section_view`
@@ -194,7 +205,7 @@ The command does not choose templates automatically, generate drawings, create v
 - Drawing generation scenarios are outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
 - Typed detailed Eye for `Sheet.HoleTables` is still missing.
-- Drawing Generation Hands still missing: `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`.
+- Drawing Generation Hands still missing: `create_auxiliary_view`, `add_drawing_view_break`.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`

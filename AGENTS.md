@@ -492,3 +492,17 @@ direction, analyze the model, or perform engineering/GOST decisions.
 
 Next correct action: run a Capability Audit for `create_detail_view` before
 writing code.
+
+## Current milestone addendum after Package 25
+
+```text
+Package 25 complete - Detail View Pipeline checkpoint
+```
+
+`create_detail_view` is a VERIFIED atomic Hand. It calls
+`DrawingViews.AddDetailView()` with an explicit circular fence. Runtime does
+not generate fences, choose scale or placement, select attachments, analyze
+models, or perform engineering/GOST decisions.
+
+Next correct action: run a Capability Audit for `create_auxiliary_view` before
+writing code.

@@ -73,7 +73,7 @@ sheet-to-sketch coordinate conversion before `AddSectionView2`.
 Next expected stage:
 
 ```text
-Capability Audit - create_detail_view Hand
+Capability Audit - create_auxiliary_view Hand
 ```
 
 Required next check:
