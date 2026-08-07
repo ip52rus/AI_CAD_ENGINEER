@@ -6,10 +6,10 @@ Repository: `C:\AI_CAD_ENGINEER\AI_CAD_ENGINEER`
 
 Branch: `cleanup/legacy-architecture`
 
-Checkpoint before this documentation sync:
+Checkpoint after this documentation sync:
 
 ```text
-fee707a v0.20 complete Surface Texture Symbols Eye
+v0.22 complete Drawing Symbol Layer
 ```
 
 ## Ground rules
@@ -50,6 +50,11 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Surface texture semantic interpretation | MISSING | - | - | - | roughness interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Welding Symbols Eye | VERIFIED | `get_welding_symbols` | `get_welding_symbols`, `get_welding_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
 | Welding semantic analysis | MISSING | - | - | - | weld interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
+| Drawing Symbol Layer | VERIFIED | `get_feature_control_frames`, `get_surface_texture_symbols`, `get_welding_symbols`, `get_revision_clouds`, `get_edge_symbols`, `get_transition_symbols` | all six typed symbol Eyes have Inventor PASS recorded through Package 22 | - | semantic interpretation is outside Runtime; create/move/delete/format Hands are not confirmed | P0 maintained |
+| RevisionClouds Eye | VERIFIED | `get_revision_clouds` | `get_revision_clouds`, `get_revision_clouds` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| EdgeSymbols Eye | VERIFIED | `get_edge_symbols` | `get_edge_symbols`, `get_edge_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| TransitionSymbols Eye | VERIFIED | `get_transition_symbols` | `get_transition_symbols`, `get_transition_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| Drawing symbol semantic interpretation | MISSING | - | - | - | symbol interpretation, GOST/ISO validation, correctness checking, and engineering analysis belong to external LLM, not Runtime | no Runtime priority |
 | Datum identifiers | MISSING | placeholder count only; no confirmed API coverage | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Datum target symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Feature Control Frames | VERIFIED | `get_feature_control_frames` | `get_feature_control_frames`, `get_feature_control_frames` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
@@ -94,6 +99,12 @@ Exact commands explicitly confirmed:
 {"command":"get_feature_control_frames","sheetName":"Лист:1"}
 {"command":"get_drawing_text_objects","sheetName":"Лист:1"}
 {"command":"get_custom_tables","sheetName":"Лист:1"}
+{"command":"get_revision_clouds"}
+{"command":"get_revision_clouds","sheetName":"Лист:1"}
+{"command":"get_edge_symbols"}
+{"command":"get_edge_symbols","sheetName":"Лист:1"}
+{"command":"get_transition_symbols"}
+{"command":"get_transition_symbols","sheetName":"Лист:1"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -107,6 +118,12 @@ Exact commands explicitly confirmed:
 `get_surface_texture_symbols` is verified for reading `Sheet.SurfaceTextureSymbols`, SurfaceTextureSymbol metadata, surface texture fields, definition data, reference keys, and diagnostics.
 
 `get_welding_symbols` is verified for reading `Sheet.WeldingSymbols`, DrawingWeldingSymbol metadata, definition fields, weld symbol fields, reference keys, and diagnostics.
+
+`get_revision_clouds` is verified for reading `Sheet.RevisionClouds`, RevisionCloud metadata, RevisionCloudDefinition data, control points, reference keys, and diagnostics.
+
+`get_edge_symbols` is verified for reading `Sheet.EdgeSymbols`, EdgeSymbol metadata, EdgeSymbolDefinition data, reference keys, and diagnostics.
+
+`get_transition_symbols` is verified for reading `Sheet.TransitionSymbols`, TransitionSymbol metadata, TransitionSymbolDefinition data, leader/attachment metadata, reference keys, and diagnostics.
 
 ## Experimental commands
 
@@ -202,9 +219,49 @@ diagnostics
 
 This is not weld interpretation, GOST validation, welding semantic analysis, or engineering analysis.
 
+## Package 22 result
+
+Package 22 completed the Drawing Symbol Layer with three additional typed Eyes:
+
+```text
+Sheet.RevisionClouds
+RevisionCloud metadata
+RevisionCloudDefinition
+RevisionCloudControlPoints
+reference keys
+diagnostics
+
+Sheet.EdgeSymbols
+EdgeSymbol metadata
+EdgeSymbolDefinition
+reference keys
+diagnostics
+
+Sheet.TransitionSymbols
+TransitionSymbol metadata
+TransitionSymbolDefinition
+leader metadata
+attachment metadata
+reference keys
+diagnostics
+```
+
+Together with Packages 19A, 20A, and 21A, the verified Drawing Symbol Layer is:
+
+```text
+FeatureControlFrames          VERIFIED
+SurfaceTextureSymbols         VERIFIED
+WeldingSymbols                VERIFIED
+RevisionClouds                VERIFIED
+EdgeSymbols                   VERIFIED
+TransitionSymbols             VERIFIED
+```
+
+This is not symbol interpretation, GOST/ISO validation, correctness checking, or engineering analysis.
+
 ## Priority notes
 
-- P0: continue the Drawing Symbol Layer completion review before implementation.
+- P0: choose the next engineering layer through a Capability Check before implementation.
 - P1: continue atomic Drawing Views / Drawing Dimensions / HoleThreadNotes improvements only where audits confirmed gaps.
 - P2: add specialized annotation/table capabilities only after typed Eyes define reliable selector snapshots.
 

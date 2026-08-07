@@ -3,10 +3,10 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`
-- Latest checkpoint before this commit: `fee707a v0.20 complete Surface Texture Symbols Eye`
-- Latest completed package: Package 21A - Welding Symbols Eye
-- Current milestone: Welding Symbols Eye is implemented, built, registered, Inventor-validated, and marked `VERIFIED`
-- Live command inventory after Package 21A: `117 registered / 117 unique`, no duplicate command names, no unregistered command classes
+- Latest checkpoint after this commit: `v0.22 complete Drawing Symbol Layer`
+- Latest completed package: Package 22 - Drawing Symbol Layer
+- Current milestone: Drawing Symbol Layer is implemented, built, registered, Inventor-validated, and marked `VERIFIED`
+- Live command inventory after Package 22D: `120 registered / 120 unique`, no duplicate command names, no unregistered command classes
 
 ## Architecture Rules
 
@@ -33,6 +33,18 @@
 - Feature Control Frames Eye: `get_feature_control_frames`.
 - Surface Texture Symbols Eye: `get_surface_texture_symbols`.
 - Welding Symbols Eye: `get_welding_symbols`.
+- RevisionClouds Eye: `get_revision_clouds`.
+- EdgeSymbols Eye: `get_edge_symbols`.
+- TransitionSymbols Eye: `get_transition_symbols`.
+
+## Drawing Symbol Layer Commands
+
+- `get_feature_control_frames`
+- `get_surface_texture_symbols`
+- `get_welding_symbols`
+- `get_revision_clouds`
+- `get_edge_symbols`
+- `get_transition_symbols`
 
 ## Drawing Text Objects Coverage
 
@@ -97,6 +109,46 @@ The command does not interpret roughness values, validate GOST/ESKD compliance, 
 
 The command does not interpret weld data, validate GOST/ESKD compliance, or perform welding semantic analysis.
 
+## RevisionClouds Coverage
+
+`get_revision_clouds` reads Inventor API facts from:
+
+- `Sheet.RevisionClouds`;
+- `RevisionCloud` metadata;
+- `RevisionCloudDefinition`;
+- revision cloud control points;
+- reference keys;
+- diagnostics.
+
+The command does not analyze drawing changes, connect clouds to revision tables, validate GOST/ESKD compliance, or perform engineering interpretation.
+
+## EdgeSymbols Coverage
+
+`get_edge_symbols` reads Inventor API facts from:
+
+- `Sheet.EdgeSymbols`;
+- `EdgeSymbol` metadata;
+- `EdgeSymbolDefinition`;
+- layer/style metadata where available;
+- reference keys;
+- diagnostics.
+
+The command does not interpret edge symbols, validate GOST/ISO compliance, check correctness, or perform engineering interpretation.
+
+## TransitionSymbols Coverage
+
+`get_transition_symbols` reads Inventor API facts from:
+
+- `Sheet.TransitionSymbols`;
+- `TransitionSymbol` metadata;
+- leader metadata;
+- attachment metadata;
+- `TransitionSymbolDefinition`;
+- reference keys;
+- diagnostics.
+
+The command does not interpret transition symbols, validate GOST/ISO compliance, check correctness, or perform engineering interpretation.
+
 ## Known Limitations
 
 - Semantic text understanding is not implemented in Runtime.
@@ -105,6 +157,8 @@ The command does not interpret weld data, validate GOST/ESKD compliance, or perf
 - GD&T semantic interpretation is outside Runtime.
 - Surface texture semantic interpretation is outside Runtime.
 - Welding semantic interpretation is outside Runtime.
+- Drawing symbol semantic interpretation is outside Runtime.
+- GOST/ISO symbol validation is outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
 - Typed detailed Eye for `Sheet.HoleTables` is still missing.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
@@ -120,7 +174,7 @@ The command does not interpret weld data, validate GOST/ESKD compliance, or perf
 Next Capability Check:
 
 ```text
-Capability Check - Drawing Symbol Layer completion review
+Capability Check - choose next engineering layer
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`, `CAPABILITY_MAP.md`, and this `CHAT_HANDOFF.md`. Then audit the live repository before proposing or writing code.

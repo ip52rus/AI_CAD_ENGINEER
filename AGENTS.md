@@ -205,6 +205,41 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 22:
+
+```text
+Package 22 complete - Drawing Symbol Layer checkpoint
+```
+
+Current verified drawing symbol commands:
+
+```text
+get_feature_control_frames
+get_surface_texture_symbols
+get_welding_symbols
+get_revision_clouds
+get_edge_symbols
+get_transition_symbols
+```
+
+Current Package 22 status:
+
+- Drawing Symbol Layer is VERIFIED.
+- `get_revision_clouds` reads `Sheet.RevisionClouds`, RevisionCloud metadata, RevisionCloudDefinition, control points, reference keys, and diagnostics.
+- `get_edge_symbols` reads `Sheet.EdgeSymbols`, EdgeSymbol metadata, EdgeSymbolDefinition, reference keys, and diagnostics.
+- `get_transition_symbols` reads `Sheet.TransitionSymbols`, TransitionSymbol metadata, leader/attachment metadata, TransitionSymbolDefinition, reference keys, and diagnostics.
+- the runtime still does not perform symbol interpretation, GOST/ISO validation, correctness checking, semantic analysis, or engineering interpretation.
+
+Next correct action:
+
+1. run a Capability Check to choose the next engineering layer;
+2. verify whether sufficient atomic Eyes/Hands already exist;
+3. inspect actual Inventor 2027 interop signatures before proposing any new code;
+4. decide whether another atomic Eye or Hand is needed;
+5. do not write implementation code until the audit proves a gap and the user authorizes implementation.
+
+The older Package 21A, Package 20A, Package 19A, Package 18A, and Package 17A notes below are superseded by this addendum where they conflict.
+
 Current milestone addendum after Package 21A:
 
 ```text

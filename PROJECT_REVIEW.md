@@ -1,5 +1,42 @@
 # PROJECT REVIEW
 
+## Package 22E addendum - current checkpoint
+
+This addendum supersedes older command counts and next-step notes below where they conflict.
+
+Current live command inventory after Package 22D:
+
+```text
+120 registered JSON commands
+120 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+0 unregistered command classes
+```
+
+Package 22 status:
+
+- `get_revision_clouds` is VERIFIED.
+- `get_edge_symbols` is VERIFIED.
+- `get_transition_symbols` is VERIFIED.
+- Drawing Symbol Layer is now VERIFIED for:
+  - `get_feature_control_frames`;
+  - `get_surface_texture_symbols`;
+  - `get_welding_symbols`;
+  - `get_revision_clouds`;
+  - `get_edge_symbols`;
+  - `get_transition_symbols`.
+- The runtime reads Inventor API facts only.
+- It does not perform symbol interpretation, GOST/ISO validation, correctness checking, or engineering conclusions.
+
+Next recommended capability check:
+
+```text
+Capability Check - choose next engineering layer
+```
+
+Do not reintroduce EngineeringBrain, DrawingManager, Planning, Decision, or automatic engineering logic into the runtime.
+
 ## Package 21B addendum - current checkpoint
 
 This addendum supersedes older command counts and next-step notes below where they conflict.

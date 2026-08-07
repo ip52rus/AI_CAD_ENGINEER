@@ -229,6 +229,15 @@ public class InventorCommandDispatcher
     private readonly GetWeldingSymbolsCommand
         _getWeldingSymbolsCommand;
 
+    private readonly GetRevisionCloudsCommand
+        _getRevisionCloudsCommand;
+
+    private readonly GetEdgeSymbolsCommand
+        _getEdgeSymbolsCommand;
+
+    private readonly GetTransitionSymbolsCommand
+        _getTransitionSymbolsCommand;
+
     private readonly GetBalloonsCommand
         _getBalloonsCommand;
 
@@ -657,6 +666,18 @@ public class InventorCommandDispatcher
 
         _getWeldingSymbolsCommand =
             new GetWeldingSymbolsCommand(
+                inventor);
+
+        _getRevisionCloudsCommand =
+            new GetRevisionCloudsCommand(
+                inventor);
+
+        _getEdgeSymbolsCommand =
+            new GetEdgeSymbolsCommand(
+                inventor);
+
+        _getTransitionSymbolsCommand =
+            new GetTransitionSymbolsCommand(
                 inventor);
 
         _getBalloonsCommand =
@@ -1162,6 +1183,18 @@ public class InventorCommandDispatcher
 
                 "get_welding_symbols" =>
                     _getWeldingSymbolsCommand.Execute(
+                        root),
+
+                "get_revision_clouds" =>
+                    _getRevisionCloudsCommand.Execute(
+                        root),
+
+                "get_edge_symbols" =>
+                    _getEdgeSymbolsCommand.Execute(
+                        root),
+
+                "get_transition_symbols" =>
+                    _getTransitionSymbolsCommand.Execute(
                         root),
 
                 "get_balloons" =>

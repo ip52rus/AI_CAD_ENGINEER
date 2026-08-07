@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint before the Package 21B documentation sync:
+Current checkpoint after the Package 22E documentation sync:
 
 ```text
-fee707a v0.20 complete Surface Texture Symbols Eye
+v0.22 complete Drawing Symbol Layer
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 21A:
+Live command audit after Package 22D:
 
 ```text
-117 registered JSON commands
-117 unique registered JSON commands
+120 registered JSON commands
+120 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -316,6 +316,46 @@ Explicit non-scope:
 - no welding semantic analysis;
 - no engineering conclusions.
 
+## Package 22 status
+
+Package 22 completed the remaining Drawing Symbol Layer Eyes:
+
+```json
+{"command":"get_revision_clouds"}
+{"command":"get_edge_symbols"}
+{"command":"get_transition_symbols"}
+```
+
+Status: VERIFIED.
+
+Drawing Symbol Layer verified commands:
+
+```text
+get_feature_control_frames
+get_surface_texture_symbols
+get_welding_symbols
+get_revision_clouds
+get_edge_symbols
+get_transition_symbols
+```
+
+Confirmed scope:
+
+- reads `Sheet.FeatureControlFrames`;
+- reads `Sheet.SurfaceTextureSymbols`;
+- reads `Sheet.WeldingSymbols`;
+- reads `Sheet.RevisionClouds`;
+- reads `Sheet.EdgeSymbols`;
+- reads `Sheet.TransitionSymbols`;
+- returns Inventor API facts, reference keys where available, selector snapshots, and diagnostics.
+
+Explicit non-scope:
+
+- no symbol interpretation;
+- no GOST validation;
+- no engineering analysis;
+- no semantic classification of drawing symbols.
+
 ## Verified eyes
 
 Major verified read areas include:
@@ -332,6 +372,9 @@ Major verified read areas include:
 - feature control frames;
 - surface texture symbols;
 - welding symbols;
+- revision clouds;
+- edge symbols;
+- transition symbols;
 - view and curve geometry;
 - model feature tree;
 - feature details;
@@ -353,6 +396,7 @@ Major verified read areas include:
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - Surface texture semantic interpretation is not implemented in Runtime and must remain outside the C# layer.
 - Welding semantic interpretation is not implemented in Runtime and must remain outside the C# layer.
+- Drawing symbol semantic interpretation is not implemented in Runtime and must remain outside the C# layer.
 - Do not describe GOST `CustomTable` objects as `PartsList` objects.
 
 ## Next task
@@ -360,7 +404,7 @@ Major verified read areas include:
 Next capability check:
 
 ```text
-Capability Check - Drawing Symbol Layer completion review
+Capability Check - choose next engineering layer
 ```
 
 Goal:
