@@ -76,6 +76,12 @@ public class InventorCommandDispatcher
     private readonly CreateDrawingDocumentCommand
         _createDrawingDocumentCommand;
 
+    private readonly CreateSectionLineCommand
+        _createSectionLineCommand;
+
+    private readonly CreateSectionViewCommand
+        _createSectionViewCommand;
+
     private readonly ActivateDocumentCommand
         _activateDocumentCommand;
 
@@ -465,6 +471,14 @@ public class InventorCommandDispatcher
 
         _createDrawingDocumentCommand =
             new CreateDrawingDocumentCommand(
+                inventor);
+
+        _createSectionLineCommand =
+            new CreateSectionLineCommand(
+                inventor);
+
+        _createSectionViewCommand =
+            new CreateSectionViewCommand(
                 inventor);
 
         _activateDocumentCommand =
@@ -986,6 +1000,14 @@ public class InventorCommandDispatcher
 
                 "create_drawing_document" =>
                     _createDrawingDocumentCommand.Execute(
+                        root),
+
+                "create_section_line" =>
+                    _createSectionLineCommand.Execute(
+                        root),
+
+                "create_section_view" =>
+                    _createSectionViewCommand.Execute(
                         root),
 
                 "activate_document" =>

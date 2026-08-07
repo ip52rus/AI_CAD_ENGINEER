@@ -51,8 +51,8 @@ CommandProcessor
 Live command audit after Package 23B:
 
 ```text
-121 registered JSON commands
-121 unique registered JSON commands
+123 registered JSON commands
+123 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -443,3 +443,24 @@ Goal:
 - select the next capability boundary;
 - run an audit before implementation;
 - keep Runtime limited to Eyes and atomic Hands.
+
+## Package 24 checkpoint
+
+Package 24 complete: Section View Pipeline is VERIFIED.
+
+Verified atomic Hands: `create_drawing_document`, `create_base_view`,
+`create_section_line`, and `create_section_view`.
+
+Verified pipeline: `DrawingDocument → Base View → Section Line → Section View`.
+The section line is created through `parentView.Sketches.Add()` and explicit
+sheet coordinates are converted with `DrawingSketch.SheetToSketchSpace()`;
+`DrawingViews.AddSectionView2` then consumes that parent-view-owned sketch.
+This ownership requirement was confirmed after `Sheet.Sketches.Add()` caused
+Inventor `E_FAIL`.
+
+Inventor PASS, Build PASS, Registry PASS, and runtime pipeline PASS are
+recorded for Package 24. Runtime receives all coordinates explicitly and does
+not choose placement or direction, analyze the model, make engineering
+decisions, or perform GOST analysis.
+
+Next capability check: `create_detail_view` Hand.

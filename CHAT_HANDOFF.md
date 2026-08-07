@@ -2,11 +2,21 @@
 
 ## Current State
 
+- Current checkpoint: `v0.24 complete Section View Pipeline`
+- Latest completed package: Package 24
+- Verified pipeline: `create_drawing_document` → `create_base_view` → `create_section_line` → `create_section_view`
+- Build PASS, Registry PASS, and Inventor runtime PASS are confirmed.
+
+The section line is created with `parentView.Sketches.Add()` and explicit sheet
+coordinates are converted via `SheetToSketchSpace`; the resulting sketch is
+consumed by `AddSectionView2`. Runtime does not choose placement or direction,
+analyze the model, or perform GOST analysis.
+
 - Branch: `cleanup/legacy-architecture`
 - Latest checkpoint after this commit: `v0.23 complete create_drawing_document Hand`
 - Latest completed package: Package 23 - create_drawing_document Hand
 - Current milestone: create_drawing_document is implemented, built, registered, Inventor-validated, and marked `VERIFIED`
-- Live command inventory after Package 23B: `121 registered / 121 unique`, no duplicate command names, no unregistered command classes
+- Live command inventory after Package 24: `123 registered / 123 unique`, no duplicate command names, no unregistered command classes
 
 ## Architecture Rules
 

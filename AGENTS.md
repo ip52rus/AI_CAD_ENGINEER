@@ -468,3 +468,27 @@ A capability is complete only when all applicable items are true:
 6. returned data/action is visually or structurally confirmed;
 7. documentation is updated;
 8. the user explicitly approves the commit.
+
+## Current milestone addendum after Package 24
+
+```text
+Package 24 complete - Section View Pipeline checkpoint
+```
+
+Verified Drawing Generation Hands:
+
+```text
+create_drawing_document
+create_base_view
+create_section_line
+create_section_view
+```
+
+The section pipeline is verified in Inventor. `create_section_line` creates a
+sketch owned by the selected parent view and converts explicit sheet
+coordinates with `SheetToSketchSpace`; `create_section_view` uses that sketch
+with `DrawingViews.AddSectionView2`. Runtime does not choose placement or
+direction, analyze the model, or perform engineering/GOST decisions.
+
+Next correct action: run a Capability Audit for `create_detail_view` before
+writing code.

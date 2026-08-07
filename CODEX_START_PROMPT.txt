@@ -58,10 +58,22 @@ Current checkpoint context:
 - Runtime does not perform drawing symbol interpretation, GOST/ISO validation, correctness checking, or engineering conclusions.
 - Runtime does not choose drawing templates, generate drawings, create views automatically, fill title blocks, export, or perform engineering decisions.
 
+Current checkpoint:
+
+```text
+Package 24 complete - Section View Pipeline
+```
+
+Verified pipeline: `create_drawing_document` → `create_base_view` →
+`create_section_line` → `create_section_view`.
+
+The section-line sketch is owned by `parentView.Sketches` and uses explicit
+sheet-to-sketch coordinate conversion before `AddSectionView2`.
+
 Next expected stage:
 
 ```text
-Capability Audit - create_section_view Hand
+Capability Audit - create_detail_view Hand
 ```
 
 Required next check:

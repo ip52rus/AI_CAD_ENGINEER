@@ -1,5 +1,15 @@
 # PROJECT REVIEW
 
+## Package 24 checkpoint - current state
+
+Package 24 closes the verified Section View generation pipeline. The current
+atomic Drawing Generation Hands are `create_drawing_document`,
+`create_base_view`, `create_section_line`, and `create_section_view`.
+
+The section-line sketch must belong to the parent view (`parentView.Sketches.Add()`)
+and caller-provided sheet coordinates are converted with `SheetToSketchSpace`.
+The next capability check is the `create_detail_view` Hand.
+
 ## Package 23C addendum - current checkpoint
 
 This addendum supersedes older command counts and next-step notes below where they conflict.
@@ -7,8 +17,8 @@ This addendum supersedes older command counts and next-step notes below where th
 Current live command inventory after Package 23B:
 
 ```text
-121 registered JSON commands
-121 unique registered JSON commands
+123 registered JSON commands
+123 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes

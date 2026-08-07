@@ -293,3 +293,17 @@ add_drawing_view_break
 - P2: add specialized annotation/table capabilities only after typed Eyes define reliable selector snapshots.
 
 Do not add automatic scenarios such as auto-placement, collision resolution, best-view selection, dimension selection, BOM generation, specification parsing, or complete drawing generation into the C# Runtime.
+
+## Package 24 result
+
+Drawing Generation Hands — Section View Pipeline: **VERIFIED**
+
+Commands: `create_drawing_document`, `create_base_view`, `create_section_line`,
+`create_section_view`.
+
+Coverage is the explicit pipeline `DrawingDocument → Base View → Section Line →
+Section View`. `create_section_line` uses `parentView.Sketches.Add()` and
+`SheetToSketchSpace`; `create_section_view` uses `DrawingViews.AddSectionView2`.
+No automatic placement, direction selection, model analysis, GOST/ESKD checks,
+or engineering decisions are performed. Next capability check:
+`create_detail_view` Hand.
