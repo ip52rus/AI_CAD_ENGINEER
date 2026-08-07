@@ -1,5 +1,34 @@
 # PROJECT REVIEW
 
+## Package 21B addendum - current checkpoint
+
+This addendum supersedes older command counts and next-step notes below where they conflict.
+
+Current live command inventory after Package 21A:
+
+```text
+117 registered JSON commands
+117 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+0 unregistered command classes
+```
+
+Package 21A status:
+
+- `get_welding_symbols` is VERIFIED.
+- It reads Inventor API `Sheet.WeldingSymbols` as a typed Eye.
+- It covers DrawingWeldingSymbol metadata, DrawingWeldingSymbolDefinition fields, WeldSymbolOne, WeldSymbolTwo, reference keys, and diagnostics.
+- It does not perform weld interpretation, GOST validation, welding semantic analysis, or engineering conclusions.
+
+Next recommended capability check:
+
+```text
+Capability Check - Drawing Symbol Layer completion review
+```
+
+Do not reintroduce EngineeringBrain, DrawingManager, Planning, Decision, or automatic engineering logic into the runtime.
+
 ## Package 20B addendum - current checkpoint
 
 This addendum supersedes older command counts and next-step notes below where they conflict.

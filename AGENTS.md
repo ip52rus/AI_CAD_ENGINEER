@@ -205,6 +205,36 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 21A:
+
+```text
+Package 21A complete - Welding Symbols Eye checkpoint
+```
+
+Current confirmed drawing symbol commands:
+
+```text
+get_feature_control_frames
+get_surface_texture_symbols
+get_welding_symbols
+```
+
+Current Package 21A status:
+
+- `get_welding_symbols` is VERIFIED;
+- welding symbol reading covers `Sheet.WeldingSymbols`, DrawingWeldingSymbols collection metadata, DrawingWeldingSymbol metadata, DrawingWeldingSymbolDefinition, WeldSymbolOne, WeldSymbolTwo, reference keys, and diagnostics;
+- the runtime still does not perform weld interpretation, GOST validation, welding semantic analysis, or engineering interpretation.
+
+Next correct action:
+
+1. run a Capability Check for Drawing Symbol Layer completion review;
+2. verify which symbol Eyes are now covered and which are still missing;
+3. inspect actual Inventor 2027 interop signatures before proposing any new code;
+4. decide whether another atomic Eye or Hand is needed;
+5. do not write implementation code until the audit proves a gap and the user authorizes implementation.
+
+The older Package 20A, Package 19A, Package 18A, and Package 17A notes below are superseded by this addendum where they conflict.
+
 Current milestone addendum after Package 20A:
 
 ```text

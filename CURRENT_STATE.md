@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint before the Package 20B documentation sync:
+Current checkpoint before the Package 21B documentation sync:
 
 ```text
-13c02c9 v0.19 complete Feature Control Frames Eye
+fee707a v0.20 complete Surface Texture Symbols Eye
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 20A:
+Live command audit after Package 21A:
 
 ```text
-116 registered JSON commands
-116 unique registered JSON commands
+117 registered JSON commands
+117 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -282,6 +282,40 @@ Explicit non-scope:
 - no surface texture semantic analysis;
 - no engineering conclusions.
 
+## Package 21A status
+
+Package 21A added Welding Symbols Eye:
+
+```json
+{"command":"get_welding_symbols"}
+```
+
+Status: VERIFIED.
+
+Confirmed scope:
+
+- reads `Sheet.WeldingSymbols`;
+- reads `DrawingWeldingSymbols` collection metadata;
+- reads `DrawingWeldingSymbol` metadata;
+- reads position;
+- reads layer;
+- reads style;
+- reads leader metadata;
+- reads retrieved state and retrieved source metadata where available;
+- reads `DrawingWeldingSymbolDefinition`;
+- reads `WeldSymbolOne`;
+- reads `WeldSymbolTwo`;
+- returns reference keys where available;
+- returns selector snapshots and diagnostics.
+
+Explicit non-scope:
+
+- no weld interpretation;
+- no weld-type engineering classification;
+- no GOST validation;
+- no welding semantic analysis;
+- no engineering conclusions.
+
 ## Verified eyes
 
 Major verified read areas include:
@@ -297,6 +331,7 @@ Major verified read areas include:
 - drawing text objects;
 - feature control frames;
 - surface texture symbols;
+- welding symbols;
 - view and curve geometry;
 - model feature tree;
 - feature details;
@@ -317,6 +352,7 @@ Major verified read areas include:
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - Surface texture semantic interpretation is not implemented in Runtime and must remain outside the C# layer.
+- Welding semantic interpretation is not implemented in Runtime and must remain outside the C# layer.
 - Do not describe GOST `CustomTable` objects as `PartsList` objects.
 
 ## Next task
@@ -324,7 +360,7 @@ Major verified read areas include:
 Next capability check:
 
 ```text
-Capability Check - Welding Symbols Eye
+Capability Check - Drawing Symbol Layer completion review
 ```
 
 Goal:

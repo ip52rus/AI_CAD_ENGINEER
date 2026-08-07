@@ -226,6 +226,9 @@ public class InventorCommandDispatcher
     private readonly GetSurfaceTextureSymbolsCommand
         _getSurfaceTextureSymbolsCommand;
 
+    private readonly GetWeldingSymbolsCommand
+        _getWeldingSymbolsCommand;
+
     private readonly GetBalloonsCommand
         _getBalloonsCommand;
 
@@ -650,6 +653,10 @@ public class InventorCommandDispatcher
 
         _getSurfaceTextureSymbolsCommand =
             new GetSurfaceTextureSymbolsCommand(
+                inventor);
+
+        _getWeldingSymbolsCommand =
+            new GetWeldingSymbolsCommand(
                 inventor);
 
         _getBalloonsCommand =
@@ -1151,6 +1158,10 @@ public class InventorCommandDispatcher
 
                 "get_surface_texture_symbols" =>
                     _getSurfaceTextureSymbolsCommand.Execute(
+                        root),
+
+                "get_welding_symbols" =>
+                    _getWeldingSymbolsCommand.Execute(
                         root),
 
                 "get_balloons" =>

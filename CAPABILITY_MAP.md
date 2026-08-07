@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint before this documentation sync:
 
 ```text
-13c02c9 v0.19 complete Feature Control Frames Eye
+fee707a v0.20 complete Surface Texture Symbols Eye
 ```
 
 ## Ground rules
@@ -48,7 +48,8 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Annotation collision/layout logic | EXPERIMENTAL | - | not applicable | `check_annotation_collisions`, `auto_resolve_annotation_collisions` | should not be expanded as Runtime coverage | no priority |
 | Surface Texture Symbols Eye | VERIFIED | `get_surface_texture_symbols` | `get_surface_texture_symbols`, `get_surface_texture_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
 | Surface texture semantic interpretation | MISSING | - | - | - | roughness interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
-| Weld symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
+| Welding Symbols Eye | VERIFIED | `get_welding_symbols` | `get_welding_symbols`, `get_welding_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| Welding semantic analysis | MISSING | - | - | - | weld interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Datum identifiers | MISSING | placeholder count only; no confirmed API coverage | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Datum target symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Feature Control Frames | VERIFIED | `get_feature_control_frames` | `get_feature_control_frames`, `get_feature_control_frames` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
@@ -85,6 +86,8 @@ Exact commands explicitly confirmed:
 {"command":"get_drawing_table_collections","sheetName":"Лист:1"}
 {"command":"get_custom_tables"}
 {"command":"get_surface_texture_symbols"}
+{"command":"get_welding_symbols"}
+{"command":"get_welding_symbols","sheetName":"Лист:1"}
 {"command":"get_surface_texture_symbols","sheetName":"Лист:1"}
 {"command":"get_drawing_text_objects"}
 {"command":"get_feature_control_frames"}
@@ -102,6 +105,8 @@ Exact commands explicitly confirmed:
 `get_feature_control_frames` is verified for reading `Sheet.FeatureControlFrames`, frame metadata, rows, tolerance fields, datum fields, reference keys, and diagnostics.
 
 `get_surface_texture_symbols` is verified for reading `Sheet.SurfaceTextureSymbols`, SurfaceTextureSymbol metadata, surface texture fields, definition data, reference keys, and diagnostics.
+
+`get_welding_symbols` is verified for reading `Sheet.WeldingSymbols`, DrawingWeldingSymbol metadata, definition fields, weld symbol fields, reference keys, and diagnostics.
 
 ## Experimental commands
 
@@ -181,9 +186,25 @@ diagnostics
 
 This is not roughness interpretation, GOST validation, surface texture semantic analysis, or engineering analysis.
 
+## Package 21 result
+
+Package 21A confirmed that `get_welding_symbols` reads Autodesk Inventor `Sheet.WeldingSymbols` as a typed Eye:
+
+```text
+DrawingWeldingSymbols collection
+DrawingWeldingSymbol metadata
+DrawingWeldingSymbolDefinition
+WeldSymbolOne
+WeldSymbolTwo
+reference keys
+diagnostics
+```
+
+This is not weld interpretation, GOST validation, welding semantic analysis, or engineering analysis.
+
 ## Priority notes
 
-- P0: continue the Welding Symbols Eye capability check before implementation.
+- P0: continue the Drawing Symbol Layer completion review before implementation.
 - P1: continue atomic Drawing Views / Drawing Dimensions / HoleThreadNotes improvements only where audits confirmed gaps.
 - P2: add specialized annotation/table capabilities only after typed Eyes define reliable selector snapshots.
 

@@ -3,10 +3,10 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`
-- Latest checkpoint before this commit: `13c02c9 v0.19 complete Feature Control Frames Eye`
-- Latest completed package: Package 20A - Surface Texture Symbols Eye
-- Current milestone: Surface Texture Symbols Eye is implemented, built, registered, Inventor-validated, and marked `VERIFIED`
-- Live command inventory after Package 20A: `116 registered / 116 unique`, no duplicate command names, no unregistered command classes
+- Latest checkpoint before this commit: `fee707a v0.20 complete Surface Texture Symbols Eye`
+- Latest completed package: Package 21A - Welding Symbols Eye
+- Current milestone: Welding Symbols Eye is implemented, built, registered, Inventor-validated, and marked `VERIFIED`
+- Live command inventory after Package 21A: `117 registered / 117 unique`, no duplicate command names, no unregistered command classes
 
 ## Architecture Rules
 
@@ -32,6 +32,7 @@
 - Drawing Text Objects: `get_drawing_text_objects`.
 - Feature Control Frames Eye: `get_feature_control_frames`.
 - Surface Texture Symbols Eye: `get_surface_texture_symbols`.
+- Welding Symbols Eye: `get_welding_symbols`.
 
 ## Drawing Text Objects Coverage
 
@@ -81,6 +82,21 @@ The command does not interpret tolerances, validate GOST/ESKD compliance, or per
 
 The command does not interpret roughness values, validate GOST/ESKD compliance, or perform surface texture semantic analysis.
 
+## Welding Symbols Coverage
+
+`get_welding_symbols` reads Inventor API facts from:
+
+- `Sheet.WeldingSymbols`;
+- `DrawingWeldingSymbols` collection;
+- `DrawingWeldingSymbol` metadata;
+- `DrawingWeldingSymbolDefinition`;
+- `WeldSymbolOne`;
+- `WeldSymbolTwo`;
+- reference keys;
+- diagnostics.
+
+The command does not interpret weld data, validate GOST/ESKD compliance, or perform welding semantic analysis.
+
 ## Known Limitations
 
 - Semantic text understanding is not implemented in Runtime.
@@ -88,9 +104,9 @@ The command does not interpret roughness values, validate GOST/ESKD compliance, 
 - TT/TU recognition is not implemented in Runtime.
 - GD&T semantic interpretation is outside Runtime.
 - Surface texture semantic interpretation is outside Runtime.
+- Welding semantic interpretation is outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
 - Typed detailed Eye for `Sheet.HoleTables` is still missing.
-- Welding symbols still need a typed Eye if selected by the next capability check.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`
@@ -104,7 +120,7 @@ The command does not interpret roughness values, validate GOST/ESKD compliance, 
 Next Capability Check:
 
 ```text
-Capability Check - Welding Symbols Eye
+Capability Check - Drawing Symbol Layer completion review
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`, `CAPABILITY_MAP.md`, and this `CHAT_HANDOFF.md`. Then audit the live repository before proposing or writing code.
