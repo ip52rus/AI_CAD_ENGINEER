@@ -3,10 +3,10 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`
-- Latest checkpoint after this commit: `v0.22 complete Drawing Symbol Layer`
-- Latest completed package: Package 22 - Drawing Symbol Layer
-- Current milestone: Drawing Symbol Layer is implemented, built, registered, Inventor-validated, and marked `VERIFIED`
-- Live command inventory after Package 22D: `120 registered / 120 unique`, no duplicate command names, no unregistered command classes
+- Latest checkpoint after this commit: `v0.23 complete create_drawing_document Hand`
+- Latest completed package: Package 23 - create_drawing_document Hand
+- Current milestone: create_drawing_document is implemented, built, registered, Inventor-validated, and marked `VERIFIED`
+- Live command inventory after Package 23B: `121 registered / 121 unique`, no duplicate command names, no unregistered command classes
 
 ## Architecture Rules
 
@@ -36,6 +36,7 @@
 - RevisionClouds Eye: `get_revision_clouds`.
 - EdgeSymbols Eye: `get_edge_symbols`.
 - TransitionSymbols Eye: `get_transition_symbols`.
+- create_drawing_document Hand: `create_drawing_document`.
 
 ## Drawing Symbol Layer Commands
 
@@ -149,6 +150,26 @@ The command does not interpret edge symbols, validate GOST/ISO compliance, check
 
 The command does not interpret transition symbols, validate GOST/ISO compliance, check correctness, or perform engineering interpretation.
 
+## Drawing Generation Hands
+
+`create_drawing_document` creates a new Autodesk Inventor drawing document as an atomic Hand.
+
+Implementation verified:
+
+- Build PASS.
+- Command Registry PASS.
+- Inventor PASS.
+
+Runtime behavior:
+
+- calls `Application.Documents.Add`;
+- uses `DocumentTypeEnum.kDrawingDocumentObject`;
+- requires explicit `templatePath`;
+- accepts optional `visible`;
+- returns created `DrawingDocument` metadata.
+
+The command does not choose templates automatically, generate drawings, create views, create dimensions, fill title blocks, export, validate GOST/ESKD compliance, or perform engineering interpretation.
+
 ## Known Limitations
 
 - Semantic text understanding is not implemented in Runtime.
@@ -159,8 +180,11 @@ The command does not interpret transition symbols, validate GOST/ISO compliance,
 - Welding semantic interpretation is outside Runtime.
 - Drawing symbol semantic interpretation is outside Runtime.
 - GOST/ISO symbol validation is outside Runtime.
+- Automatic template selection is outside Runtime.
+- Drawing generation scenarios are outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
 - Typed detailed Eye for `Sheet.HoleTables` is still missing.
+- Drawing Generation Hands still missing: `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`
@@ -174,7 +198,7 @@ The command does not interpret transition symbols, validate GOST/ISO compliance,
 Next Capability Check:
 
 ```text
-Capability Check - choose next engineering layer
+Capability Audit - create_section_view Hand
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`, `CAPABILITY_MAP.md`, and this `CHAT_HANDOFF.md`. Then audit the live repository before proposing or writing code.

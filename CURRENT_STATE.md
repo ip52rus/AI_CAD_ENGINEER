@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 22E documentation sync:
+Current checkpoint after the Package 23C documentation sync:
 
 ```text
-v0.22 complete Drawing Symbol Layer
+v0.23 complete create_drawing_document Hand
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 22D:
+Live command audit after Package 23B:
 
 ```text
-120 registered JSON commands
-120 unique registered JSON commands
+121 registered JSON commands
+121 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -356,6 +356,35 @@ Explicit non-scope:
 - no engineering analysis;
 - no semantic classification of drawing symbols.
 
+## Package 23 status
+
+Package 23 added the first atomic Drawing Generation Hand:
+
+```json
+{"command":"create_drawing_document"}
+```
+
+Status: VERIFIED.
+
+Confirmed scope:
+
+- requires explicit `templatePath`;
+- accepts optional `visible`;
+- creates a new drawing document through `Application.Documents.Add`;
+- uses `DocumentTypeEnum.kDrawingDocumentObject`;
+- returns created `DrawingDocument` metadata including document name, document type, template path, visibility, sheet count, and dirty state.
+
+Explicit non-scope:
+
+- no automatic template selection;
+- no drawing generation scenario;
+- no view creation;
+- no dimension creation;
+- no title block logic;
+- no export;
+- no GOST/ESKD interpretation;
+- no engineering decisions.
+
 ## Verified eyes
 
 Major verified read areas include:
@@ -375,6 +404,7 @@ Major verified read areas include:
 - revision clouds;
 - edge symbols;
 - transition symbols;
+- `create_drawing_document` atomic Hand;
 - view and curve geometry;
 - model feature tree;
 - feature details;
@@ -392,6 +422,7 @@ Major verified read areas include:
 ## Known gaps
 
 - Typed detailed Eye for `Sheet.HoleTables` is not implemented yet.
+- Drawing Generation Hands are still partial: section/detail/auxiliary views and drawing view break operations are not implemented yet.
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - Surface texture semantic interpretation is not implemented in Runtime and must remain outside the C# layer.
@@ -404,7 +435,7 @@ Major verified read areas include:
 Next capability check:
 
 ```text
-Capability Check - choose next engineering layer
+Capability Audit - create_section_view Hand
 ```
 
 Goal:

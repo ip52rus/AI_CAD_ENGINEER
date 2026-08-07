@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.22 complete Drawing Symbol Layer
+v0.23 complete create_drawing_document Hand
 ```
 
 ## Ground rules
@@ -35,10 +35,11 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Capability | Status | Implemented commands | Inventor PASS confirmed | Experimental | Missing | Priority |
 |---|---|---|---|---|---|---|
 | Runtime connectivity | VERIFIED | `ping`, `get_active_document` | `ping`, `get_active_document` | - | - | P0 maintained |
-| Document operations | PARTIAL | `get_open_documents`, `open_document`, `activate_document`, `update_active_document`, `save_document`, `save_document_as`, `close_document` | not separately recorded | - | create new drawing from template, export/print workflows | P1 |
+| Document operations | PARTIAL | `get_open_documents`, `open_document`, `activate_document`, `update_active_document`, `save_document`, `save_document_as`, `close_document`, `create_drawing_document` | `create_drawing_document` | - | export/print workflows | P1 |
 | Drawing sheets | VERIFIED | `get_drawing_sheets`, `get_sheets`, `get_sheet`, `activate_sheet`, `rename_sheet`, `create_sheet`, `delete_sheet`, `set_sheet_size`, `set_sheet_orientation` | `get_drawing_sheets` | - | no additional missing items confirmed by Package audits | P0 maintained |
 | Borders and title blocks | PARTIAL | `get_border_definitions`, `get_sheet_border`, `set_sheet_border`, `remove_sheet_border`, `get_title_block_definitions`, `get_sheet_title_block`, `set_sheet_title_block`, `remove_sheet_title_block`, `get_title_block_fields`, `set_title_block_field`, `set_title_block_field_by_name`, `fill_title_block`, `get_title_block_definition_text`, `set_title_block_definition_text`, `get_title_block_binding`, `get_title_block_bindings`, `get_title_block_field_map` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P1 |
 | Drawing views | PARTIAL | `get_drawing_views`, `get_drawing_view`, `get_drawing_views_detailed`, `get_drawing_view_relationships`, `get_drawing_curves`, `get_view_model_references`, `get_curve_model_reference`, `create_base_view`, `create_projected_view`, `move_drawing_view`, `delete_drawing_view`, `rename_drawing_view`, `rotate_drawing_view`, `set_drawing_view_scale`, `set_drawing_view_style`, `set_drawing_view_label_visibility`, `set_drawing_view_scale_inheritance`, `set_drawing_view_alignment`, `set_drawing_view_suppressed` | drawing views / relationships / curve geometry recorded as verified areas; exact PASS command list not recorded for `create_base_view` | - | section/detail/auxiliary/break/crop views not covered by confirmed commands | P1 |
+| Drawing Generation Hands | PARTIAL | `create_drawing_document`, `create_sheet`, `create_base_view`, `create_projected_view` | `create_drawing_document` | - | `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break` | P0 next |
 | Drawing dimensions | PARTIAL | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | not separately recorded | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | angular/ordinate/baseline/chain/symmetric/chamfer dimensions and additional atomic format/read variants | P1 |
 | Hole/thread notes | IMPLEMENTED_UNTESTED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | not separately recorded | - | stable selector variants are still missing; current commands use indexes | P1 |
 | Basic drawing annotation Eyes | IMPLEMENTED_UNTESTED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | not recorded after Package 15A | - | Inventor PASS still required | P0 test when needed |
@@ -105,6 +106,7 @@ Exact commands explicitly confirmed:
 {"command":"get_edge_symbols","sheetName":"Лист:1"}
 {"command":"get_transition_symbols"}
 {"command":"get_transition_symbols","sheetName":"Лист:1"}
+{"command":"create_drawing_document"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -124,6 +126,8 @@ Exact commands explicitly confirmed:
 `get_edge_symbols` is verified for reading `Sheet.EdgeSymbols`, EdgeSymbol metadata, EdgeSymbolDefinition data, reference keys, and diagnostics.
 
 `get_transition_symbols` is verified for reading `Sheet.TransitionSymbols`, TransitionSymbol metadata, TransitionSymbolDefinition data, leader/attachment metadata, reference keys, and diagnostics.
+
+`create_drawing_document` is verified for creating a new Autodesk Inventor `DrawingDocument` through `Application.Documents.Add` with an explicit `templatePath`.
 
 ## Experimental commands
 
@@ -259,9 +263,32 @@ TransitionSymbols             VERIFIED
 
 This is not symbol interpretation, GOST/ISO validation, correctness checking, or engineering analysis.
 
+## Package 23 result
+
+Package 23B confirmed that `create_drawing_document` creates a new Autodesk Inventor drawing document as an atomic Hand:
+
+```text
+Application.Documents.Add
+DocumentTypeEnum.kDrawingDocumentObject
+explicit templatePath
+optional visible
+created DrawingDocument metadata
+```
+
+This is not automatic template selection, drawing generation, view creation, title block logic, export, GOST/ESKD interpretation, or engineering analysis.
+
+Next Drawing Generation Hands:
+
+```text
+create_section_view
+create_detail_view
+create_auxiliary_view
+add_drawing_view_break
+```
+
 ## Priority notes
 
-- P0: choose the next engineering layer through a Capability Check before implementation.
+- P0: audit `create_section_view` as the next atomic Drawing Generation Hand.
 - P1: continue atomic Drawing Views / Drawing Dimensions / HoleThreadNotes improvements only where audits confirmed gaps.
 - P2: add specialized annotation/table capabilities only after typed Eyes define reliable selector snapshots.
 

@@ -73,6 +73,9 @@ public class InventorCommandDispatcher
     private readonly OpenDocumentCommand
         _openDocumentCommand;
 
+    private readonly CreateDrawingDocumentCommand
+        _createDrawingDocumentCommand;
+
     private readonly ActivateDocumentCommand
         _activateDocumentCommand;
 
@@ -458,6 +461,10 @@ public class InventorCommandDispatcher
 
         _openDocumentCommand =
             new OpenDocumentCommand(
+                inventor);
+
+        _createDrawingDocumentCommand =
+            new CreateDrawingDocumentCommand(
                 inventor);
 
         _activateDocumentCommand =
@@ -975,6 +982,10 @@ public class InventorCommandDispatcher
 
                 "open_document" =>
                     _openDocumentCommand.Execute(
+                        root),
+
+                "create_drawing_document" =>
+                    _createDrawingDocumentCommand.Execute(
                         root),
 
                 "activate_document" =>

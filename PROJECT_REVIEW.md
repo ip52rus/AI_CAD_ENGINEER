@@ -1,5 +1,36 @@
 # PROJECT REVIEW
 
+## Package 23C addendum - current checkpoint
+
+This addendum supersedes older command counts and next-step notes below where they conflict.
+
+Current live command inventory after Package 23B:
+
+```text
+121 registered JSON commands
+121 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+0 unregistered command classes
+```
+
+Package 23 status:
+
+- `create_drawing_document` is VERIFIED.
+- It creates a new Inventor `DrawingDocument` through `Application.Documents.Add`.
+- It requires an explicit `templatePath`.
+- It accepts optional `visible`.
+- It returns created drawing document metadata.
+- It does not select templates, create views, create dimensions, fill title blocks, export, validate GOST/ESKD, or perform engineering decisions.
+
+Next recommended capability audit:
+
+```text
+Capability Audit - create_section_view Hand
+```
+
+Do not reintroduce EngineeringBrain, DrawingManager, Planning, Decision, or automatic engineering logic into the runtime.
+
 ## Package 22E addendum - current checkpoint
 
 This addendum supersedes older command counts and next-step notes below where they conflict.

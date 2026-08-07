@@ -205,6 +205,36 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 23:
+
+```text
+Package 23 complete - create_drawing_document Hand checkpoint
+```
+
+Current verified Drawing Generation Hand:
+
+```text
+create_drawing_document
+```
+
+Current Package 23 status:
+
+- `create_drawing_document` is VERIFIED.
+- It creates a new Autodesk Inventor `DrawingDocument` through `Application.Documents.Add`.
+- It requires explicit `templatePath` and accepts optional `visible`.
+- It returns created drawing document metadata.
+- The runtime still does not choose templates, generate drawings, create views, fill title blocks, export, validate GOST/ESKD, or perform engineering decisions.
+
+Next correct action:
+
+1. run a Capability Audit for `create_section_view`;
+2. verify whether sufficient atomic Hands already exist;
+3. inspect actual Inventor 2027 interop signatures before proposing any new code;
+4. keep all section line and placement inputs explicit;
+5. do not write implementation code until the audit proves a gap and the user authorizes implementation.
+
+The older Package 22, Package 21A, Package 20A, Package 19A, Package 18A, and Package 17A notes below are superseded by this addendum where they conflict.
+
 Current milestone addendum after Package 22:
 
 ```text
