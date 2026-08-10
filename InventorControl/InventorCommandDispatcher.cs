@@ -103,6 +103,12 @@ public class InventorCommandDispatcher
     private readonly ExportPdfCommand
         _exportPdfCommand;
 
+    private readonly ExportDwgCommand
+        _exportDwgCommand;
+
+    private readonly ExportDxfCommand
+        _exportDxfCommand;
+
     private readonly CloseDocumentCommand
         _closeDocumentCommand;
 
@@ -519,6 +525,14 @@ public class InventorCommandDispatcher
 
         _exportPdfCommand =
             new ExportPdfCommand(
+                inventor);
+
+        _exportDwgCommand =
+            new ExportDwgCommand(
+                inventor);
+
+        _exportDxfCommand =
+            new ExportDxfCommand(
                 inventor);
 
         _closeDocumentCommand =
@@ -1064,6 +1078,14 @@ public class InventorCommandDispatcher
 
                 "export_pdf" =>
                     _exportPdfCommand.Execute(
+                        root),
+
+                "export_dwg" =>
+                    _exportDwgCommand.Execute(
+                        root),
+
+                "export_dxf" =>
+                    _exportDxfCommand.Execute(
                         root),
 
                 "close_document" =>

@@ -1,5 +1,42 @@
 # PROJECT REVIEW
 
+## Package 29 checkpoint - current state
+
+Package 29 closes the verified DWG/DXF Export Pipeline. The commands
+`export_dwg` and `export_dxf` export the active `DrawingDocument` through the
+confirmed Inventor DWG/DXF Translator Add-Ins and `TranslatorAddIn.SaveCopyAs`.
+
+Current live command inventory after Package 29:
+
+```text
+129 registered JSON commands
+129 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified Drawing Export Hands:
+
+```text
+export_pdf
+export_dwg
+export_dxf
+```
+
+DWG uses translator ClientId `{C24E3AC2-122E-11D5-8E91-0010B541CD80}`.
+DXF uses translator ClientId `{C24E3AC4-122E-11D5-8E91-0010B541CD80}`.
+Both require caller-supplied INI files and assign
+`Export_Acad_IniFile` through the `NameValueMap.Value` setter. Both support
+overwrite protection, `overwrite=true`, output file verification, unsaved
+`DrawingDocument` export, and non-interactive export.
+
+DXF note: the public Inventor `exportdxf.ini` had `USE TRANSMITTAL=Yes` and
+therefore produced a ZIP package containing the DXF. Direct DXF output was
+verified with a caller-supplied DXF INI where transmittal is disabled.
+Runtime does not compensate for this translator setting.
+
+Next capability check: choose the next practical engineering layer.
+
 ## Package 28 checkpoint - current state
 
 Package 28 closes the verified PDF Export Pipeline. The command `export_pdf`

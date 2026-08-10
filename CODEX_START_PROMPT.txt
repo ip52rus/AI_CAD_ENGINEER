@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 28 is complete.
-- Current checkpoint: `v0.28 complete PDF export pipeline`.
-- Live registry after Package 28: `127 registered / 127 unique`, no duplicate command names.
+- Package 29 is complete.
+- Current checkpoint: `v0.29 complete DWG/DXF export pipeline`.
+- Live registry after Package 29: `129 registered / 129 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -32,14 +32,18 @@ Verified Drawing Generation / Export Hands:
 - `create_auxiliary_view`
 - `add_drawing_view_break`
 - `export_pdf`
+- `export_dwg`
+- `export_dxf`
 
 Verified export command:
 
 - `export_pdf` exports the active Autodesk Inventor `DrawingDocument` through the PDF Translator Add-In and `TranslatorAddIn.SaveCopyAs`.
-- It requires an explicit output path.
-- It blocks existing files unless `overwrite=true`.
-- It verifies output file existence.
-- It returns file size and timestamp facts.
+- `export_dwg` exports through the DWG Translator Add-In with a caller-supplied DWG INI.
+- `export_dxf` exports through the DXF Translator Add-In with a caller-supplied DXF INI.
+- Export commands require explicit output paths.
+- Export commands block existing files unless `overwrite=true`.
+- Export commands verify output file existence.
+- Export commands return file size and timestamp facts where available.
 
 Verified PDF Translator:
 
@@ -50,13 +54,27 @@ supportsSaveCopyAs = true
 translatorAvailable = true
 ```
 
+Verified DWG/DXF Translators:
+
+```text
+DWG ClientId: {C24E3AC2-122E-11D5-8E91-0010B541CD80}
+DXF ClientId: {C24E3AC4-122E-11D5-8E91-0010B541CD80}
+HasSaveCopyAsOptions = true
+Export_Acad_IniFile is assigned through NameValueMap.Value setter
+```
+
+DXF fact: the public Inventor `exportdxf.ini` had `USE TRANSMITTAL=Yes` and
+produced a ZIP package containing DXF. Direct DXF output was verified with a
+caller-supplied DXF INI where transmittal is disabled. Runtime does not
+compensate for translator packaging settings.
+
 Verified end-to-end pipeline:
 
 ```text
 DrawingDocument
 -> Base/Projected/Section/Detail/Auxiliary Views
 -> Drawing View Break
--> PDF Export
+-> PDF/DWG/DXF Export
 ```
 
 Runtime does not:
@@ -68,13 +86,15 @@ Runtime does not:
 - choose export paths;
 - create missing directories;
 - overwrite without explicit `overwrite=true`;
-- tune PDF options semantically;
+- tune PDF/DWG/DXF options semantically;
+- generate INI files;
+- choose AutoCAD versions, mappings/layers, or transmittal behavior;
 - perform engineering or GOST decisions.
 
 Next expected stage:
 
 ```text
-Capability Audit - Drawing Export Hands (DWG / DXF)
+Capability Check - choose the next practical engineering layer
 ```
 
 Required next check:

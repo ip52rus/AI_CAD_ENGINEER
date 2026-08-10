@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.28 complete PDF export pipeline`.
+- Current checkpoint: `v0.29 complete DWG/DXF export pipeline`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed package: Package 28 - `export_pdf` Hand.
-- Registry after Package 28: `127 registered / 127 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 28 checkpoint commit.
+- Latest completed package: Package 29 - DWG/DXF Export Pipeline.
+- Registry after Package 29: `129 registered / 129 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 29 checkpoint commit.
 
 ## Architecture Rules
 
@@ -39,6 +39,8 @@
 - create_drawing_document Hand: `create_drawing_document`.
 - Drawing View Break Hand: `add_drawing_view_break`.
 - PDF Export Hand: `export_pdf`.
+- DWG Export Hand: `export_dwg`.
+- DXF Export Hand: `export_dxf`.
 
 ## Drawing Generation / Export Hands
 
@@ -53,6 +55,8 @@ Verified commands:
 - `create_auxiliary_view`
 - `add_drawing_view_break`
 - `export_pdf`
+- `export_dwg`
+- `export_dxf`
 
 Verified end-to-end pipeline:
 
@@ -60,8 +64,54 @@ Verified end-to-end pipeline:
 DrawingDocument
 -> Base/Projected/Section/Detail/Auxiliary Views
 -> Drawing View Break
--> PDF Export
+-> PDF/DWG/DXF Export
 ```
+
+## DWG/DXF Export Coverage
+
+`export_dwg` and `export_dxf` export the active Autodesk Inventor
+`DrawingDocument` through the DWG/DXF Translator Add-Ins.
+
+Confirmed translators:
+
+```text
+DWG ClientId: {C24E3AC2-122E-11D5-8E91-0010B541CD80}
+DXF ClientId: {C24E3AC4-122E-11D5-8E91-0010B541CD80}
+HasSaveCopyAsOptions = true
+TranslatorAvailable = true
+SupportsSaveCopyAs = true
+```
+
+Implementation verified:
+
+- Build PASS.
+- Command Registry PASS.
+- Inventor PASS.
+
+Runtime coverage:
+
+- active `DrawingDocument` validation;
+- caller-supplied DWG/DXF INI validation;
+- `TranslationContext`;
+- `NameValueMap`;
+- `NameValueMap.Value["Export_Acad_IniFile"]` assignment;
+- `DataMedium`;
+- `TranslatorAddIn.SaveCopyAs`;
+- overwrite protection;
+- `overwrite=true` support;
+- output file existence verification;
+- file size / timestamp facts;
+- unsaved `DrawingDocument` support;
+- structured diagnostics;
+- no interactive dialog.
+
+DXF translator behavior:
+
+- The public Inventor `exportdxf.ini` had `USE TRANSMITTAL=Yes`.
+- That setting produced a ZIP package containing the DXF.
+- Direct DXF output was verified with a caller-supplied DXF INI where
+  transmittal is disabled.
+- Runtime does not compensate for or reinterpret transmittal packaging.
 
 ## PDF Export Coverage
 
@@ -104,10 +154,11 @@ Verified runtime tests:
 
 ## Known Limitations
 
-- DWG export Hand is not implemented yet.
-- DXF export Hand is not implemented yet.
 - Print workflow is not implemented yet.
 - PDF option tuning is not implemented in Runtime.
+- DWG/DXF option tuning is not implemented in Runtime.
+- Runtime does not generate export INI files.
+- Runtime does not choose AutoCAD versions, mappings/layers, or transmittal behavior.
 - Runtime does not choose output paths.
 - Runtime does not create output directories.
 - Runtime does not overwrite unless `overwrite=true`.
@@ -132,7 +183,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - Drawing Export Hands (DWG / DXF)
+Capability Check - choose the next practical engineering layer
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

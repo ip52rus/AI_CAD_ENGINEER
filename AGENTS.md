@@ -205,6 +205,40 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 29:
+
+```text
+Package 29 complete - DWG/DXF Export Pipeline checkpoint
+```
+
+Verified Drawing Export Hands:
+
+```text
+export_pdf
+export_dwg
+export_dxf
+```
+
+`export_dwg` and `export_dxf` are VERIFIED. They export the active Autodesk
+Inventor `DrawingDocument` through the DWG/DXF Translator Add-Ins and
+`TranslatorAddIn.SaveCopyAs`. Runtime requires explicit output paths and
+caller-supplied INI files, assigns `Export_Acad_IniFile` through
+`NameValueMap.Value`, blocks existing destinations unless `overwrite=true`,
+verifies output files, and does not open interactive dialogs.
+
+DXF translator behavior recorded by Package 29: the public Inventor
+`exportdxf.ini` had `USE TRANSMITTAL=Yes` and produced a ZIP package
+containing DXF. Direct DXF output was verified with a caller-supplied DXF INI
+where transmittal is disabled. Runtime must not compensate for or reinterpret
+translator packaging choices.
+
+Runtime still does not generate INI files, choose AutoCAD versions, choose
+mappings/layers, choose transmittal behavior, create directories, overwrite
+without explicit permission, or perform engineering/GOST decisions.
+
+Next correct action: run a Capability Check to choose the next practical
+engineering layer.
+
 Current milestone addendum after Package 28:
 
 ```text

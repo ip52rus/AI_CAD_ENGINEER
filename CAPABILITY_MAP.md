@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.28 complete PDF export pipeline
+v0.29 complete DWG/DXF export pipeline
 ```
 
 ## Ground rules
@@ -35,11 +35,12 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Capability | Status | Implemented commands | Inventor PASS confirmed | Experimental | Missing | Priority |
 |---|---|---|---|---|---|---|
 | Runtime connectivity | VERIFIED | `ping`, `get_active_document` | `ping`, `get_active_document` | - | - | P0 maintained |
-| Document operations | PARTIAL | `get_open_documents`, `open_document`, `activate_document`, `update_active_document`, `save_document`, `save_document_as`, `close_document`, `create_drawing_document`, `export_pdf` | `create_drawing_document`, `export_pdf` | - | DWG/DXF export and print workflows | P1 |
+| Document operations | PARTIAL | `get_open_documents`, `open_document`, `activate_document`, `update_active_document`, `save_document`, `save_document_as`, `close_document`, `create_drawing_document`, `export_pdf`, `export_dwg`, `export_dxf` | `create_drawing_document`, `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow | P1 |
 | Drawing sheets | VERIFIED | `get_drawing_sheets`, `get_sheets`, `get_sheet`, `activate_sheet`, `rename_sheet`, `create_sheet`, `delete_sheet`, `set_sheet_size`, `set_sheet_orientation` | `get_drawing_sheets` | - | no additional missing items confirmed by Package audits | P0 maintained |
 | Borders and title blocks | PARTIAL | `get_border_definitions`, `get_sheet_border`, `set_sheet_border`, `remove_sheet_border`, `get_title_block_definitions`, `get_sheet_title_block`, `set_sheet_title_block`, `remove_sheet_title_block`, `get_title_block_fields`, `set_title_block_field`, `set_title_block_field_by_name`, `fill_title_block`, `get_title_block_definition_text`, `set_title_block_definition_text`, `get_title_block_binding`, `get_title_block_bindings`, `get_title_block_field_map` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P1 |
 | Drawing views | PARTIAL | `get_drawing_views`, `get_drawing_view`, `get_drawing_views_detailed`, `get_drawing_view_relationships`, `get_drawing_curves`, `get_view_model_references`, `get_curve_model_reference`, `create_base_view`, `create_projected_view`, `create_auxiliary_view`, `add_drawing_view_break`, `move_drawing_view`, `delete_drawing_view`, `rename_drawing_view`, `rotate_drawing_view`, `set_drawing_view_scale`, `set_drawing_view_style`, `set_drawing_view_label_visibility`, `set_drawing_view_scale_inheritance`, `set_drawing_view_alignment`, `set_drawing_view_suppressed` | drawing views / relationships / curve geometry, `create_auxiliary_view`, and `add_drawing_view_break` are verified areas | - | detail/crop view improvements not covered by confirmed commands | P1 |
-| Drawing Generation Hands | PARTIAL | `create_drawing_document`, `create_sheet`, `create_base_view`, `create_projected_view`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf` | `create_drawing_document`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf` | - | DWG/DXF Drawing Export Hands | P0 next |
+| Drawing Generation Hands | PARTIAL | `create_drawing_document`, `create_sheet`, `create_base_view`, `create_projected_view`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | `create_drawing_document`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow and other drawing-generation Hands not yet audited | P1 |
+| Drawing Export Hands | VERIFIED | `export_pdf`, `export_dwg`, `export_dxf` | `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow is not implemented | P0 maintained |
 | Drawing dimensions | PARTIAL | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | not separately recorded | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | angular/ordinate/baseline/chain/symmetric/chamfer dimensions and additional atomic format/read variants | P1 |
 | Hole/thread notes | IMPLEMENTED_UNTESTED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | not separately recorded | - | stable selector variants are still missing; current commands use indexes | P1 |
 | Basic drawing annotation Eyes | IMPLEMENTED_UNTESTED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | not recorded after Package 15A | - | Inventor PASS still required | P0 test when needed |
@@ -108,6 +109,8 @@ Exact commands explicitly confirmed:
 {"command":"get_transition_symbols","sheetName":"Лист:1"}
 {"command":"create_drawing_document"}
 {"command":"export_pdf"}
+{"command":"export_dwg"}
+{"command":"export_dxf"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -131,6 +134,10 @@ Exact commands explicitly confirmed:
 `create_drawing_document` is verified for creating a new Autodesk Inventor `DrawingDocument` through `Application.Documents.Add` with an explicit `templatePath`.
 
 `export_pdf` is verified for exporting the active Autodesk Inventor `DrawingDocument` through the PDF Translator Add-In and `TranslatorAddIn.SaveCopyAs`, with overwrite protection and output file verification.
+
+`export_dwg` is verified for exporting the active Autodesk Inventor `DrawingDocument` through the DWG Translator Add-In and `TranslatorAddIn.SaveCopyAs`, with caller-supplied DWG INI, overwrite protection, output file verification, and no interactive dialog.
+
+`export_dxf` is verified for exporting the active Autodesk Inventor `DrawingDocument` through the DXF Translator Add-In and `TranslatorAddIn.SaveCopyAs`, with caller-supplied DXF INI, overwrite protection, output file verification, and no interactive dialog.
 
 ## Experimental commands
 
@@ -291,7 +298,7 @@ add_drawing_view_break
 
 ## Priority notes
 
-- P0: audit `create_section_view` as the next atomic Drawing Generation Hand.
+- P0: choose the next practical engineering layer after verified PDF/DWG/DXF export.
 - P1: continue atomic Drawing Views / Drawing Dimensions / HoleThreadNotes improvements only where audits confirmed gaps.
 - P2: add specialized annotation/table capabilities only after typed Eyes define reliable selector snapshots.
 
@@ -360,6 +367,56 @@ explicit permission, tune PDF options, regenerate drawing geometry, or perform
 engineering/GOST logic.
 
 Next capability check: Drawing Export Hands - DWG / DXF.
+
+## Package 29 result
+
+Drawing Export Hands - DWG/DXF Export Pipeline: **VERIFIED**
+
+Commands:
+
+```text
+export_dwg
+export_dxf
+```
+
+DWG coverage:
+
+```text
+DWG Translator ClientId {C24E3AC2-122E-11D5-8E91-0010B541CD80}
+HasSaveCopyAsOptions
+NameValueMap.Value["Export_Acad_IniFile"]
+caller-supplied DWG INI
+direct DWG output
+overwrite=false protection
+overwrite=true support
+output file verification
+unsaved DrawingDocument support
+no interactive dialog
+```
+
+DXF coverage:
+
+```text
+DXF Translator ClientId {C24E3AC4-122E-11D5-8E91-0010B541CD80}
+HasSaveCopyAsOptions
+NameValueMap.Value["Export_Acad_IniFile"]
+caller-supplied DXF INI
+direct DXF output when transmittal is disabled
+overwrite=false protection
+overwrite=true support
+output file verification
+unsaved DrawingDocument support
+no interactive dialog
+```
+
+The public Inventor `exportdxf.ini` had `USE TRANSMITTAL=Yes` and produced a
+ZIP package containing the DXF. Direct DXF output was verified with a
+caller-supplied DXF INI where transmittal is disabled. Runtime does not
+generate INI files, choose AutoCAD versions, choose mappings/layers, choose
+transmittal behavior, create directories, overwrite without explicit
+permission, or perform engineering/GOST decisions.
+
+Next capability check: choose the next practical engineering layer.
 
 ## Package 26 result
 

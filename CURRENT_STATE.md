@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 28 documentation sync:
+Current checkpoint after the Package 29 documentation sync:
 
 ```text
-v0.28 complete PDF export pipeline
+v0.29 complete DWG/DXF export pipeline
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 28B:
+Live command audit after Package 29H:
 
 ```text
-127 registered JSON commands
-127 unique registered JSON commands
+129 registered JSON commands
+129 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -422,7 +422,7 @@ Major verified read areas include:
 ## Known gaps
 
 - Typed detailed Eye for `Sheet.HoleTables` is not implemented yet.
-- Drawing Generation Hands are still partial: DWG/DXF drawing export Hands are not implemented yet.
+- Drawing Generation Hands are still partial outside the verified view/export pipeline; print workflow is not implemented yet.
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - Surface texture semantic interpretation is not implemented in Runtime and must remain outside the C# layer.
@@ -435,12 +435,12 @@ Major verified read areas include:
 Next capability check:
 
 ```text
-Capability Audit - Drawing Export Hands - DWG / DXF
+Capability Check - choose the next practical engineering layer
 ```
 
 Goal:
 
-- audit DWG and DXF export as separate atomic Hands;
+- identify the next useful Runtime gap after verified PDF/DWG/DXF export;
 - run an audit before implementation;
 - keep Runtime limited to Eyes and atomic Hands.
 
@@ -583,3 +583,75 @@ DrawingDocument
 ```
 
 Next capability check: Drawing Export Hands - DWG / DXF.
+
+## Package 29 checkpoint
+
+Package 29 complete: DWG/DXF Export Pipeline is VERIFIED.
+
+Verified commands:
+
+```json
+{"command":"export_dwg"}
+{"command":"export_dxf"}
+```
+
+DWG verified behavior:
+
+```text
+Translator ClientId: {C24E3AC2-122E-11D5-8E91-0010B541CD80}
+HasSaveCopyAsOptions = true
+Export_Acad_IniFile assigned through NameValueMap.Value setter
+caller-supplied DWG INI
+direct DWG output
+overwrite=false protection
+overwrite=true support
+output file verification
+unsaved DrawingDocument supported
+no interactive dialog
+```
+
+DXF verified behavior:
+
+```text
+Translator ClientId: {C24E3AC4-122E-11D5-8E91-0010B541CD80}
+HasSaveCopyAsOptions = true
+Export_Acad_IniFile assigned through NameValueMap.Value setter
+caller-supplied DXF INI
+direct DXF output when transmittal is disabled
+overwrite=false protection
+overwrite=true support
+output file verification
+unsaved DrawingDocument supported
+no interactive dialog
+```
+
+Important DXF translator behavior:
+
+The public Inventor `exportdxf.ini` contained `USE TRANSMITTAL=Yes` and
+therefore produced a ZIP package containing the DXF. Direct DXF output was
+verified with a caller-supplied DXF INI where transmittal is disabled. Runtime
+does not compensate for or reinterpret transmittal packaging.
+
+Verified Drawing Export Hands:
+
+```text
+export_pdf
+export_dwg
+export_dxf
+```
+
+Verified end-to-end pipeline:
+
+```text
+DrawingDocument
+-> Base/Projected/Section/Detail/Auxiliary Views
+-> Drawing View Break
+-> PDF/DWG/DXF Export
+```
+
+Runtime does not choose output formats automatically, generate INI files,
+choose AutoCAD versions, choose mappings/layers, choose transmittal behavior,
+create directories, overwrite without explicit permission, or perform
+engineering/GOST decisions.
+
+Next capability check: choose the next practical engineering layer.
