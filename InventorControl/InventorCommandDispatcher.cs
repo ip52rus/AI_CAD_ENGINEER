@@ -88,6 +88,9 @@ public class InventorCommandDispatcher
     private readonly CreateAuxiliaryViewCommand
         _createAuxiliaryViewCommand;
 
+    private readonly AddDrawingViewBreakCommand
+        _addDrawingViewBreakCommand;
+
     private readonly ActivateDocumentCommand
         _activateDocumentCommand;
 
@@ -493,6 +496,10 @@ public class InventorCommandDispatcher
 
         _createAuxiliaryViewCommand =
             new CreateAuxiliaryViewCommand(
+                inventor);
+
+        _addDrawingViewBreakCommand =
+            new AddDrawingViewBreakCommand(
                 inventor);
 
         _activateDocumentCommand =
@@ -1030,6 +1037,10 @@ public class InventorCommandDispatcher
 
                 "create_auxiliary_view" =>
                     _createAuxiliaryViewCommand.Execute(
+                        root),
+
+                "add_drawing_view_break" =>
+                    _addDrawingViewBreakCommand.Execute(
                         root),
 
                 "activate_document" =>

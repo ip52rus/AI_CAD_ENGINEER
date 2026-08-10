@@ -2,6 +2,17 @@
 
 ## Current State
 
+- Current checkpoint: `v0.27 complete drawing view break Hand`
+- Latest completed package: Package 27
+- Verified command: `add_drawing_view_break`
+- Live command inventory after Package 27: `126 registered / 126 unique`, no duplicate command names.
+
+Inventor validation passed for horizontal and vertical breaks. Runtime
+preserves factual post-creation values, including gap `1.00076` for a requested
+`1.0` and `numberOfSymbols = 0` for a requested `1`.
+
+Next stage: Capability Check — Drawing Export Hands (`PDF`, `DWG`, `DXF`).
+
 - Current checkpoint: `v0.26 complete auxiliary view pipeline`
 - Latest completed package: Package 26
 - Verified Drawing View Hands now include `create_auxiliary_view`.
@@ -217,7 +228,7 @@ The command does not choose templates automatically, generate drawings, create v
 - Drawing generation scenarios are outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
 - Typed detailed Eye for `Sheet.HoleTables` is still missing.
-- Drawing Generation Hands still missing: `add_drawing_view_break`.
+- Drawing Generation Hands still missing: Drawing Export Hands.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`

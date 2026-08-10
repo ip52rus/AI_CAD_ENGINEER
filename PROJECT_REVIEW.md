@@ -1,5 +1,14 @@
 # PROJECT REVIEW
 
+## Package 27 checkpoint - current state
+
+Package 27 closes the verified Drawing View Break Hand. The command
+`add_drawing_view_break` uses `DrawingView.BreakOperations.Add` and supports
+horizontal/vertical orientations and rectangular style. Actual Inventor
+post-creation values are preserved without compensation.
+
+Next capability check: Drawing Export Hands (`PDF`, `DWG`, `DXF`).
+
 ## Package 26 checkpoint - current state
 
 Package 26 closes the verified Auxiliary View pipeline. The current Drawing

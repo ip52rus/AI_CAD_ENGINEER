@@ -512,3 +512,20 @@ requested position `(35, 20)` to approximately `(35, 15)`; this is recorded as
 API behavior and is not compensated by Runtime.
 
 Next capability: `add_drawing_view_break`.
+
+## Package 27 checkpoint
+
+Package 27 complete: Drawing View Break Hand is VERIFIED.
+
+Verified command: `add_drawing_view_break`.
+
+Coverage includes `DrawingView.BreakOperations.Add`, horizontal and vertical
+orientation, rectangular style, BreakOperation reference keys, factual
+post-creation values, and diagnostics. Inventor returned a requested gap of
+`1.0` as approximately `1.00076` and requested `numberOfSymbols = 1` as
+`numberOfSymbols = 0`; Runtime preserves these actual API values.
+
+Runtime does not choose break location, orientation, style, or geometry and
+does not perform engineering or GOST decisions.
+
+Next capability check: Drawing Export Hands.

@@ -506,6 +506,19 @@ direction, scale, engineering, or GOST decisions.
 
 Next correct action: run a Capability Audit for `add_drawing_view_break`.
 
+## Current milestone addendum after Package 27
+
+```text
+Package 27 complete - Drawing View Break Hand checkpoint
+```
+
+`add_drawing_view_break` is VERIFIED for horizontal and vertical breaks using
+`DrawingView.BreakOperations.Add`. Runtime preserves factual Inventor values
+and does not choose break geometry, style, orientation, or engineering/GOST
+decisions.
+
+Next correct action: run a Capability Audit for Drawing Export Hands.
+
 ## Current milestone addendum after Package 25
 
 ```text

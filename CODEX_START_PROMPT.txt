@@ -73,7 +73,7 @@ sheet-to-sketch coordinate conversion before `AddSectionView2`.
 Next expected stage:
 
 ```text
-Capability Audit - add_drawing_view_break Hand
+Capability Audit - Drawing Export Hands (PDF, DWG, DXF)
 ```
 
 Required next check:
