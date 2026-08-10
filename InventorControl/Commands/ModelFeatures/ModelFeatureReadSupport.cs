@@ -331,7 +331,125 @@ internal static class ModelFeatureReadSupport
             result.Add(
                 ReadHoleFeature(
                     featureObject,
-                    index));
+                    index,
+                    document));
+        }
+
+        return result;
+    }
+
+    public static List<object> ReadThreadFeatures(
+        Document document,
+        bool includeSuppressed,
+        List<object> diagnostics)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(diagnostics);
+
+        List<object> result =
+            new();
+
+        if (document.DocumentType !=
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            diagnostics.Add(
+                new
+                {
+                    scope =
+                        "ReferencedDocument",
+                    message =
+                        "Referenced document is not a PartDocument.",
+                    documentType =
+                        document.DocumentType.ToString()
+                });
+
+            return result;
+        }
+
+        PartDocument partDocument =
+            (PartDocument)document;
+
+        object threadFeaturesObject;
+
+        try
+        {
+            threadFeaturesObject =
+                partDocument
+                    .ComponentDefinition
+                    .Features
+                    .ThreadFeatures;
+        }
+        catch (Exception exception)
+        {
+            diagnostics.Add(
+                new
+                {
+                    scope =
+                        "PartDocument.ComponentDefinition.Features.ThreadFeatures",
+                    message =
+                        exception.Message,
+                    exceptionType =
+                        exception
+                            .GetType()
+                            .FullName
+                });
+
+            return result;
+        }
+
+        dynamic threadFeatures =
+            threadFeaturesObject;
+
+        int count =
+            GetCollectionCount(
+                threadFeaturesObject);
+
+        for (int index = 1;
+             index <= count;
+             index++)
+        {
+            object featureObject;
+
+            try
+            {
+                featureObject =
+                    threadFeatures[index];
+            }
+            catch (Exception exception)
+            {
+                diagnostics.Add(
+                    new
+                    {
+                        scope =
+                            "ThreadFeatures.Item",
+                        index,
+                        message =
+                            exception.Message,
+                        exceptionType =
+                            exception
+                                .GetType()
+                                .FullName
+                    });
+
+                continue;
+            }
+
+            bool suppressed =
+                GetBooleanProperty(
+                    featureObject,
+                    "Suppressed");
+
+            if (!includeSuppressed &&
+                suppressed)
+            {
+                continue;
+            }
+
+            result.Add(
+                ReadThreadFeature(
+                    featureObject,
+                    index,
+                    document));
         }
 
         return result;
@@ -521,8 +639,18 @@ internal static class ModelFeatureReadSupport
 
     private static object ReadHoleFeature(
         object featureObject,
-        int index)
+        int index,
+        Document document)
     {
+        List<object> diagnostics =
+            new();
+
+        bool isThreaded =
+            GetBooleanProperty(
+                featureObject,
+                "Tapped",
+                diagnostics);
+
         return new
         {
             index,
@@ -537,6 +665,13 @@ internal static class ModelFeatureReadSupport
                     featureObject,
                     "Type"),
 
+            referenceKey =
+                ReadReferenceKey(
+                    document,
+                    featureObject,
+                    "HoleFeature.GetReferenceKey",
+                    diagnostics),
+
             suppressed =
                 GetBooleanProperty(
                     featureObject,
@@ -546,6 +681,12 @@ internal static class ModelFeatureReadSupport
                 GetEnumStringProperty(
                     featureObject,
                     "HealthStatus"),
+
+            extendedName =
+                GetStringProperty(
+                    featureObject,
+                    "ExtendedName",
+                    diagnostics),
 
             holeType =
                 GetEnumStringProperty(
@@ -557,74 +698,280 @@ internal static class ModelFeatureReadSupport
                     featureObject,
                     "ExtentType"),
 
+            placementType =
+                GetEnumStringProperty(
+                    featureObject,
+                    "PlacementType",
+                    diagnostics),
+
+            drillPointType =
+                GetEnumStringProperty(
+                    featureObject,
+                    "DrillPointType",
+                    diagnostics),
+
+            isClearanceHole =
+                GetNullableBooleanProperty(
+                    featureObject,
+                    "IsClearanceHole",
+                    diagnostics),
+
             diameter =
                 ReadParameterProperty(
                     featureObject,
-                    "HoleDiameter"),
+                    "HoleDiameter",
+                    diagnostics),
 
             depth =
                 ReadParameterProperty(
                     featureObject,
-                    "Depth"),
+                    "Depth",
+                    diagnostics),
 
             counterboreDiameter =
                 ReadParameterProperty(
                     featureObject,
-                    "CBoreDiameter"),
+                    "CBoreDiameter",
+                    diagnostics),
 
             counterboreDepth =
                 ReadParameterProperty(
                     featureObject,
-                    "CBoreDepth"),
+                    "CBoreDepth",
+                    diagnostics),
 
             countersinkDiameter =
                 ReadParameterProperty(
                     featureObject,
-                    "CSinkDiameter"),
+                    "CSinkDiameter",
+                    diagnostics),
 
             countersinkAngle =
                 ReadParameterProperty(
                     featureObject,
-                    "CSinkAngle"),
+                    "CSinkAngle",
+                    diagnostics),
 
-            isThreaded =
-                GetBooleanProperty(
+            countersinkDepth =
+                ReadParameterProperty(
                     featureObject,
-                    "Tapped"),
+                    "CSinkDepth",
+                    diagnostics),
+
+            spotFaceDiameter =
+                ReadParameterProperty(
+                    featureObject,
+                    "SpotFaceDiameter",
+                    diagnostics),
+
+            spotFaceDepth =
+                ReadParameterProperty(
+                    featureObject,
+                    "SpotFaceDepth",
+                    diagnostics),
+
+            isThreaded,
 
             threadInfo =
-                ReadThreadInfo(
-                    featureObject),
+                isThreaded
+                    ? ReadThreadInfo(
+                        featureObject,
+                        diagnostics)
+                    : null,
 
             placementDefinitionType =
                 GetNestedEnumStringProperty(
                     featureObject,
                     "PlacementDefinition",
-                    "Type"),
+                    "Type",
+                    diagnostics),
 
             holeCenterCount =
                 ReadHoleCenterCount(
-                    featureObject),
+                    featureObject,
+                    diagnostics),
 
             surfaceBodyCount =
                 GetNestedCollectionCount(
                     featureObject,
-                    "SurfaceBodies")
+                    "SurfaceBodies",
+                    diagnostics),
+
+            rangeBox =
+                ReadBox(
+                    GetObjectProperty(
+                        featureObject,
+                        "RangeBox",
+                        diagnostics),
+                    diagnostics),
+
+            propertyDiagnostics =
+                diagnostics
         };
     }
 
+    private static object ReadThreadFeature(
+        object featureObject,
+        int index,
+        Document document)
+    {
+        List<object> diagnostics =
+            new();
+
+        return new
+        {
+            index,
+
+            name =
+                GetStringProperty(
+                    featureObject,
+                    "Name",
+                    diagnostics),
+
+            extendedName =
+                GetStringProperty(
+                    featureObject,
+                    "ExtendedName",
+                    diagnostics),
+
+            objectType =
+                GetEnumStringProperty(
+                    featureObject,
+                    "Type",
+                    diagnostics),
+
+            referenceKey =
+                ReadReferenceKey(
+                    document,
+                    featureObject,
+                    "ThreadFeature.GetReferenceKey",
+                    diagnostics),
+
+            suppressed =
+                GetBooleanProperty(
+                    featureObject,
+                    "Suppressed",
+                    diagnostics),
+
+            healthStatus =
+                GetEnumStringProperty(
+                    featureObject,
+                    "HealthStatus",
+                    diagnostics),
+
+            directionReversed =
+                GetNullableBooleanProperty(
+                    featureObject,
+                    "DirectionReversed",
+                    diagnostics),
+
+            fullDepth =
+                GetNullableBooleanProperty(
+                    featureObject,
+                    "FullDepth",
+                    diagnostics),
+
+            threadDepth =
+                ReadParameterProperty(
+                    featureObject,
+                    "ThreadDepth",
+                    diagnostics),
+
+            threadOffset =
+                ReadParameterProperty(
+                    featureObject,
+                    "ThreadOffset",
+                    diagnostics),
+
+            threadInfoType =
+                GetEnumStringProperty(
+                    featureObject,
+                    "ThreadInfoType",
+                    diagnostics),
+
+            threadInfo =
+                ReadThreadInfoFromObject(
+                    GetObjectProperty(
+                        featureObject,
+                        "ThreadInfo",
+                        diagnostics),
+                    diagnostics),
+
+            threadedFaceCount =
+                GetNestedCollectionCount(
+                    featureObject,
+                    "ThreadedFace",
+                    diagnostics),
+
+            faceCount =
+                GetNestedCollectionCount(
+                    featureObject,
+                    "Faces",
+                    diagnostics),
+
+            surfaceBodyCount =
+                GetNestedCollectionCount(
+                    featureObject,
+                    "SurfaceBodies",
+                    diagnostics),
+
+            participantCount =
+                GetNestedCollectionCount(
+                    featureObject,
+                    "Participants",
+                    diagnostics),
+
+            isOwnedByFeature =
+                GetNullableBooleanProperty(
+                    featureObject,
+                    "IsOwnedByFeature",
+                    diagnostics),
+
+            featureDimensionCount =
+                GetNestedCollectionCount(
+                    featureObject,
+                    "FeatureDimensions",
+                    diagnostics),
+
+            rangeBox =
+                ReadBox(
+                    GetObjectProperty(
+                        featureObject,
+                        "RangeBox",
+                        diagnostics),
+                    diagnostics),
+
+            propertyDiagnostics =
+                diagnostics
+        };
+    }
+
+
     private static object? ReadParameterProperty(
         object ownerObject,
-        string propertyName)
+        string propertyName,
+        List<object>? diagnostics = null)
     {
         object? parameterObject =
             GetObjectProperty(
                 ownerObject,
-                propertyName);
+                propertyName,
+                diagnostics);
 
         if (parameterObject == null)
         {
             return null;
+        }
+
+        if (TryConvertDouble(
+                parameterObject,
+                out double scalarValue))
+        {
+            return new
+            {
+                value =
+                    scalarValue
+            };
         }
 
         return new
@@ -632,38 +979,68 @@ internal static class ModelFeatureReadSupport
             name =
                 GetStringProperty(
                     parameterObject,
-                    "Name"),
+                    "Name",
+                    diagnostics),
 
             expression =
                 GetStringProperty(
                     parameterObject,
-                    "Expression"),
+                    "Expression",
+                    diagnostics),
 
             value =
                 GetNullableDoubleProperty(
                     parameterObject,
-                    "Value"),
+                    "Value",
+                    diagnostics),
 
             units =
                 GetStringProperty(
                     parameterObject,
-                    "Units"),
+                    "Units",
+                    diagnostics),
 
             modelValue =
                 GetNullableDoubleProperty(
                     parameterObject,
-                    "ModelValue")
+                    "ModelValue",
+                    diagnostics)
         };
     }
 
     private static object? ReadThreadInfo(
-        object featureObject)
+        object featureObject,
+        List<object> diagnostics)
     {
         object? threadInfoObject =
             GetObjectProperty(
                 featureObject,
-                "ThreadInfo");
+                "TapInfo",
+                diagnostics);
 
+        if (threadInfoObject == null)
+        {
+            threadInfoObject =
+                GetObjectProperty(
+                    featureObject,
+                    "ThreadInfo",
+                    diagnostics);
+        }
+
+        if (threadInfoObject == null)
+        {
+            return null;
+        }
+
+        return ReadThreadInfoFromObject(
+            threadInfoObject,
+            diagnostics);
+    }
+
+    private static object? ReadThreadInfoFromObject(
+        object? threadInfoObject,
+        List<object> diagnostics)
+    {
         if (threadInfoObject == null)
         {
             return null;
@@ -671,40 +1048,99 @@ internal static class ModelFeatureReadSupport
 
         return new
         {
+            objectType =
+                GetEnumStringProperty(
+                    threadInfoObject,
+                    "Type",
+                    diagnostics),
+
             threadType =
                 GetStringProperty(
                     threadInfoObject,
-                    "ThreadType"),
+                    "ThreadType",
+                    diagnostics),
+
+            threadTypeIdentifier =
+                GetStringProperty(
+                    threadInfoObject,
+                    "ThreadTypeIdentifier",
+                    diagnostics),
 
             designation =
                 GetStringProperty(
                     threadInfoObject,
-                    "ThreadDesignation"),
+                    "ThreadDesignation",
+                    diagnostics),
+
+            customDesignation =
+                GetStringProperty(
+                    threadInfoObject,
+                    "CustomThreadDesignation",
+                    diagnostics),
 
             threadClass =
                 GetStringProperty(
                     threadInfoObject,
-                    "Class"),
+                    "Class",
+                    diagnostics),
 
             fullThreadDepth =
                 GetBooleanProperty(
                     threadInfoObject,
-                    "FullThreadDepth"),
+                    "FullThreadDepth",
+                    diagnostics),
+
+            metric =
+                GetNullableBooleanProperty(
+                    threadInfoObject,
+                    "Metric",
+                    diagnostics),
+
+            internalThread =
+                GetNullableBooleanProperty(
+                    threadInfoObject,
+                    "Internal",
+                    diagnostics),
+
+            threadDirection =
+                ReadVector(
+                    GetObjectProperty(
+                        threadInfoObject,
+                        "ThreadDirection",
+                        diagnostics),
+                    diagnostics),
+
+            threadDirectionUnit =
+                ReadVector(
+                    GetObjectProperty(
+                        threadInfoObject,
+                        "_ThreadDirection",
+                        diagnostics),
+                    diagnostics),
+
+            threadBasePointCount =
+                GetNestedCollectionCount(
+                    threadInfoObject,
+                    "ThreadBasePoints",
+                    diagnostics),
 
             threadDepth =
                 ReadParameterProperty(
                     threadInfoObject,
-                    "ThreadDepth")
+                    "ThreadDepth",
+                    diagnostics)
         };
     }
 
     private static int ReadHoleCenterCount(
-        object featureObject)
+        object featureObject,
+        List<object>? diagnostics = null)
     {
         object? placementObject =
             GetObjectProperty(
                 featureObject,
-                "PlacementDefinition");
+                "PlacementDefinition",
+                diagnostics);
 
         if (placementObject == null)
         {
@@ -714,7 +1150,8 @@ internal static class ModelFeatureReadSupport
         object? pointsObject =
             GetObjectProperty(
                 placementObject,
-                "HoleCenterPoints");
+                "HoleCenterPoints",
+                diagnostics);
 
         return pointsObject == null
             ? 0
@@ -741,12 +1178,14 @@ internal static class ModelFeatureReadSupport
 
     private static int GetNestedCollectionCount(
         object ownerObject,
-        string propertyName)
+        string propertyName,
+        List<object>? diagnostics = null)
     {
         object? collectionObject =
             GetObjectProperty(
                 ownerObject,
-                propertyName);
+                propertyName,
+                diagnostics);
 
         return collectionObject == null
             ? 0
@@ -756,7 +1195,8 @@ internal static class ModelFeatureReadSupport
 
     private static object? GetObjectProperty(
         object ownerObject,
-        string propertyName)
+        string propertyName,
+        List<object>? diagnostics = null)
     {
         dynamic owner =
             ownerObject;
@@ -768,11 +1208,20 @@ internal static class ModelFeatureReadSupport
                 "SurfaceBodies" =>
                     owner.SurfaceBodies,
 
+                "SurfaceBody" =>
+                    owner.SurfaceBody,
+
                 "ParticipantBodies" =>
                     owner.ParticipantBodies,
 
+                "Participants" =>
+                    owner.Participants,
+
                 "Parent" =>
                     owner.Parent,
+
+                "RangeBox" =>
+                    owner.RangeBox,
 
                 "PlacementDefinition" =>
                     owner.PlacementDefinition,
@@ -786,6 +1235,18 @@ internal static class ModelFeatureReadSupport
                 "Depth" =>
                     owner.Depth,
 
+                "ExtendedName" =>
+                    owner.ExtendedName,
+
+                "PlacementType" =>
+                    owner.PlacementType,
+
+                "DrillPointType" =>
+                    owner.DrillPointType,
+
+                "IsClearanceHole" =>
+                    owner.IsClearanceHole,
+
                 "CBoreDiameter" =>
                     owner.CBoreDiameter,
 
@@ -798,25 +1259,64 @@ internal static class ModelFeatureReadSupport
                 "CSinkAngle" =>
                     owner.CSinkAngle,
 
+                "CSinkDepth" =>
+                    owner.CSinkDepth,
+
+                "SpotFaceDiameter" =>
+                    owner.SpotFaceDiameter,
+
+                "SpotFaceDepth" =>
+                    owner.SpotFaceDepth,
+
                 "ThreadInfo" =>
                     owner.ThreadInfo,
 
+                "TapInfo" =>
+                    owner.TapInfo,
+
                 "ThreadDepth" =>
                     owner.ThreadDepth,
+
+                "ThreadOffset" =>
+                    owner.ThreadOffset,
+
+                "ThreadedFace" =>
+                    owner.ThreadedFace,
+
+                "Faces" =>
+                    owner.Faces,
+
+                "FeatureDimensions" =>
+                    owner.FeatureDimensions,
+
+                "ThreadDirection" =>
+                    owner.ThreadDirection,
+
+                "_ThreadDirection" =>
+                    owner._ThreadDirection,
+
+                "ThreadBasePoints" =>
+                    owner.ThreadBasePoints,
 
                 _ =>
                     null
             };
         }
-        catch
+        catch (Exception exception)
         {
+            AddDiagnostic(
+                diagnostics,
+                propertyName,
+                exception);
+
             return null;
         }
     }
 
     private static string GetStringProperty(
         object ownerObject,
-        string propertyName)
+        string propertyName,
+        List<object>? diagnostics = null)
     {
         dynamic owner =
             ownerObject;
@@ -835,11 +1335,20 @@ internal static class ModelFeatureReadSupport
                     "Units" =>
                         owner.Units,
 
+                    "ExtendedName" =>
+                        owner.ExtendedName,
+
                     "ThreadType" =>
                         owner.ThreadType,
 
+                    "ThreadTypeIdentifier" =>
+                        owner.ThreadTypeIdentifier,
+
                     "ThreadDesignation" =>
                         owner.ThreadDesignation,
+
+                    "CustomThreadDesignation" =>
+                        owner.CustomThreadDesignation,
 
                     "Class" =>
                         owner.Class,
@@ -851,15 +1360,21 @@ internal static class ModelFeatureReadSupport
             return value?.ToString() ??
                    string.Empty;
         }
-        catch
+        catch (Exception exception)
         {
+            AddDiagnostic(
+                diagnostics,
+                propertyName,
+                exception);
+
             return string.Empty;
         }
     }
 
     private static string GetEnumStringProperty(
         object ownerObject,
-        string propertyName)
+        string propertyName,
+        List<object>? diagnostics = null)
     {
         dynamic owner =
             ownerObject;
@@ -881,6 +1396,15 @@ internal static class ModelFeatureReadSupport
                     "ExtentType" =>
                         owner.ExtentType,
 
+                    "PlacementType" =>
+                        owner.PlacementType,
+
+                    "DrillPointType" =>
+                        owner.DrillPointType,
+
+                    "ThreadInfoType" =>
+                        owner.ThreadInfoType,
+
                     _ =>
                         null
                 };
@@ -888,8 +1412,13 @@ internal static class ModelFeatureReadSupport
             return value?.ToString() ??
                    string.Empty;
         }
-        catch
+        catch (Exception exception)
         {
+            AddDiagnostic(
+                diagnostics,
+                propertyName,
+                exception);
+
             return string.Empty;
         }
     }
@@ -897,23 +1426,27 @@ internal static class ModelFeatureReadSupport
     private static string GetNestedEnumStringProperty(
         object ownerObject,
         string objectPropertyName,
-        string enumPropertyName)
+        string enumPropertyName,
+        List<object>? diagnostics = null)
     {
         object? nestedObject =
             GetObjectProperty(
                 ownerObject,
-                objectPropertyName);
+                objectPropertyName,
+                diagnostics);
 
         return nestedObject == null
             ? string.Empty
             : GetEnumStringProperty(
                 nestedObject,
-                enumPropertyName);
+                enumPropertyName,
+                diagnostics);
     }
 
     private static bool GetBooleanProperty(
         object ownerObject,
-        string propertyName)
+        string propertyName,
+        List<object>? diagnostics = null)
     {
         dynamic owner =
             ownerObject;
@@ -938,15 +1471,21 @@ internal static class ModelFeatureReadSupport
                     false
             };
         }
-        catch
+        catch (Exception exception)
         {
+            AddDiagnostic(
+                diagnostics,
+                propertyName,
+                exception);
+
             return false;
         }
     }
 
     private static double? GetNullableDoubleProperty(
         object ownerObject,
-        string propertyName)
+        string propertyName,
+        List<object>? diagnostics = null)
     {
         dynamic owner =
             ownerObject;
@@ -965,10 +1504,314 @@ internal static class ModelFeatureReadSupport
                     null
             };
         }
-        catch
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                diagnostics,
+                propertyName,
+                exception);
+
+            return null;
+        }
+    }
+
+    private static bool? GetNullableBooleanProperty(
+        object ownerObject,
+        string propertyName,
+        List<object>? diagnostics = null)
+    {
+        dynamic owner =
+            ownerObject;
+
+        try
+        {
+            return propertyName switch
+            {
+                "IsClearanceHole" =>
+                    (bool)owner.IsClearanceHole,
+
+                "Metric" =>
+                    (bool)owner.Metric,
+
+                "Internal" =>
+                    (bool)owner.Internal,
+
+                "DirectionReversed" =>
+                    (bool)owner.DirectionReversed,
+
+                "FullDepth" =>
+                    (bool)owner.FullDepth,
+
+                "IsOwnedByFeature" =>
+                    (bool)owner.IsOwnedByFeature,
+
+                _ =>
+                    null
+            };
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                diagnostics,
+                propertyName,
+                exception);
+
+            return null;
+        }
+    }
+
+    private static object? ReadReferenceKey(
+        Document document,
+        object featureObject,
+        string scope,
+        List<object> diagnostics)
+    {
+        int keyContext =
+            0;
+
+        try
+        {
+            ReferenceKeyManager manager =
+                document.ReferenceKeyManager;
+
+            keyContext =
+                manager.CreateKeyContext();
+
+            Array referenceKey =
+                Array.Empty<byte>();
+
+            dynamic feature =
+                featureObject;
+
+            feature.GetReferenceKey(
+                ref referenceKey,
+                keyContext);
+
+            string keyString =
+                manager.KeyToString(
+                    ref referenceKey);
+
+            return new
+            {
+                keyString,
+                byteCount =
+                    referenceKey.Length
+            };
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                diagnostics,
+                scope,
+                exception);
+
+            return null;
+        }
+        finally
+        {
+            if (keyContext !=
+                0)
+            {
+                try
+                {
+                    document
+                        .ReferenceKeyManager
+                        .ReleaseKeyContext(
+                            keyContext);
+                }
+                catch (Exception exception)
+                {
+                    AddDiagnostic(
+                        diagnostics,
+                        "ReferenceKeyManager.ReleaseKeyContext",
+                        exception);
+                }
+            }
+        }
+    }
+
+    private static object? ReadBox(
+        object? boxObject,
+        List<object>? diagnostics = null)
+    {
+        if (boxObject == null)
         {
             return null;
         }
+
+        dynamic box =
+            boxObject;
+
+        try
+        {
+            return new
+            {
+                minPoint =
+                    ReadPoint3d(
+                        box.MinPoint,
+                        diagnostics),
+
+                maxPoint =
+                    ReadPoint3d(
+                        box.MaxPoint,
+                        diagnostics)
+            };
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                diagnostics,
+                "RangeBox",
+                exception);
+
+            return null;
+        }
+    }
+
+    private static object? ReadPoint3d(
+        object? pointObject,
+        List<object>? diagnostics = null)
+    {
+        if (pointObject == null)
+        {
+            return null;
+        }
+
+        dynamic point =
+            pointObject;
+
+        try
+        {
+            return new
+            {
+                x =
+                    (double)point.X,
+
+                y =
+                    (double)point.Y,
+
+                z =
+                    (double)point.Z
+            };
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                diagnostics,
+                "Point3d",
+                exception);
+
+            return null;
+        }
+    }
+
+    private static object? ReadVector(
+        object? vectorObject,
+        List<object>? diagnostics = null)
+    {
+        if (vectorObject == null)
+        {
+            return null;
+        }
+
+        dynamic vector =
+            vectorObject;
+
+        try
+        {
+            return new
+            {
+                x =
+                    (double)vector.X,
+
+                y =
+                    (double)vector.Y,
+
+                z =
+                    (double)vector.Z
+            };
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                diagnostics,
+                "ThreadDirection",
+                exception);
+
+            return null;
+        }
+    }
+
+    private static bool TryConvertDouble(
+        object value,
+        out double result)
+    {
+        try
+        {
+            if (value is double doubleValue)
+            {
+                result =
+                    doubleValue;
+
+                return true;
+            }
+
+            if (value is float floatValue)
+            {
+                result =
+                    floatValue;
+
+                return true;
+            }
+
+            if (value is int intValue)
+            {
+                result =
+                    intValue;
+
+                return true;
+            }
+
+            if (value is decimal decimalValue)
+            {
+                result =
+                    (double)decimalValue;
+
+                return true;
+            }
+        }
+        catch
+        {
+        }
+
+        result =
+            0;
+
+        return false;
+    }
+
+    private static void AddDiagnostic(
+        List<object>? diagnostics,
+        string propertyName,
+        Exception exception)
+    {
+        diagnostics?.Add(
+            new
+            {
+                property =
+                    propertyName,
+
+                available =
+                    false,
+
+                error =
+                    exception.Message,
+
+                exceptionType =
+                    exception
+                        .GetType()
+                        .FullName
+            });
     }
 
     public static string CreateSuccess(

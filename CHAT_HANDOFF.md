@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.33 complete center mark and centerline pipeline`.
+- Current checkpoint: `v0.34 complete hole and thread annotation pipeline`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 40-41 - Center Mark and Centerline Pipeline.
-- Registry after Package 40-41: `155 registered / 155 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 40-41 checkpoint commit.
+- Latest completed checkpoint: Package 42 - Hole and Thread Annotation Pipeline.
+- Registry after Package 42: `156 registered / 156 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 42 checkpoint commit.
 
 ## Architecture Rules
 
@@ -69,6 +69,83 @@
 - Center mark Hand: `create_center_mark`.
 - Centerline bisector Hand: `create_centerline_bisector`.
 - Centerline centered-pattern Hand: `create_centerline_centered_pattern`.
+- Hardened HoleFeature Eye: `get_hole_features`.
+- Standalone ThreadFeature Eye: `get_thread_features`.
+- Hole/thread note Hand: `create_hole_thread_note`.
+- Hardened hole/thread note Eye: `get_hole_thread_notes`.
+
+## Hole and Thread Annotation Pipeline
+
+Verified commands and Eye hardening:
+
+- `get_hole_features`
+- `get_thread_features`
+- `create_hole_thread_note`
+- `get_hole_thread_notes`
+
+Package 42A verified `get_hole_features` hardening:
+
+- expanded factual `HoleFeature` fields;
+- `HoleFeature` referenceKey support;
+- tapped-hole `ThreadInfo` facts;
+- property-level diagnostics for optional COM property failures.
+
+Package 42B verified `get_thread_features` for standalone Inventor
+`ThreadFeature` facts from the `PartDocument` referenced by an explicit
+`DrawingView`. Inventor validation read a real external thread:
+
+```text
+designation = M15x1.5
+threadClass = 6g
+referenceKey returned
+```
+
+Standalone thread drawing identification was verified through
+`get_curve_model_reference`:
+
+```text
+curveIndex 21 -> edgeType = kThreadEdge
+curveIndex 22 -> edgeType = kThreadEdge
+```
+
+Existing `create_hole_thread_note` is verified as sufficient for standalone
+`ThreadFeature` drawing annotation. Inventor generated:
+
+```text
+text = M15x1.5 - 6g
+isHoleNote = false
+attached = true
+```
+
+Package 42D verified `get_hole_thread_notes` hardening:
+
+- previous whole-command `E_FAIL` on standalone thread notes is eliminated;
+- `success = true`;
+- `text = M15x1.5 - 6g`;
+- `isHoleNote = false`;
+- `attached = true`;
+- `referenceKey` present;
+- unavailable optional COM properties such as `Intent` and
+  `RightHandedThread` are isolated in `propertyDiagnostics`.
+
+Verified standalone-thread annotation pipeline:
+
+```text
+get_thread_features
+-> get_drawing_curves / get_curve_model_reference
+-> explicit kThreadEdge selection by external caller
+-> create_hole_thread_note
+-> Inventor-generated annotation
+-> get_hole_thread_notes
+```
+
+No dedicated `ThreadFeature` to `DrawingCurve` mapper is currently required:
+`get_curve_model_reference` exposes `kThreadEdge` sufficiently for explicit
+caller-driven selection.
+
+Runtime does not parse thread designations, choose curves automatically,
+reconstruct hole/thread note text, modify the model, or perform GOST/ESKD
+decisions. Inventor remains responsible for native hole/thread note text.
 
 ## Center Mark and Centerline Pipeline
 
@@ -405,7 +482,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - Hole / Thread annotation capabilities
+Capability Audit - General Notes / Leader Notes / technical requirements
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 40-41 documentation sync:
+Current checkpoint after the Package 42 documentation sync:
 
 ```text
-v0.33 complete center mark and centerline pipeline
+v0.34 complete hole and thread annotation pipeline
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 40-41 checkpoint:
+Live command audit after Package 42 checkpoint:
 
 ```text
-155 registered JSON commands
-155 unique registered JSON commands
+156 registered JSON commands
+156 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -432,16 +432,98 @@ Major verified read areas include:
 
 ## Next task
 
+## Package 42 checkpoint
+
+Package 42 complete: Hole and Thread Annotation Pipeline is VERIFIED.
+
+Verified Package 42A Eye hardening:
+
+- `get_hole_features` preserves existing fields and now exposes expanded factual `HoleFeature` data;
+- `HoleFeature` reference keys are returned where available;
+- tapped-hole `ThreadInfo` facts are returned where Inventor exposes them;
+- optional COM property failures are isolated in `propertyDiagnostics`.
+
+Verified Package 42B Eye:
+
+```json
+{"command":"get_thread_features"}
+```
+
+`get_thread_features` reads standalone Inventor `ThreadFeature` objects from the
+`PartDocument` referenced by an explicit drawing view. Inventor validation
+confirmed a standalone external thread:
+
+```text
+designation = M15x1.5
+threadClass = 6g
+referenceKey returned
+```
+
+Verified standalone-thread drawing identification:
+
+```text
+get_curve_model_reference
+curveIndex 21 -> edgeType = kThreadEdge
+curveIndex 22 -> edgeType = kThreadEdge
+```
+
+Existing `create_hole_thread_note` is VERIFIED as sufficient for standalone
+`ThreadFeature` drawing annotation. Inventor generated the native annotation
+text from explicit caller-selected thread geometry:
+
+```text
+text = M15x1.5 - 6g
+isHoleNote = false
+attached = true
+```
+
+Verified Package 42D Eye hardening:
+
+- `get_hole_thread_notes` no longer fails the whole command when one optional
+  COM property throws `E_FAIL`;
+- standalone thread note reading returns `success = true`;
+- `text = M15x1.5 - 6g`;
+- `isHoleNote = false`;
+- `attached = true`;
+- `referenceKey` present;
+- unavailable COM properties such as `Intent` and `RightHandedThread` are
+  reported as non-blocking `propertyDiagnostics`.
+
+Verified standalone-thread annotation pipeline:
+
+```text
+get_thread_features
+-> get_drawing_curves / get_curve_model_reference
+-> explicit kThreadEdge selection by external caller
+-> create_hole_thread_note
+-> Inventor-generated annotation
+-> get_hole_thread_notes
+```
+
+No dedicated `ThreadFeature` to `DrawingCurve` mapper is currently required:
+`get_curve_model_reference` exposes `kThreadEdge` sufficiently for explicit
+caller-driven selection.
+
+Runtime boundary:
+
+- Runtime does not parse thread designations;
+- Runtime does not perform GOST/ESKD decision logic;
+- Runtime does not select curves automatically;
+- Runtime does not reconstruct hole/thread note text;
+- Runtime does not modify the model;
+- Inventor remains responsible for generating native hole/thread note text.
+
 Next capability check:
 
 ```text
-Capability Audit - Hole / Thread annotation capabilities
+Capability Audit - General Notes / Leader Notes / technical requirements
 ```
 
 Goal:
 
 - audit existing Runtime coverage first;
-- determine whether Hole / Thread annotation capabilities are already sufficient;
+- determine whether General Notes / Leader Notes / technical requirements
+  capabilities are already sufficient;
 - run an audit before implementation;
 - keep Runtime limited to Eyes and atomic Hands.
 

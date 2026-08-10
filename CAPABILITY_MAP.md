@@ -1,6 +1,6 @@
 # CAPABILITY MAP
 
-Date: 2026-08-10
+Date: 2026-08-11
 
 Repository: `C:\AI_CAD_ENGINEER\AI_CAD_ENGINEER`
 
@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.33 complete center mark and centerline pipeline
+v0.34 complete hole and thread annotation pipeline
 ```
 
 ## Ground rules
@@ -43,7 +43,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Drawing Export Hands | VERIFIED | `export_pdf`, `export_dwg`, `export_dxf` | `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow is not implemented | P0 maintained |
 | Drawing dimensions | VERIFIED | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `create_angular_dimension`, `create_ordinate_dimension`, `get_drawing_view_origin_indicator`, `create_drawing_view_origin_indicator`, `create_baseline_dimension`, `create_chain_dimension`, `set_general_dimension_formatted_text`, `set_general_dimension_hide_value`, `set_general_dimension_precision`, `set_general_dimension_model_value_override`, `clear_general_dimension_model_value_override`, `set_general_dimension_style`, `set_general_dimension_layer`, `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | linear/diameter/radius plus Package 31-39 commands listed in explicit PASS section | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | symmetric/chamfer dimensions are not confirmed | P0 maintained |
 | General Dimension Tolerance Pipeline | VERIFIED | `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits` | all Package 37-39 tolerance commands | - | no automatic tolerance selection, no fit validation, no GOST/ESKD tolerance decisions in Runtime | P0 maintained |
-| Hole/thread notes | IMPLEMENTED_UNTESTED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | not separately recorded | - | stable selector variants are still missing; current commands use indexes | P1 |
+| Hole/thread notes | VERIFIED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | `create_hole_thread_note` verified for standalone `ThreadFeature` thread edge annotation; `get_hole_thread_notes` hardened and verified with referenceKey support | - | stable selector variants are still missing; current commands use indexes | P0 maintained |
 | Center Marks / Centerlines | VERIFIED | `get_center_marks`, `get_centerlines`, `create_center_mark`, `create_centerline_bisector`, `create_centerline_centered_pattern` | Package 40-41 commands and referenceKey support | - | generic `create_centerline`, work-feature centerline, delete centerline/center mark deferred | P0 maintained |
 | Basic drawing annotation Eyes | PARTIAL | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | center marks/centerlines are verified; remaining basic note/balloon read Eyes not all separately recorded after Package 15A | - | Inventor PASS still required for remaining basic annotation Eyes when needed | P1 |
 | Drawing Text Objects | VERIFIED | `get_drawing_text_objects` | `get_drawing_text_objects`, `get_drawing_text_objects` with `sheetName` | - | - | P0 maintained |
@@ -75,7 +75,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Hole Tables detailed Eye | MISSING | - | - | - | typed detailed Eye for `Sheet.HoleTables` | P2 |
 | Legacy drawing table aggregate | PARTIAL | `get_drawing_tables` | legacy parts/revision table aggregate exists; does not cover `CustomTables` or `HoleTables` | - | not a complete all-table reader | compatibility |
 | Document properties | PARTIAL | `get_document_properties`, `get_document_property`, `get_document_property_by_id`, `get_document_property_sets`, `set_document_property`, `set_document_property_by_id` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P2 |
-| Model feature Eyes | VERIFIED | `get_model_feature_tree`, `get_hole_features`, `get_feature_details`, `get_model_parameters` | feature tree, feature details, parameters recorded as verified areas; exact PASS command list not recorded | - | write commands for model features are not part of confirmed Runtime scope | P0 maintained |
+| Model feature Eyes | VERIFIED | `get_model_feature_tree`, `get_hole_features`, `get_thread_features`, `get_feature_details`, `get_model_parameters` | `get_hole_features` hardened and verified; `get_thread_features` verified for standalone external ThreadFeature; feature tree, feature details, parameters recorded as verified areas | - | write commands for model features are not part of confirmed Runtime scope | P0 maintained |
 | Model geometry Eyes | VERIFIED | `get_surface_bodies`, `get_body_faces`, `get_face_edges` | surface bodies, faces, edges recorded as verified areas; exact PASS command list not recorded | - | no missing items confirmed by Package 13-17 audits | P0 maintained |
 | Sketch / constraint / work feature Eyes | VERIFIED | `get_sketches`, `get_sketch_geometry`, `get_sketch_constraints`, `get_sketch_dimensions`, `get_work_features` | sketches, sketch geometry, constraints, dimensions, work features recorded as verified areas; exact PASS command list not recorded | - | model/sketch constraint writes are outside Package 15 audit scope | P0 maintained |
 | Assembly Eyes | VERIFIED | `get_assembly_summary`, `get_assembly_occurrences`, `get_assembly_constraints`, `get_assembly_bom`, `get_assembly_referenced_documents` | assembly summary, occurrences, constraints, BOM, referenced documents recorded as verified areas; exact PASS command list not recorded | - | assembly Hands are not confirmed | P1 |
@@ -141,6 +141,11 @@ Exact commands explicitly confirmed:
 {"command":"create_center_mark"}
 {"command":"create_centerline_bisector"}
 {"command":"create_centerline_centered_pattern"}
+{"command":"get_hole_features"}
+{"command":"get_thread_features"}
+{"command":"get_curve_model_reference"}
+{"command":"create_hole_thread_note"}
+{"command":"get_hole_thread_notes"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -205,6 +210,30 @@ Package 40-41 commands are verified for center mark and centerline creation.
 supported. `create_centerline_centered_pattern` is verified for explicit
 pattern-center and member `GeometryIntent` objects passed through an
 `ObjectCollection` to `Centerlines.AddCenteredPattern`.
+
+Package 42 commands are verified for the Hole / Thread annotation pipeline.
+`get_hole_features` is hardened for expanded `HoleFeature` facts, reference
+keys, tapped-hole `ThreadInfo`, and property-level diagnostics.
+`get_thread_features` is verified for standalone external Inventor
+`ThreadFeature` facts, including the M15x1.5 / 6g test thread and reference
+key. Existing `create_hole_thread_note` is verified as sufficient for
+standalone `ThreadFeature` drawing annotation from an explicit `kThreadEdge`
+drawing curve. `get_hole_thread_notes` is hardened and verified for the
+created standalone thread note with non-blocking property diagnostics.
+
+Verified standalone-thread pipeline:
+
+```text
+get_thread_features
+-> get_drawing_curves / get_curve_model_reference
+-> explicit kThreadEdge selection by external caller
+-> create_hole_thread_note
+-> Inventor-generated annotation
+-> get_hole_thread_notes
+```
+
+Runtime does not parse thread designations, choose curves automatically,
+reconstruct note text, modify the model, or perform GOST/ESKD decisions.
 
 ## Experimental commands
 

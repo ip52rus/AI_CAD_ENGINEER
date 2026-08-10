@@ -1,6 +1,87 @@
 # PROJECT REVIEW
 
-## Package 40-41 checkpoint - current state
+## Package 42 checkpoint - current state
+
+Package 42 closes the verified Hole and Thread Annotation Pipeline. The runtime
+now exposes hardened factual model hole/thread Eyes and robust drawing
+hole/thread note reading while preserving the existing native Inventor
+`create_hole_thread_note` Hand.
+
+Current live command inventory after Package 42:
+
+```text
+156 registered JSON commands
+156 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified commands and Eye hardening:
+
+```text
+get_hole_features
+get_thread_features
+create_hole_thread_note
+get_hole_thread_notes
+```
+
+Package 42A verified `get_hole_features` hardening:
+
+- expanded factual `HoleFeature` fields;
+- `HoleFeature` referenceKey support;
+- tapped-hole `ThreadInfo` facts;
+- property-level diagnostics for unavailable optional COM properties.
+
+Package 42B verified `get_thread_features` for standalone `ThreadFeature`
+facts. Inventor validation read a real external thread:
+
+```text
+designation = M15x1.5
+threadClass = 6g
+referenceKey returned
+```
+
+Standalone thread drawing identification is verified through
+`get_curve_model_reference`:
+
+```text
+curveIndex 21 -> edgeType = kThreadEdge
+curveIndex 22 -> edgeType = kThreadEdge
+```
+
+Existing `create_hole_thread_note` is verified as sufficient for standalone
+`ThreadFeature` annotation. Inventor generated:
+
+```text
+text = M15x1.5 - 6g
+isHoleNote = false
+attached = true
+```
+
+Package 42D verified `get_hole_thread_notes` hardening: the previous whole
+command `E_FAIL` on standalone thread notes is eliminated. Unavailable optional
+COM properties such as `Intent` and `RightHandedThread` are isolated in
+`propertyDiagnostics` and do not invalidate the Eye.
+
+Verified standalone-thread annotation pipeline:
+
+```text
+get_thread_features
+-> get_drawing_curves / get_curve_model_reference
+-> explicit kThreadEdge selection by external caller
+-> create_hole_thread_note
+-> Inventor-generated annotation
+-> get_hole_thread_notes
+```
+
+Runtime boundaries remain explicit: no thread designation parsing, no
+automatic curve selection, no note-text reconstruction, no model modification,
+and no GOST/ESKD decisions. Inventor remains responsible for generating native
+hole/thread note text.
+
+Next capability check: General Notes / Leader Notes / technical requirements.
+
+## Package 40-41 checkpoint
 
 Package 40-41 closes the verified Center Mark and Centerline Pipeline. The
 commands create center marks, bisector centerlines, and centered-pattern

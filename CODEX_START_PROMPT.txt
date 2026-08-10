@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 40-41 are complete.
-- Current checkpoint: `v0.33 complete center mark and centerline pipeline`.
-- Live registry after Package 40-41: `155 registered / 155 unique`, no duplicate command names.
+- Package 42 is complete.
+- Current checkpoint: `v0.34 complete hole and thread annotation pipeline`.
+- Live registry after Package 42: `156 registered / 156 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -60,6 +60,45 @@ Verified Drawing Generation / Export Hands:
 - `create_center_mark`
 - `create_centerline_bisector`
 - `create_centerline_centered_pattern`
+- `get_hole_features`
+- `get_thread_features`
+- `create_hole_thread_note`
+- `get_hole_thread_notes`
+
+Verified Hole / Thread annotation pipeline:
+
+```text
+get_hole_features
+-> expanded HoleFeature facts / referenceKey / tapped-hole ThreadInfo
+
+get_thread_features
+-> standalone ThreadFeature facts / referenceKey
+
+get_drawing_curves / get_curve_model_reference
+-> explicit kThreadEdge selection by external caller
+
+create_hole_thread_note
+-> Inventor-generated native hole/thread note text
+
+get_hole_thread_notes
+-> robust note read / referenceKey / propertyDiagnostics
+```
+
+Verified standalone external thread facts:
+
+```text
+designation = M15x1.5
+threadClass = 6g
+curveIndex 21 -> edgeType = kThreadEdge
+curveIndex 22 -> edgeType = kThreadEdge
+created note text = M15x1.5 - 6g
+isHoleNote = false
+attached = true
+```
+
+`get_hole_thread_notes` isolates unavailable optional COM properties such as
+`Intent` and `RightHandedThread` into property diagnostics instead of failing
+the whole command.
 
 Verified Center Mark / Centerline pipeline:
 
@@ -184,12 +223,16 @@ Runtime does not:
 - reorder upper/lower tolerance values;
 - validate or choose fit strings;
 - apply GOST/ESKD tolerance decisions;
+- parse thread designations;
+- select thread curves automatically;
+- reconstruct hole/thread note text;
+- modify HoleFeature or ThreadFeature objects;
 - perform engineering or GOST decisions.
 
 Next expected stage:
 
 ```text
-Capability Audit - Hole / Thread annotation capabilities
+Capability Audit - General Notes / Leader Notes / technical requirements
 ```
 
 Required next check:

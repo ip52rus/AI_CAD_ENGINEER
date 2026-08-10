@@ -400,6 +400,9 @@ public class InventorCommandDispatcher
     private readonly GetHoleFeaturesCommand
         _getHoleFeaturesCommand;
 
+    private readonly GetThreadFeaturesCommand
+        _getThreadFeaturesCommand;
+
     private readonly GetFeatureDetailsCommand
         _getFeatureDetailsCommand;
 
@@ -999,6 +1002,10 @@ public class InventorCommandDispatcher
 
         _getHoleFeaturesCommand =
             new GetHoleFeaturesCommand(
+                inventor);
+
+        _getThreadFeaturesCommand =
+            new GetThreadFeaturesCommand(
                 inventor);
 
         _getFeatureDetailsCommand =
@@ -1656,6 +1663,10 @@ public class InventorCommandDispatcher
 
                 "get_hole_features" =>
                     _getHoleFeaturesCommand.Execute(
+                        root),
+
+                "get_thread_features" =>
+                    _getThreadFeaturesCommand.Execute(
                         root),
 
                 "get_feature_details" =>

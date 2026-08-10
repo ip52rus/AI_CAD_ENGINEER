@@ -692,6 +692,57 @@ direction, analyze the model, or perform engineering/GOST decisions.
 Next correct action: run a Capability Audit for `create_detail_view` before
 writing code.
 
+## Current milestone addendum after Package 42
+
+```text
+Package 42 complete - Hole and Thread Annotation Pipeline checkpoint
+```
+
+Verified capabilities:
+
+```text
+get_hole_features
+get_thread_features
+create_hole_thread_note
+get_hole_thread_notes
+```
+
+`get_hole_features` is hardened for expanded factual HoleFeature data,
+HoleFeature reference keys, tapped-hole ThreadInfo facts, and non-blocking
+property diagnostics.
+
+`get_thread_features` is a VERIFIED read-only Eye for standalone Inventor
+ThreadFeature facts from the PartDocument referenced by an explicit DrawingView.
+Inventor validation read an external `M15x1.5` / class `6g` thread and returned
+a reference key.
+
+Existing `create_hole_thread_note` is VERIFIED as sufficient for standalone
+ThreadFeature drawing annotation when the external caller explicitly selects a
+`kThreadEdge` drawing curve. Inventor generated the native note text
+`M15x1.5 - 6g`.
+
+`get_hole_thread_notes` is hardened so unavailable optional COM properties do
+not fail the entire Eye. Standalone thread notes are read with text,
+`isHoleNote`, attachment state, reference keys, and property diagnostics.
+
+Verified standalone-thread pipeline:
+
+```text
+get_thread_features
+-> get_drawing_curves / get_curve_model_reference
+-> explicit kThreadEdge selection by external caller
+-> create_hole_thread_note
+-> Inventor-generated annotation
+-> get_hole_thread_notes
+```
+
+Runtime does not parse thread designations, choose curves automatically,
+reconstruct hole/thread note text, modify the model, or perform GOST/ESKD
+decisions. Inventor remains responsible for native hole/thread note text.
+
+Next correct action: run a Capability Audit for General Notes / Leader Notes /
+technical requirements before writing code.
+
 ## Current milestone addendum after Package 26
 
 ```text
