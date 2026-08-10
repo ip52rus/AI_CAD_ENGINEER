@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 37-39 are complete.
-- Current checkpoint: `v0.32 complete general dimension tolerance pipeline`.
-- Live registry after Package 37-39: `152 registered / 152 unique`, no duplicate command names.
+- Package 40-41 are complete.
+- Current checkpoint: `v0.33 complete center mark and centerline pipeline`.
+- Live registry after Package 40-41: `155 registered / 155 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -57,6 +57,27 @@ Verified Drawing Generation / Export Hands:
 - `set_general_dimension_tolerance_deviation`
 - `set_general_dimension_tolerance_limits`
 - `set_general_dimension_tolerance_fits`
+- `create_center_mark`
+- `create_centerline_bisector`
+- `create_centerline_centered_pattern`
+
+Verified Center Mark / Centerline pipeline:
+
+```text
+get_center_marks / get_centerlines
+-> reference keys where supported
+
+DrawingView drawing curves
+-> explicit GeometryIntent
+-> Centermarks.Add / Centerlines.AddBisector
+
+DrawingView drawing curves
+-> explicit pattern-center GeometryIntent
+-> explicit member GeometryIntents
+-> ObjectCollection
+-> Centerlines.AddCenteredPattern
+-> Centerline
+```
 
 Verified Parts List + Balloon pipeline:
 
@@ -152,6 +173,10 @@ Runtime does not:
 - choose item numbering automatically;
 - choose balloon placement;
 - select drawing geometry automatically;
+- detect holes or bolt-circle patterns;
+- select center marks, centerlines, pattern centers, or member holes automatically;
+- infer symmetry;
+- reorder centerline geometry;
 - optimize drawing annotation layout;
 - choose dimension geometry, placement, style, layer, tolerance, precision, text, or model-value overrides;
 - convert tolerance units;
@@ -164,7 +189,7 @@ Runtime does not:
 Next expected stage:
 
 ```text
-Capability Audit - next practical drawing engineering layer
+Capability Audit - Hole / Thread annotation capabilities
 ```
 
 Required next check:

@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 37-39 documentation sync:
+Current checkpoint after the Package 40-41 documentation sync:
 
 ```text
-v0.32 complete general dimension tolerance pipeline
+v0.33 complete center mark and centerline pipeline
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 37-39 checkpoint:
+Live command audit after Package 40-41 checkpoint:
 
 ```text
-152 registered JSON commands
-152 unique registered JSON commands
+155 registered JSON commands
+155 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -435,12 +435,13 @@ Major verified read areas include:
 Next capability check:
 
 ```text
-Capability Audit - next practical drawing engineering layer
+Capability Audit - Hole / Thread annotation capabilities
 ```
 
 Goal:
 
-- determine existing coverage before proposing implementation;
+- audit existing Runtime coverage first;
+- determine whether Hole / Thread annotation capabilities are already sufficient;
 - run an audit before implementation;
 - keep Runtime limited to Eyes and atomic Hands.
 
@@ -824,4 +825,84 @@ Next capability check:
 
 ```text
 Capability Audit - next practical drawing engineering layer
+```
+
+## Package 40-41 checkpoint
+
+Package 40-41 complete: Center Mark and Centerline Pipeline is VERIFIED.
+
+Verified Eye extensions:
+
+```json
+{"command":"get_center_marks"}
+{"command":"get_centerlines"}
+```
+
+Confirmed additions:
+
+- `get_center_marks` returns `referenceKey` for `Centermark` items where available;
+- `get_centerlines` returns `referenceKey` for `Centerline` items where available;
+- reference-key extraction diagnostics are non-blocking property diagnostics.
+
+Verified Hands:
+
+```json
+{"command":"create_center_mark"}
+{"command":"create_centerline_bisector"}
+{"command":"create_centerline_centered_pattern"}
+```
+
+Verified centered-pattern pipeline:
+
+```text
+DrawingView drawing curves
+-> explicit pattern-center GeometryIntent
+-> explicit member GeometryIntents
+-> ObjectCollection
+-> Centerlines.AddCenteredPattern
+-> Centerline
+```
+
+Inventor validation for `create_centerline_centered_pattern` confirmed:
+
+- `success = true`;
+- `centerlineType = kCenteredPatternCenterlineType`;
+- `geometryType = kCircleCurve`;
+- `visible = true`;
+- `attached = true`;
+- `referenceKey` returned;
+- `get_centerlines` reads the created object;
+- `patternCenter` is present;
+- circular centerline is visually correct in Inventor.
+
+Runtime does:
+
+- expose factual drawing geometry;
+- resolve caller-supplied sheet/view/curve selectors;
+- create explicit `GeometryIntent` objects;
+- execute atomic Inventor API operations;
+- return factual resulting state and reference keys.
+
+Runtime does not:
+
+- detect holes automatically;
+- detect bolt-circle patterns;
+- select pattern centers;
+- select member holes;
+- infer symmetry;
+- reorder geometry;
+- choose annotations based on engineering meaning;
+- make GOST/ESKD decisions;
+- optimize annotation or layout placement.
+
+Deferred capabilities:
+
+- generic `create_centerline`;
+- `Centerlines.AddByWorkFeature` centerline;
+- delete centerline / delete center mark commands.
+
+Next capability check:
+
+```text
+Capability Audit - Hole / Thread annotation capabilities
 ```

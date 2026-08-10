@@ -97,6 +97,15 @@ public class InventorCommandDispatcher
     private readonly CreateBalloonCommand
         _createBalloonCommand;
 
+    private readonly CreateCenterMarkCommand
+        _createCenterMarkCommand;
+
+    private readonly CreateCenterlineBisectorCommand
+        _createCenterlineBisectorCommand;
+
+    private readonly CreateCenterlineCenteredPatternCommand
+        _createCenterlineCenteredPatternCommand;
+
     private readonly ActivateDocumentCommand
         _activateDocumentCommand;
 
@@ -586,6 +595,18 @@ public class InventorCommandDispatcher
 
         _createBalloonCommand =
             new CreateBalloonCommand(
+                inventor);
+
+        _createCenterMarkCommand =
+            new CreateCenterMarkCommand(
+                inventor);
+
+        _createCenterlineBisectorCommand =
+            new CreateCenterlineBisectorCommand(
+                inventor);
+
+        _createCenterlineCenteredPatternCommand =
+            new CreateCenterlineCenteredPatternCommand(
                 inventor);
 
         _activateDocumentCommand =
@@ -1231,6 +1252,18 @@ public class InventorCommandDispatcher
 
                 "create_balloon" =>
                     _createBalloonCommand.Execute(
+                        root),
+
+                "create_center_mark" =>
+                    _createCenterMarkCommand.Execute(
+                        root),
+
+                "create_centerline_bisector" =>
+                    _createCenterlineBisectorCommand.Execute(
+                        root),
+
+                "create_centerline_centered_pattern" =>
+                    _createCenterlineCenteredPatternCommand.Execute(
                         root),
 
                 "activate_document" =>

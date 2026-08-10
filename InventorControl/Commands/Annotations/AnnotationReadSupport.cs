@@ -669,6 +669,11 @@ internal static class AnnotationReadSupport
                         "Layer",
                         diagnostics),
                     diagnostics),
+            referenceKey =
+                ReadReferenceKey(
+                    sheet,
+                    centerMark,
+                    diagnostics),
             attachedEntity,
             associatedCenterlines =
                 ReadEntityCollection(
@@ -852,6 +857,11 @@ internal static class AnnotationReadSupport
                     "Layer",
                     diagnostics),
                     diagnostics),
+            referenceKey =
+                ReadReferenceKey(
+                    sheet,
+                    centerline,
+                    diagnostics),
             patternCenter =
                 ReadEntityMetadata(
                     GetValue(
@@ -878,6 +888,64 @@ internal static class AnnotationReadSupport
             propertyDiagnostics =
                 diagnostics
         };
+    }
+
+    private static string? ReadReferenceKey(
+        Sheet sheet,
+        Centermark centerMark,
+        List<object> diagnostics)
+    {
+        try
+        {
+            DrawingDocument drawingDocument =
+                (DrawingDocument)sheet.Parent;
+
+            Array key =
+                Array.CreateInstance(
+                    typeof(byte),
+                    0);
+
+            centerMark.GetReferenceKey(
+                ref key,
+                0);
+
+            return drawingDocument.ReferenceKeyManager.KeyToString(
+                ref key);
+        }
+        catch (Exception exception)
+        {
+            diagnostics.Add(new { scope = "Centermark.GetReferenceKey", message = exception.Message, exceptionType = exception.GetType().FullName });
+            return null;
+        }
+    }
+
+    private static string? ReadReferenceKey(
+        Sheet sheet,
+        Centerline centerline,
+        List<object> diagnostics)
+    {
+        try
+        {
+            DrawingDocument drawingDocument =
+                (DrawingDocument)sheet.Parent;
+
+            Array key =
+                Array.CreateInstance(
+                    typeof(byte),
+                    0);
+
+            centerline.GetReferenceKey(
+                ref key,
+                0);
+
+            return drawingDocument.ReferenceKeyManager.KeyToString(
+                ref key);
+        }
+        catch (Exception exception)
+        {
+            diagnostics.Add(new { scope = "Centerline.GetReferenceKey", message = exception.Message, exceptionType = exception.GetType().FullName });
+            return null;
+        }
     }
 
     private static DrawingDocument? GetActiveDrawingDocument(

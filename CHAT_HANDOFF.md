@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.32 complete general dimension tolerance pipeline`.
+- Current checkpoint: `v0.33 complete center mark and centerline pipeline`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 37-39 - General Dimension Tolerance Pipeline.
-- Registry after Package 37-39: `152 registered / 152 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 37-39 checkpoint commit.
+- Latest completed checkpoint: Package 40-41 - Center Mark and Centerline Pipeline.
+- Registry after Package 40-41: `155 registered / 155 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 40-41 checkpoint commit.
 
 ## Architecture Rules
 
@@ -64,6 +64,70 @@
 - General dimension tolerance deviation Hand: `set_general_dimension_tolerance_deviation`.
 - General dimension tolerance limits Hand: `set_general_dimension_tolerance_limits`.
 - General dimension tolerance fits Hand: `set_general_dimension_tolerance_fits`.
+- Center marks Eye: `get_center_marks` with referenceKey support.
+- Centerlines Eye: `get_centerlines` with referenceKey support.
+- Center mark Hand: `create_center_mark`.
+- Centerline bisector Hand: `create_centerline_bisector`.
+- Centerline centered-pattern Hand: `create_centerline_centered_pattern`.
+
+## Center Mark and Centerline Pipeline
+
+Verified commands and Eye extensions:
+
+- `get_center_marks` referenceKey support
+- `get_centerlines` referenceKey support
+- `create_center_mark`
+- `create_centerline_bisector`
+- `create_centerline_centered_pattern`
+
+Verified centered-pattern pipeline:
+
+```text
+DrawingView drawing curves
+-> explicit pattern-center GeometryIntent
+-> explicit member GeometryIntents
+-> ObjectCollection
+-> Centerlines.AddCenteredPattern
+-> Centerline
+```
+
+Inventor validation for `create_centerline_centered_pattern` confirmed:
+
+- `success = true`;
+- `centerlineType = kCenteredPatternCenterlineType`;
+- `geometryType = kCircleCurve`;
+- `visible = true`;
+- `attached = true`;
+- `referenceKey` returned;
+- `get_centerlines` reads the created object;
+- `patternCenter` is present;
+- circular centerline is visually correct in Inventor.
+
+Runtime does:
+
+- expose factual drawing geometry;
+- resolve caller-supplied sheet/view/curve selectors;
+- create explicit `GeometryIntent` objects;
+- execute atomic Inventor API operations;
+- return factual resulting state/reference keys.
+
+Runtime does not:
+
+- detect holes automatically;
+- detect bolt-circle patterns;
+- select pattern centers;
+- select member holes;
+- infer symmetry;
+- reorder geometry;
+- choose annotations based on engineering meaning;
+- make GOST/ESKD decisions;
+- optimize annotation/layout placement.
+
+Deferred:
+
+- generic `create_centerline`;
+- `Centerlines.AddByWorkFeature` centerline;
+- delete centerline / delete center mark commands.
 
 ## General Dimension Tolerance Pipeline
 
@@ -341,7 +405,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - next practical drawing engineering layer
+Capability Audit - Hole / Thread annotation capabilities
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

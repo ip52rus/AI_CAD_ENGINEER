@@ -1,5 +1,51 @@
 # PROJECT REVIEW
 
+## Package 40-41 checkpoint - current state
+
+Package 40-41 closes the verified Center Mark and Centerline Pipeline. The
+commands create center marks, bisector centerlines, and centered-pattern
+centerlines from explicit caller-selected drawing geometry.
+
+Current live command inventory after Package 40-41:
+
+```text
+155 registered JSON commands
+155 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified commands and Eye extensions:
+
+```text
+get_center_marks referenceKey support
+get_centerlines referenceKey support
+create_center_mark
+create_centerline_bisector
+create_centerline_centered_pattern
+```
+
+Verified centered-pattern pipeline:
+
+```text
+DrawingView drawing curves
+-> explicit pattern-center GeometryIntent
+-> explicit member GeometryIntents
+-> ObjectCollection
+-> Centerlines.AddCenteredPattern
+-> Centerline
+```
+
+Runtime boundaries remain explicit: no hole detection, no bolt-circle pattern
+detection, no automatic center/member selection, no symmetry inference, no
+geometry reordering, no engineering-meaning selection, no layout optimization,
+and no GOST/ESKD decisions.
+
+Deferred: generic `create_centerline`, work-feature centerline creation, and
+delete centerline / center mark commands.
+
+Next capability check: Hole / Thread annotation capabilities.
+
 ## Package 37-39 checkpoint - current state
 
 Package 37-39 closes the verified General Dimension Tolerance Pipeline. The

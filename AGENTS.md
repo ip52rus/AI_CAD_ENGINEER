@@ -205,6 +205,46 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 40-41:
+
+```text
+Package 40-41 complete - Center Mark and Centerline Pipeline checkpoint
+```
+
+Verified commands and Eye extensions:
+
+```text
+get_center_marks referenceKey support
+get_centerlines referenceKey support
+create_center_mark
+create_centerline_bisector
+create_centerline_centered_pattern
+```
+
+Verified centered-pattern pipeline:
+
+```text
+DrawingView drawing curves
+-> explicit pattern-center GeometryIntent
+-> explicit member GeometryIntents
+-> ObjectCollection
+-> Centerlines.AddCenteredPattern
+-> Centerline
+```
+
+Runtime exposes factual drawing geometry, resolves explicit caller selectors,
+creates explicit `GeometryIntent` objects, executes atomic Inventor API
+operations, and returns factual state/reference keys. Runtime must not detect
+holes, detect bolt-circle patterns, select pattern centers or member holes,
+infer symmetry, reorder geometry, choose annotations by engineering meaning,
+optimize layout, or make GOST/ESKD decisions.
+
+Deferred: generic `create_centerline`, work-feature centerline creation, and
+delete centerline / center mark commands.
+
+Next correct action: run a Capability Audit for Hole / Thread annotation
+capabilities before writing code.
+
 Current milestone addendum after Package 37-39:
 
 ```text

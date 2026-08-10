@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.32 complete general dimension tolerance pipeline
+v0.33 complete center mark and centerline pipeline
 ```
 
 ## Ground rules
@@ -44,7 +44,8 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Drawing dimensions | VERIFIED | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `create_angular_dimension`, `create_ordinate_dimension`, `get_drawing_view_origin_indicator`, `create_drawing_view_origin_indicator`, `create_baseline_dimension`, `create_chain_dimension`, `set_general_dimension_formatted_text`, `set_general_dimension_hide_value`, `set_general_dimension_precision`, `set_general_dimension_model_value_override`, `clear_general_dimension_model_value_override`, `set_general_dimension_style`, `set_general_dimension_layer`, `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | linear/diameter/radius plus Package 31-39 commands listed in explicit PASS section | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | symmetric/chamfer dimensions are not confirmed | P0 maintained |
 | General Dimension Tolerance Pipeline | VERIFIED | `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits` | all Package 37-39 tolerance commands | - | no automatic tolerance selection, no fit validation, no GOST/ESKD tolerance decisions in Runtime | P0 maintained |
 | Hole/thread notes | IMPLEMENTED_UNTESTED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | not separately recorded | - | stable selector variants are still missing; current commands use indexes | P1 |
-| Basic drawing annotation Eyes | IMPLEMENTED_UNTESTED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | not recorded after Package 15A | - | Inventor PASS still required | P0 test when needed |
+| Center Marks / Centerlines | VERIFIED | `get_center_marks`, `get_centerlines`, `create_center_mark`, `create_centerline_bisector`, `create_centerline_centered_pattern` | Package 40-41 commands and referenceKey support | - | generic `create_centerline`, work-feature centerline, delete centerline/center mark deferred | P0 maintained |
+| Basic drawing annotation Eyes | PARTIAL | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | center marks/centerlines are verified; remaining basic note/balloon read Eyes not all separately recorded after Package 15A | - | Inventor PASS still required for remaining basic annotation Eyes when needed | P1 |
 | Drawing Text Objects | VERIFIED | `get_drawing_text_objects` | `get_drawing_text_objects`, `get_drawing_text_objects` with `sheetName` | - | - | P0 maintained |
 | Drawing Text semantic analysis | MISSING | - | - | - | semantic text understanding, GOST interpretation, TT/TU recognition; belongs to external LLM, not Runtime | no Runtime priority |
 | Annotation summary and bounds | PARTIAL | `get_drawing_annotation_summary`, `get_annotation_bounds` | annotation summary recorded as verified area; exact PASS command not separately recorded | - | typed bounds for all annotation classes; current bounds coverage is incomplete | P1 |
@@ -137,6 +138,9 @@ Exact commands explicitly confirmed:
 {"command":"set_general_dimension_tolerance_deviation"}
 {"command":"set_general_dimension_tolerance_limits"}
 {"command":"set_general_dimension_tolerance_fits"}
+{"command":"create_center_mark"}
+{"command":"create_centerline_bisector"}
+{"command":"create_centerline_centered_pattern"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -195,6 +199,12 @@ Observed Inventor API behavior: after `Tolerance.SetToDefault()`,
 `ToleranceType` becomes `kDefaultTolerance` and `Upper` / `Lower` reset to `0`,
 but previous `HoleTolerance` / `ShaftTolerance` strings may remain readable.
 Runtime does not compensate for or clear those strings.
+
+Package 40-41 commands are verified for center mark and centerline creation.
+`get_center_marks` and `get_centerlines` now expose reference keys where
+supported. `create_centerline_centered_pattern` is verified for explicit
+pattern-center and member `GeometryIntent` objects passed through an
+`ObjectCollection` to `Centerlines.AddCenteredPattern`.
 
 ## Experimental commands
 
@@ -614,6 +624,67 @@ Next capability check:
 
 ```text
 Capability Audit - next practical drawing engineering layer
+```
+
+## Package 40-41 result
+
+Center Mark and Centerline Pipeline: **VERIFIED**
+
+Commands:
+
+```text
+get_center_marks
+get_centerlines
+create_center_mark
+create_centerline_bisector
+create_centerline_centered_pattern
+```
+
+Coverage:
+
+```text
+Sheet.Centermarks
+Centermark.GetReferenceKey
+Sheet.Centerlines
+Centerline.GetReferenceKey
+Sheet.CreateGeometryIntent
+Centermarks.Add
+Centerlines.AddBisector
+Centerlines.AddCenteredPattern
+ObjectCollection of explicit GeometryIntent objects
+diagnostics
+```
+
+Verified centered-pattern pipeline:
+
+```text
+DrawingView drawing curves
+-> explicit pattern-center GeometryIntent
+-> explicit member GeometryIntents
+-> ObjectCollection
+-> Centerlines.AddCenteredPattern
+-> Centerline
+```
+
+Runtime boundary remains explicit: Runtime exposes facts, resolves caller
+selectors, creates explicit `GeometryIntent` objects, calls one Inventor API
+operation, and returns factual state/reference keys. Runtime does not detect
+holes, detect bolt-circle patterns, select centers or members, infer symmetry,
+reorder geometry, choose annotations by engineering meaning, optimize layout,
+or make GOST/ESKD decisions.
+
+Deferred:
+
+```text
+generic create_centerline
+Centerlines.AddByWorkFeature centerline
+delete centerline / center mark commands
+```
+
+Next capability check:
+
+```text
+Capability Audit - Hole / Thread annotation capabilities
 ```
 
 ## Package 26 result
