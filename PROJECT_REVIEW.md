@@ -1,5 +1,58 @@
 # PROJECT REVIEW
 
+## Package 31-36 checkpoint - current state
+
+Package 31-36 closes the verified Drawing Dimensions Creation and Editing
+Pipeline. The new commands create angular, ordinate, baseline, and chain
+dimensions from explicit caller inputs and edit explicitly selected
+`GeneralDimension` objects.
+
+Current live command inventory after Package 31-36:
+
+```text
+144 registered JSON commands
+144 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified commands:
+
+```text
+create_angular_dimension
+create_ordinate_dimension
+get_drawing_view_origin_indicator
+create_drawing_view_origin_indicator
+create_baseline_dimension
+create_chain_dimension
+set_general_dimension_formatted_text
+set_general_dimension_hide_value
+set_general_dimension_precision
+set_general_dimension_model_value_override
+clear_general_dimension_model_value_override
+set_general_dimension_style
+set_general_dimension_layer
+```
+
+Verified ordinate pipeline:
+
+```text
+DrawingView geometry
+-> GeometryIntent
+-> DrawingView.CreateOriginIndicator(...)
+-> OrdinateDimensions.Add(...)
+```
+
+Baseline and chain dimensions were verified with three explicit
+`GeometryIntent` selectors and created two dimensions each.
+
+Runtime boundaries remain explicit: no automatic geometry selection, no
+automatic dimension placement, no automatic style/layer selection, no
+tolerance decisions, no layout optimization, and no engineering/GOST/ESKD
+decisions.
+
+Next capability check: General Dimension Tolerance capabilities.
+
 ## Package 30 checkpoint - current state
 
 Package 30 closes the verified Parts List + Balloon Pipeline. The commands

@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 30 is complete.
-- Current checkpoint: `v0.30 complete parts list and balloon pipeline`.
-- Live registry after Package 30: `131 registered / 131 unique`, no duplicate command names.
+- Package 31-36 are complete.
+- Current checkpoint: `v0.31 complete drawing dimensions creation and editing pipeline`.
+- Live registry after Package 31-36: `144 registered / 144 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -36,6 +36,19 @@ Verified Drawing Generation / Export Hands:
 - `export_dxf`
 - `create_parts_list`
 - `create_balloon`
+- `create_angular_dimension`
+- `create_ordinate_dimension`
+- `get_drawing_view_origin_indicator`
+- `create_drawing_view_origin_indicator`
+- `create_baseline_dimension`
+- `create_chain_dimension`
+- `set_general_dimension_formatted_text`
+- `set_general_dimension_hide_value`
+- `set_general_dimension_precision`
+- `set_general_dimension_model_value_override`
+- `clear_general_dimension_model_value_override`
+- `set_general_dimension_style`
+- `set_general_dimension_layer`
 
 Verified Parts List + Balloon pipeline:
 
@@ -47,6 +60,21 @@ DrawingView geometry -> GeometryIntent -> Balloon
 `create_parts_list` creates one Inventor PartsList from explicit caller inputs.
 `create_balloon` creates one Inventor Balloon from an explicit DrawingView curve
 and caller-supplied leader points.
+
+Verified Drawing Dimensions creation/editing pipeline:
+
+```text
+DrawingView geometry
+-> GeometryIntent
+-> DrawingView.CreateOriginIndicator(...)
+-> OrdinateDimensions.Add(...)
+
+explicit GeometryIntent selectors
+-> BaselineDimensionSets.Add / ChainDimensionSets.Add
+
+explicit GeneralDimension
+-> text / visibility / precision / model-value override / style / layer edit
+```
 
 Verified export command:
 
@@ -107,12 +135,13 @@ Runtime does not:
 - choose balloon placement;
 - select drawing geometry automatically;
 - optimize drawing annotation layout;
+- choose dimension geometry, placement, style, layer, tolerance, precision, text, or model-value overrides;
 - perform engineering or GOST decisions.
 
 Next expected stage:
 
 ```text
-Capability Check - choose the next practical engineering layer
+Capability Audit - General Dimension Tolerance capabilities
 ```
 
 Required next check:

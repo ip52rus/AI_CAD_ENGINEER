@@ -229,6 +229,45 @@ public class InventorCommandDispatcher
     private readonly CreateRadiusDimensionCommand
         _createRadiusDimensionCommand;
 
+    private readonly CreateAngularDimensionCommand
+        _createAngularDimensionCommand;
+
+    private readonly CreateOrdinateDimensionCommand
+        _createOrdinateDimensionCommand;
+
+    private readonly CreateBaselineDimensionCommand
+        _createBaselineDimensionCommand;
+
+    private readonly CreateChainDimensionCommand
+        _createChainDimensionCommand;
+
+    private readonly SetGeneralDimensionFormattedTextCommand
+        _setGeneralDimensionFormattedTextCommand;
+
+    private readonly SetGeneralDimensionHideValueCommand
+        _setGeneralDimensionHideValueCommand;
+
+    private readonly SetGeneralDimensionPrecisionCommand
+        _setGeneralDimensionPrecisionCommand;
+
+    private readonly SetGeneralDimensionModelValueOverrideCommand
+        _setGeneralDimensionModelValueOverrideCommand;
+
+    private readonly ClearGeneralDimensionModelValueOverrideCommand
+        _clearGeneralDimensionModelValueOverrideCommand;
+
+    private readonly SetGeneralDimensionStyleCommand
+        _setGeneralDimensionStyleCommand;
+
+    private readonly SetGeneralDimensionLayerCommand
+        _setGeneralDimensionLayerCommand;
+
+    private readonly GetDrawingViewOriginIndicatorCommand
+        _getDrawingViewOriginIndicatorCommand;
+
+    private readonly CreateDrawingViewOriginIndicatorCommand
+        _createDrawingViewOriginIndicatorCommand;
+
     private readonly GetHoleThreadNotesCommand
         _getHoleThreadNotesCommand;
 
@@ -699,6 +738,58 @@ public class InventorCommandDispatcher
 
         _createRadiusDimensionCommand =
             new CreateRadiusDimensionCommand(
+                inventor);
+
+        _createAngularDimensionCommand =
+            new CreateAngularDimensionCommand(
+                inventor);
+
+        _createOrdinateDimensionCommand =
+            new CreateOrdinateDimensionCommand(
+                inventor);
+
+        _createBaselineDimensionCommand =
+            new CreateBaselineDimensionCommand(
+                inventor);
+
+        _createChainDimensionCommand =
+            new CreateChainDimensionCommand(
+                inventor);
+
+        _setGeneralDimensionFormattedTextCommand =
+            new SetGeneralDimensionFormattedTextCommand(
+                inventor);
+
+        _setGeneralDimensionHideValueCommand =
+            new SetGeneralDimensionHideValueCommand(
+                inventor);
+
+        _setGeneralDimensionPrecisionCommand =
+            new SetGeneralDimensionPrecisionCommand(
+                inventor);
+
+        _setGeneralDimensionModelValueOverrideCommand =
+            new SetGeneralDimensionModelValueOverrideCommand(
+                inventor);
+
+        _clearGeneralDimensionModelValueOverrideCommand =
+            new ClearGeneralDimensionModelValueOverrideCommand(
+                inventor);
+
+        _setGeneralDimensionStyleCommand =
+            new SetGeneralDimensionStyleCommand(
+                inventor);
+
+        _setGeneralDimensionLayerCommand =
+            new SetGeneralDimensionLayerCommand(
+                inventor);
+
+        _getDrawingViewOriginIndicatorCommand =
+            new GetDrawingViewOriginIndicatorCommand(
+                inventor);
+
+        _createDrawingViewOriginIndicatorCommand =
+            new CreateDrawingViewOriginIndicatorCommand(
                 inventor);
 
         _getHoleThreadNotesCommand =
@@ -1260,6 +1351,58 @@ public class InventorCommandDispatcher
 
                 "create_radius_dimension" =>
                     _createRadiusDimensionCommand.Execute(
+                        root),
+
+                "create_angular_dimension" =>
+                    _createAngularDimensionCommand.Execute(
+                        root),
+
+                "create_ordinate_dimension" =>
+                    _createOrdinateDimensionCommand.Execute(
+                        root),
+
+                "create_baseline_dimension" =>
+                    _createBaselineDimensionCommand.Execute(
+                        root),
+
+                "create_chain_dimension" =>
+                    _createChainDimensionCommand.Execute(
+                        root),
+
+                "set_general_dimension_formatted_text" =>
+                    _setGeneralDimensionFormattedTextCommand.Execute(
+                        root),
+
+                "set_general_dimension_hide_value" =>
+                    _setGeneralDimensionHideValueCommand.Execute(
+                        root),
+
+                "set_general_dimension_precision" =>
+                    _setGeneralDimensionPrecisionCommand.Execute(
+                        root),
+
+                "set_general_dimension_model_value_override" =>
+                    _setGeneralDimensionModelValueOverrideCommand.Execute(
+                        root),
+
+                "clear_general_dimension_model_value_override" =>
+                    _clearGeneralDimensionModelValueOverrideCommand.Execute(
+                        root),
+
+                "set_general_dimension_style" =>
+                    _setGeneralDimensionStyleCommand.Execute(
+                        root),
+
+                "set_general_dimension_layer" =>
+                    _setGeneralDimensionLayerCommand.Execute(
+                        root),
+
+                "get_drawing_view_origin_indicator" =>
+                    _getDrawingViewOriginIndicatorCommand.Execute(
+                        root),
+
+                "create_drawing_view_origin_indicator" =>
+                    _createDrawingViewOriginIndicatorCommand.Execute(
                         root),
 
                 "get_hole_thread_notes" =>

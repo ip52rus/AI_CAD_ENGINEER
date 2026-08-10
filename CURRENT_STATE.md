@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 30 documentation sync:
+Current checkpoint after the Package 31-36 documentation sync:
 
 ```text
-v0.30 complete parts list and balloon pipeline
+v0.31 complete drawing dimensions creation and editing pipeline
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 30 checkpoint:
+Live command audit after Package 31-36 checkpoint:
 
 ```text
-131 registered JSON commands
-131 unique registered JSON commands
+144 registered JSON commands
+144 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -435,12 +435,12 @@ Major verified read areas include:
 Next capability check:
 
 ```text
-Capability Check - choose the next practical engineering layer
+Capability Audit - General Dimension Tolerance capabilities
 ```
 
 Goal:
 
-- identify the next useful Runtime gap after verified PDF/DWG/DXF export;
+- determine existing coverage for general dimension tolerance read/write behavior;
 - run an audit before implementation;
 - keep Runtime limited to Eyes and atomic Hands.
 
@@ -693,3 +693,63 @@ choose balloon placement, optimize leaders, renumber items, modify BOM data,
 or perform engineering/GOST decisions.
 
 Next capability check: choose the next practical engineering layer.
+
+## Package 31-36 checkpoint
+
+Package 31-36 complete: Drawing Dimensions Creation and Editing Pipeline is
+VERIFIED.
+
+Verified creation Eyes/Hands:
+
+```json
+{"command":"create_angular_dimension"}
+{"command":"create_ordinate_dimension"}
+{"command":"get_drawing_view_origin_indicator"}
+{"command":"create_drawing_view_origin_indicator"}
+{"command":"create_baseline_dimension"}
+{"command":"create_chain_dimension"}
+```
+
+Verified general dimension editing Hands:
+
+```json
+{"command":"set_general_dimension_formatted_text"}
+{"command":"set_general_dimension_hide_value"}
+{"command":"set_general_dimension_precision"}
+{"command":"set_general_dimension_model_value_override"}
+{"command":"clear_general_dimension_model_value_override"}
+{"command":"set_general_dimension_style"}
+{"command":"set_general_dimension_layer"}
+```
+
+Ordinate dimension pipeline:
+
+```text
+DrawingView geometry
+-> GeometryIntent
+-> DrawingView.CreateOriginIndicator(...)
+-> OrdinateDimensions.Add(...)
+```
+
+Baseline and chain dimensions were manually verified with three explicit
+`GeometryIntent` selectors and created two dimensions each.
+
+Dimension editing Hands operate only on explicitly selected
+`GeneralDimension` objects. Runtime does not choose geometry, placement,
+style, layer, tolerance, precision, text, or model-value override values.
+
+Runtime boundary remains unchanged:
+
+- no automatic geometry selection;
+- no automatic dimension placement;
+- no automatic style/layer selection;
+- no tolerance decisions;
+- no layout optimization;
+- no engineering decisions;
+- no GOST/ESKD reasoning inside Runtime.
+
+Next capability check:
+
+```text
+Capability Audit - General Dimension Tolerance capabilities
+```

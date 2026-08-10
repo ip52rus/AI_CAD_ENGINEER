@@ -205,6 +205,47 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 31-36:
+
+```text
+Package 31-36 complete - Drawing Dimensions Creation and Editing Pipeline checkpoint
+```
+
+Verified commands:
+
+```text
+create_angular_dimension
+create_ordinate_dimension
+get_drawing_view_origin_indicator
+create_drawing_view_origin_indicator
+create_baseline_dimension
+create_chain_dimension
+set_general_dimension_formatted_text
+set_general_dimension_hide_value
+set_general_dimension_precision
+set_general_dimension_model_value_override
+clear_general_dimension_model_value_override
+set_general_dimension_style
+set_general_dimension_layer
+```
+
+Ordinate dimension creation requires an existing DrawingView OriginIndicator:
+
+```text
+DrawingView geometry
+-> GeometryIntent
+-> DrawingView.CreateOriginIndicator(...)
+-> OrdinateDimensions.Add(...)
+```
+
+Dimension editing Hands operate only on explicitly selected
+`GeneralDimension` objects. Runtime still does not choose geometry, dimension
+placement, style, layer, tolerance, precision, text, model-value overrides, or
+perform engineering/GOST/ESKD decisions.
+
+Next correct action: run a Capability Audit for General Dimension Tolerance
+capabilities before writing code.
+
 Current milestone addendum after Package 30:
 
 ```text

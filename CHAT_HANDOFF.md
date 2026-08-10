@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.30 complete parts list and balloon pipeline`.
+- Current checkpoint: `v0.31 complete drawing dimensions creation and editing pipeline`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed package: Package 30 - Parts List + Balloon Pipeline.
-- Registry after Package 30: `131 registered / 131 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 30 checkpoint commit.
+- Latest completed checkpoint: Package 31-36 - Drawing Dimensions Creation and Editing Pipeline.
+- Registry after Package 31-36: `144 registered / 144 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 31-36 checkpoint commit.
 
 ## Architecture Rules
 
@@ -43,6 +43,53 @@
 - DXF Export Hand: `export_dxf`.
 - Parts List creation Hand: `create_parts_list`.
 - Balloon creation Hand: `create_balloon`.
+- Angular dimension Hand: `create_angular_dimension`.
+- Ordinate dimension Hand: `create_ordinate_dimension`.
+- DrawingView OriginIndicator Eye: `get_drawing_view_origin_indicator`.
+- DrawingView OriginIndicator Hand: `create_drawing_view_origin_indicator`.
+- Baseline dimension Hand: `create_baseline_dimension`.
+- Chain dimension Hand: `create_chain_dimension`.
+- General dimension formatted text Hand: `set_general_dimension_formatted_text`.
+- General dimension hide value Hand: `set_general_dimension_hide_value`.
+- General dimension precision Hand: `set_general_dimension_precision`.
+- General dimension model value override Hand: `set_general_dimension_model_value_override`.
+- General dimension clear model value override Hand: `clear_general_dimension_model_value_override`.
+- General dimension style Hand: `set_general_dimension_style`.
+- General dimension layer Hand: `set_general_dimension_layer`.
+
+## Drawing Dimensions Creation and Editing Pipeline
+
+Verified commands:
+
+- `create_angular_dimension`
+- `create_ordinate_dimension`
+- `get_drawing_view_origin_indicator`
+- `create_drawing_view_origin_indicator`
+- `create_baseline_dimension`
+- `create_chain_dimension`
+- `set_general_dimension_formatted_text`
+- `set_general_dimension_hide_value`
+- `set_general_dimension_precision`
+- `set_general_dimension_model_value_override`
+- `clear_general_dimension_model_value_override`
+- `set_general_dimension_style`
+- `set_general_dimension_layer`
+
+Verified ordinate pipeline:
+
+```text
+DrawingView geometry
+-> GeometryIntent
+-> DrawingView.CreateOriginIndicator(...)
+-> OrdinateDimensions.Add(...)
+```
+
+Baseline and chain dimensions were verified with three explicit
+`GeometryIntent` selectors and created two dimensions each.
+
+Dimension editing Hands operate only on explicitly selected
+`GeneralDimension` objects. Runtime does not choose geometry, placement,
+style, layer, tolerance, precision, text, or model-value override values.
 
 ## Parts List + Balloon Pipeline
 
@@ -198,6 +245,8 @@ Verified runtime tests:
 - Runtime does not choose output paths.
 - Runtime does not create output directories.
 - Runtime does not overwrite unless `overwrite=true`.
+- Runtime does not choose dimension geometry, placement, style, layer,
+  tolerance, precision, text, or model-value overrides.
 - Semantic text understanding is outside Runtime.
 - GOST interpretation and validation are outside Runtime.
 - GD&T semantic interpretation is outside Runtime.
@@ -219,7 +268,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Check - choose the next practical engineering layer
+Capability Audit - General Dimension Tolerance capabilities
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,
