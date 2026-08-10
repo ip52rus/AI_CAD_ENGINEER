@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 26 documentation sync:
+Current checkpoint after the Package 28 documentation sync:
 
 ```text
-v0.26 complete auxiliary view pipeline
+v0.28 complete PDF export pipeline
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 23B:
+Live command audit after Package 28B:
 
 ```text
-123 registered JSON commands
-123 unique registered JSON commands
+127 registered JSON commands
+127 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -422,7 +422,7 @@ Major verified read areas include:
 ## Known gaps
 
 - Typed detailed Eye for `Sheet.HoleTables` is not implemented yet.
-- Drawing Generation Hands are still partial: section/detail/auxiliary views and drawing view break operations are not implemented yet.
+- Drawing Generation Hands are still partial: DWG/DXF drawing export Hands are not implemented yet.
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - Surface texture semantic interpretation is not implemented in Runtime and must remain outside the C# layer.
@@ -435,12 +435,12 @@ Major verified read areas include:
 Next capability check:
 
 ```text
-Capability Audit - create_section_view Hand
+Capability Audit - Drawing Export Hands - DWG / DXF
 ```
 
 Goal:
 
-- select the next capability boundary;
+- audit DWG and DXF export as separate atomic Hands;
 - run an audit before implementation;
 - keep Runtime limited to Eyes and atomic Hands.
 
@@ -529,3 +529,57 @@ Runtime does not choose break location, orientation, style, or geometry and
 does not perform engineering or GOST decisions.
 
 Next capability check: Drawing Export Hands.
+
+## Package 28 checkpoint
+
+Package 28 complete: PDF Export Pipeline is VERIFIED.
+
+Verified command: `export_pdf`.
+
+Coverage:
+
+```text
+active DrawingDocument
+PDF Translator Add-In resolution
+TranslationContext
+NameValueMap
+DataMedium
+TranslatorAddIn.SaveCopyAs
+overwrite protection
+overwrite=true support
+output file existence verification
+file size / timestamp facts
+structured diagnostics
+```
+
+Confirmed PDF Translator:
+
+```text
+ClientId: {0AC6FD96-2F4D-42CE-8BE0-8AEA580399E4}
+DisplayName: Translator: PDF / Translyator: PDF
+supportsSaveCopyAs = true
+translatorAvailable = true
+```
+
+Verified runtime tests:
+
+```text
+new PDF export: success = true, fileExists = true, fileSizeBytes = 78737
+existing destination with overwrite=false: success = false
+existing destination with overwrite=true: success = true, existing file overwritten without pre-delete
+```
+
+Runtime does not choose output paths, create directories, overwrite
+automatically, tune PDF options, modify drawings, regenerate views, or perform
+engineering/GOST decisions.
+
+Verified end-to-end pipeline:
+
+```text
+DrawingDocument
+-> Base/Projected/Section/Detail/Auxiliary Views
+-> Drawing View Break
+-> PDF Export
+```
+
+Next capability check: Drawing Export Hands - DWG / DXF.

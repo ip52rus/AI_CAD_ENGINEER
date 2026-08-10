@@ -1,5 +1,26 @@
 # PROJECT REVIEW
 
+## Package 28 checkpoint - current state
+
+Package 28 closes the verified PDF Export Pipeline. The command `export_pdf`
+exports the active `DrawingDocument` through the confirmed Inventor PDF
+Translator Add-In and `TranslatorAddIn.SaveCopyAs`.
+
+Coverage includes translator resolution, `TranslationContext`, `NameValueMap`,
+`DataMedium`, overwrite protection, `overwrite=true`, output file existence
+verification, file size/timestamp facts, and structured diagnostics.
+
+Current live command inventory after Package 28:
+
+```text
+127 registered JSON commands
+127 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Next capability check: Drawing Export Hands - DWG / DXF.
+
 ## Package 27 checkpoint - current state
 
 Package 27 closes the verified Drawing View Break Hand. The command

@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.26 complete auxiliary view pipeline
+v0.28 complete PDF export pipeline
 ```
 
 ## Ground rules
@@ -35,11 +35,11 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Capability | Status | Implemented commands | Inventor PASS confirmed | Experimental | Missing | Priority |
 |---|---|---|---|---|---|---|
 | Runtime connectivity | VERIFIED | `ping`, `get_active_document` | `ping`, `get_active_document` | - | - | P0 maintained |
-| Document operations | PARTIAL | `get_open_documents`, `open_document`, `activate_document`, `update_active_document`, `save_document`, `save_document_as`, `close_document`, `create_drawing_document` | `create_drawing_document` | - | export/print workflows | P1 |
+| Document operations | PARTIAL | `get_open_documents`, `open_document`, `activate_document`, `update_active_document`, `save_document`, `save_document_as`, `close_document`, `create_drawing_document`, `export_pdf` | `create_drawing_document`, `export_pdf` | - | DWG/DXF export and print workflows | P1 |
 | Drawing sheets | VERIFIED | `get_drawing_sheets`, `get_sheets`, `get_sheet`, `activate_sheet`, `rename_sheet`, `create_sheet`, `delete_sheet`, `set_sheet_size`, `set_sheet_orientation` | `get_drawing_sheets` | - | no additional missing items confirmed by Package audits | P0 maintained |
 | Borders and title blocks | PARTIAL | `get_border_definitions`, `get_sheet_border`, `set_sheet_border`, `remove_sheet_border`, `get_title_block_definitions`, `get_sheet_title_block`, `set_sheet_title_block`, `remove_sheet_title_block`, `get_title_block_fields`, `set_title_block_field`, `set_title_block_field_by_name`, `fill_title_block`, `get_title_block_definition_text`, `set_title_block_definition_text`, `get_title_block_binding`, `get_title_block_bindings`, `get_title_block_field_map` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P1 |
 | Drawing views | PARTIAL | `get_drawing_views`, `get_drawing_view`, `get_drawing_views_detailed`, `get_drawing_view_relationships`, `get_drawing_curves`, `get_view_model_references`, `get_curve_model_reference`, `create_base_view`, `create_projected_view`, `create_auxiliary_view`, `add_drawing_view_break`, `move_drawing_view`, `delete_drawing_view`, `rename_drawing_view`, `rotate_drawing_view`, `set_drawing_view_scale`, `set_drawing_view_style`, `set_drawing_view_label_visibility`, `set_drawing_view_scale_inheritance`, `set_drawing_view_alignment`, `set_drawing_view_suppressed` | drawing views / relationships / curve geometry, `create_auxiliary_view`, and `add_drawing_view_break` are verified areas | - | detail/crop view improvements not covered by confirmed commands | P1 |
-| Drawing Generation Hands | PARTIAL | `create_drawing_document`, `create_sheet`, `create_base_view`, `create_projected_view`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break` | `create_drawing_document`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break` | - | Drawing Export Hands | P0 next |
+| Drawing Generation Hands | PARTIAL | `create_drawing_document`, `create_sheet`, `create_base_view`, `create_projected_view`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf` | `create_drawing_document`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf` | - | DWG/DXF Drawing Export Hands | P0 next |
 | Drawing dimensions | PARTIAL | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | not separately recorded | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | angular/ordinate/baseline/chain/symmetric/chamfer dimensions and additional atomic format/read variants | P1 |
 | Hole/thread notes | IMPLEMENTED_UNTESTED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | not separately recorded | - | stable selector variants are still missing; current commands use indexes | P1 |
 | Basic drawing annotation Eyes | IMPLEMENTED_UNTESTED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | not recorded after Package 15A | - | Inventor PASS still required | P0 test when needed |
@@ -107,6 +107,7 @@ Exact commands explicitly confirmed:
 {"command":"get_transition_symbols"}
 {"command":"get_transition_symbols","sheetName":"Лист:1"}
 {"command":"create_drawing_document"}
+{"command":"export_pdf"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -128,6 +129,8 @@ Exact commands explicitly confirmed:
 `get_transition_symbols` is verified for reading `Sheet.TransitionSymbols`, TransitionSymbol metadata, TransitionSymbolDefinition data, leader/attachment metadata, reference keys, and diagnostics.
 
 `create_drawing_document` is verified for creating a new Autodesk Inventor `DrawingDocument` through `Application.Documents.Add` with an explicit `templatePath`.
+
+`export_pdf` is verified for exporting the active Autodesk Inventor `DrawingDocument` through the PDF Translator Add-In and `TranslatorAddIn.SaveCopyAs`, with overwrite protection and output file verification.
 
 ## Experimental commands
 
@@ -331,6 +334,32 @@ orientation, rectangular style, BreakOperation reference key, actual returned
 gap/number-of-symbols values, and diagnostics. Runtime preserves Inventor's
 post-creation values and performs no automatic geometry or engineering logic.
 Next capability check: Drawing Export Hands.
+
+## Package 28 result
+
+Drawing Export Hands - PDF Export Pipeline: **VERIFIED**
+
+Command: `export_pdf`.
+
+Coverage: active `DrawingDocument`, PDF Translator Add-In resolution,
+`TranslationContext`, `NameValueMap`, `DataMedium`,
+`TranslatorAddIn.SaveCopyAs`, overwrite protection, `overwrite=true`, output
+file existence verification, file size/timestamp facts, and diagnostics.
+
+Confirmed PDF Translator:
+
+```text
+ClientId: {0AC6FD96-2F4D-42CE-8BE0-8AEA580399E4}
+DisplayName: Translator: PDF / Translyator: PDF
+supportsSaveCopyAs = true
+translatorAvailable = true
+```
+
+Runtime does not choose output paths, create folders, overwrite without
+explicit permission, tune PDF options, regenerate drawing geometry, or perform
+engineering/GOST logic.
+
+Next capability check: Drawing Export Hands - DWG / DXF.
 
 ## Package 26 result
 

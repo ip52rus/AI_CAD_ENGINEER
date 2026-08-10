@@ -100,6 +100,9 @@ public class InventorCommandDispatcher
     private readonly SaveDocumentAsCommand
         _saveDocumentAsCommand;
 
+    private readonly ExportPdfCommand
+        _exportPdfCommand;
+
     private readonly CloseDocumentCommand
         _closeDocumentCommand;
 
@@ -512,6 +515,10 @@ public class InventorCommandDispatcher
 
         _saveDocumentAsCommand =
             new SaveDocumentAsCommand(
+                inventor);
+
+        _exportPdfCommand =
+            new ExportPdfCommand(
                 inventor);
 
         _closeDocumentCommand =
@@ -1053,6 +1060,10 @@ public class InventorCommandDispatcher
 
                 "save_document_as" =>
                     _saveDocumentAsCommand.Execute(
+                        root),
+
+                "export_pdf" =>
+                    _exportPdfCommand.Execute(
                         root),
 
                 "close_document" =>

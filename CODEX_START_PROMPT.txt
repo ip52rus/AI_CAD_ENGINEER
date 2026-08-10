@@ -1,6 +1,7 @@
 # CODEX_START_PROMPT.txt
 
-Read `AGENTS.md`, `CURRENT_STATE.md`, and `CAPABILITY_MAP.md` first.
+Read `AGENTS.md`, `CURRENT_STATE.md`, `CAPABILITY_MAP.md`, and
+`CHAT_HANDOFF.md` first.
 
 Then inspect the live repository before proposing or making changes.
 
@@ -8,7 +9,7 @@ Current context:
 
 - Project: AI CAD ENGINEER.
 - Branch: `cleanup/legacy-architecture`.
-- Runtime architecture: external LLM → JSON → InventorCommandDispatcher → atomic command → support → Autodesk Inventor API.
+- Runtime architecture: external LLM -> JSON -> InventorCommandDispatcher -> atomic command -> support -> Autodesk Inventor API.
 - Runtime must remain only Eyes and atomic Hands.
 - Do not restore EngineeringBrain, DrawingManager, Planning, Decision, or similar embedded reasoning systems.
 - Commit and push are forbidden unless the user explicitly authorizes them for the current task.
@@ -16,64 +17,64 @@ Current context:
 
 Current checkpoint context:
 
-- Package 23 is complete.
-- Package 17A added and verified:
-  - `get_custom_tables`
-- Package 18A added and verified:
-  - `get_drawing_text_objects`
-- Package 19A added and verified:
-  - `get_feature_control_frames`
-- Package 20A added and verified:
-  - `get_surface_texture_symbols`
-- Package 21A added and verified:
-  - `get_welding_symbols`
-- Package 22 added and verified:
-  - `get_revision_clouds`
-  - `get_edge_symbols`
-  - `get_transition_symbols`
-- Package 23 added and verified:
-  - `create_drawing_document`
-- `get_custom_tables` reads Autodesk Inventor `Sheet.CustomTables` as a typed Eye:
-  - CustomTable metadata;
-  - Columns;
-  - Rows;
-  - Cells;
-  - MergedCells;
-  - reference keys;
-  - diagnostics.
-- CustomTables are not PartsLists.
-- Runtime returns Inventor API facts only; it does not classify a table as specification, BOM, or GOST.
-- `get_drawing_text_objects` reads DrawingNotes collections, DrawingSketch TextBoxes, and SketchedSymbols.
-- `get_feature_control_frames` reads `Sheet.FeatureControlFrames`, frame metadata, rows, tolerance fields, datum fields, reference keys, and diagnostics.
-- `get_surface_texture_symbols` reads `Sheet.SurfaceTextureSymbols`, SurfaceTextureSymbol metadata, roughness fields, production fields, sampling fields, definition data, reference keys, and diagnostics.
-- `get_welding_symbols` reads `Sheet.WeldingSymbols`, DrawingWeldingSymbol metadata, DrawingWeldingSymbolDefinition, WeldSymbolOne, WeldSymbolTwo, reference keys, and diagnostics.
-- `get_revision_clouds` reads `Sheet.RevisionClouds`, RevisionCloud metadata, RevisionCloudDefinition, control points, reference keys, and diagnostics.
-- `get_edge_symbols` reads `Sheet.EdgeSymbols`, EdgeSymbol metadata, EdgeSymbolDefinition, reference keys, and diagnostics.
-- `get_transition_symbols` reads `Sheet.TransitionSymbols`, TransitionSymbol metadata, leader/attachment metadata, TransitionSymbolDefinition, reference keys, and diagnostics.
-- `create_drawing_document` creates a new Autodesk Inventor `DrawingDocument` through `Application.Documents.Add` with explicit `templatePath` and optional `visible`.
-- Runtime does not perform semantic text analysis, TT/TU recognition, GOST interpretation, or engineering conclusions.
-- Runtime does not perform tolerance interpretation, GOST validation, GD&T semantic analysis, or engineering conclusions.
-- Runtime does not perform roughness interpretation, surface texture semantic analysis, GOST validation, or engineering conclusions.
-- Runtime does not perform weld interpretation, welding semantic analysis, GOST validation, or engineering conclusions.
-- Runtime does not perform drawing symbol interpretation, GOST/ISO validation, correctness checking, or engineering conclusions.
-- Runtime does not choose drawing templates, generate drawings, create views automatically, fill title blocks, export, or perform engineering decisions.
+- Package 28 is complete.
+- Current checkpoint: `v0.28 complete PDF export pipeline`.
+- Live registry after Package 28: `127 registered / 127 unique`, no duplicate command names.
 
-Current checkpoint:
+Verified Drawing Generation / Export Hands:
+
+- `create_drawing_document`
+- `create_base_view`
+- `create_projected_view`
+- `create_section_line`
+- `create_section_view`
+- `create_detail_view`
+- `create_auxiliary_view`
+- `add_drawing_view_break`
+- `export_pdf`
+
+Verified export command:
+
+- `export_pdf` exports the active Autodesk Inventor `DrawingDocument` through the PDF Translator Add-In and `TranslatorAddIn.SaveCopyAs`.
+- It requires an explicit output path.
+- It blocks existing files unless `overwrite=true`.
+- It verifies output file existence.
+- It returns file size and timestamp facts.
+
+Verified PDF Translator:
 
 ```text
-Package 24 complete - Section View Pipeline
+ClientId: {0AC6FD96-2F4D-42CE-8BE0-8AEA580399E4}
+DisplayName: Translator: PDF / Translyator: PDF
+supportsSaveCopyAs = true
+translatorAvailable = true
 ```
 
-Verified pipeline: `create_drawing_document` → `create_base_view` →
-`create_section_line` → `create_section_view`.
+Verified end-to-end pipeline:
 
-The section-line sketch is owned by `parentView.Sketches` and uses explicit
-sheet-to-sketch coordinate conversion before `AddSectionView2`.
+```text
+DrawingDocument
+-> Base/Projected/Section/Detail/Auxiliary Views
+-> Drawing View Break
+-> PDF Export
+```
+
+Runtime does not:
+
+- choose drawing templates;
+- choose drawing views or geometry;
+- create views automatically;
+- fill title blocks automatically;
+- choose export paths;
+- create missing directories;
+- overwrite without explicit `overwrite=true`;
+- tune PDF options semantically;
+- perform engineering or GOST decisions.
 
 Next expected stage:
 
 ```text
-Capability Audit - Drawing Export Hands (PDF, DWG, DXF)
+Capability Audit - Drawing Export Hands (DWG / DXF)
 ```
 
 Required next check:

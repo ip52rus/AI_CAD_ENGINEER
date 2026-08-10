@@ -205,6 +205,25 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 28:
+
+```text
+Package 28 complete - PDF Export Pipeline checkpoint
+```
+
+`export_pdf` is VERIFIED. It exports the active Autodesk Inventor
+`DrawingDocument` through the PDF Translator Add-In and
+`TranslatorAddIn.SaveCopyAs`.
+
+Runtime requires an explicit output path, does not create folders, does not
+overwrite without `overwrite=true`, uses default translator options, verifies
+that the output file exists, and reports file size/timestamp facts and
+diagnostics. Runtime does not tune PDF options, regenerate drawing geometry,
+or perform engineering/GOST decisions.
+
+Next correct action: run a Capability Audit for Drawing Export Hands - DWG /
+DXF.
+
 Current milestone addendum after Package 23:
 
 ```text
