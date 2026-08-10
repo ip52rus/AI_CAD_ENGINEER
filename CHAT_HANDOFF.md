@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.31 complete drawing dimensions creation and editing pipeline`.
+- Current checkpoint: `v0.32 complete general dimension tolerance pipeline`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 31-36 - Drawing Dimensions Creation and Editing Pipeline.
-- Registry after Package 31-36: `144 registered / 144 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 31-36 checkpoint commit.
+- Latest completed checkpoint: Package 37-39 - General Dimension Tolerance Pipeline.
+- Registry after Package 37-39: `152 registered / 152 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 37-39 checkpoint commit.
 
 ## Architecture Rules
 
@@ -56,6 +56,76 @@
 - General dimension clear model value override Hand: `clear_general_dimension_model_value_override`.
 - General dimension style Hand: `set_general_dimension_style`.
 - General dimension layer Hand: `set_general_dimension_layer`.
+- General dimension tolerance Eye: `get_general_dimension_tolerance`.
+- General dimension tolerance default Hand: `set_general_dimension_tolerance_default`.
+- General dimension tolerance basic Hand: `set_general_dimension_tolerance_basic`.
+- General dimension tolerance reference Hand: `set_general_dimension_tolerance_reference`.
+- General dimension tolerance symmetric Hand: `set_general_dimension_tolerance_symmetric`.
+- General dimension tolerance deviation Hand: `set_general_dimension_tolerance_deviation`.
+- General dimension tolerance limits Hand: `set_general_dimension_tolerance_limits`.
+- General dimension tolerance fits Hand: `set_general_dimension_tolerance_fits`.
+
+## General Dimension Tolerance Pipeline
+
+Verified commands:
+
+- `get_general_dimension_tolerance`
+- `set_general_dimension_tolerance_default`
+- `set_general_dimension_tolerance_basic`
+- `set_general_dimension_tolerance_reference`
+- `set_general_dimension_tolerance_symmetric`
+- `set_general_dimension_tolerance_deviation`
+- `set_general_dimension_tolerance_limits`
+- `set_general_dimension_tolerance_fits`
+
+Coverage:
+
+- `GeneralDimension.Tolerance`;
+- `Tolerance.ToleranceType`;
+- `Tolerance.Upper`;
+- `Tolerance.Lower`;
+- `Tolerance.HoleTolerance`;
+- `Tolerance.ShaftTolerance`;
+- `Tolerance.SetToDefault()`;
+- `Tolerance.SetToBasic()`;
+- `Tolerance.SetToReference()`;
+- `Tolerance.SetToSymmetric(...)`;
+- `Tolerance.SetToDeviation(...)`;
+- `Tolerance.SetToLimits(...)`;
+- `Tolerance.SetToFits(...)`;
+- before/after tolerance facts;
+- reference keys where supported;
+- diagnostics.
+
+Verified fits behavior:
+
+```text
+dimensionIndex = 2
+toleranceType = limits_fits_stacked
+holeTolerance = H7
+shaftTolerance = g6
+result toleranceType = kLimitsFitsStackedTolerance
+diagnostics = []
+```
+
+Observed Inventor behavior:
+
+After `Tolerance.SetToDefault()`, Inventor changes `ToleranceType` to
+`kDefaultTolerance` and resets upper/lower values to `0`, but previously
+assigned `HoleTolerance` / `ShaftTolerance` strings may remain readable.
+Runtime does not compensate for or clear those strings.
+
+Runtime boundary:
+
+- caller selects the dimension;
+- caller selects tolerance mode;
+- caller supplies numeric values;
+- caller supplies fit strings;
+- Runtime performs no unit conversion;
+- Runtime performs no sign normalization;
+- Runtime performs no upper/lower reordering;
+- Runtime performs no fit validation or engineering selection;
+- Runtime performs no GOST/ESKD tolerance decisions.
 
 ## Drawing Dimensions Creation and Editing Pipeline
 
@@ -247,6 +317,9 @@ Verified runtime tests:
 - Runtime does not overwrite unless `overwrite=true`.
 - Runtime does not choose dimension geometry, placement, style, layer,
   tolerance, precision, text, or model-value overrides.
+- Runtime does not convert tolerance units, normalize signs, reorder
+  upper/lower values, validate fit strings, or apply GOST/ESKD tolerance
+  decisions.
 - Semantic text understanding is outside Runtime.
 - GOST interpretation and validation are outside Runtime.
 - GD&T semantic interpretation is outside Runtime.
@@ -268,7 +341,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - General Dimension Tolerance capabilities
+Capability Audit - next practical drawing engineering layer
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

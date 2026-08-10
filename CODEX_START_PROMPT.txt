@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 31-36 are complete.
-- Current checkpoint: `v0.31 complete drawing dimensions creation and editing pipeline`.
-- Live registry after Package 31-36: `144 registered / 144 unique`, no duplicate command names.
+- Package 37-39 are complete.
+- Current checkpoint: `v0.32 complete general dimension tolerance pipeline`.
+- Live registry after Package 37-39: `152 registered / 152 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -49,6 +49,14 @@ Verified Drawing Generation / Export Hands:
 - `clear_general_dimension_model_value_override`
 - `set_general_dimension_style`
 - `set_general_dimension_layer`
+- `get_general_dimension_tolerance`
+- `set_general_dimension_tolerance_default`
+- `set_general_dimension_tolerance_basic`
+- `set_general_dimension_tolerance_reference`
+- `set_general_dimension_tolerance_symmetric`
+- `set_general_dimension_tolerance_deviation`
+- `set_general_dimension_tolerance_limits`
+- `set_general_dimension_tolerance_fits`
 
 Verified Parts List + Balloon pipeline:
 
@@ -74,7 +82,17 @@ explicit GeometryIntent selectors
 
 explicit GeneralDimension
 -> text / visibility / precision / model-value override / style / layer edit
+
+explicit GeneralDimension
+-> tolerance read / default / basic / reference / symmetric / deviation / limits / fits
 ```
+
+Observed Inventor tolerance behavior:
+
+- `Tolerance.SetToDefault()` changes `ToleranceType` to `kDefaultTolerance`.
+- `SetToDefault()` resets `Upper` / `Lower` to `0`.
+- Previously assigned `HoleTolerance` / `ShaftTolerance` strings may remain readable.
+- Runtime records this factual API state and does not compensate or clear strings.
 
 Verified export command:
 
@@ -136,12 +154,17 @@ Runtime does not:
 - select drawing geometry automatically;
 - optimize drawing annotation layout;
 - choose dimension geometry, placement, style, layer, tolerance, precision, text, or model-value overrides;
+- convert tolerance units;
+- normalize tolerance signs;
+- reorder upper/lower tolerance values;
+- validate or choose fit strings;
+- apply GOST/ESKD tolerance decisions;
 - perform engineering or GOST decisions.
 
 Next expected stage:
 
 ```text
-Capability Audit - General Dimension Tolerance capabilities
+Capability Audit - next practical drawing engineering layer
 ```
 
 Required next check:

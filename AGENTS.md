@@ -205,6 +205,39 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 37-39:
+
+```text
+Package 37-39 complete - General Dimension Tolerance Pipeline checkpoint
+```
+
+Verified commands:
+
+```text
+get_general_dimension_tolerance
+set_general_dimension_tolerance_default
+set_general_dimension_tolerance_basic
+set_general_dimension_tolerance_reference
+set_general_dimension_tolerance_symmetric
+set_general_dimension_tolerance_deviation
+set_general_dimension_tolerance_limits
+set_general_dimension_tolerance_fits
+```
+
+Runtime reads and writes `GeneralDimension.Tolerance` facts only on explicitly
+selected `GeneralDimension` objects. Caller selects dimension, tolerance mode,
+numeric values, and fit strings. Runtime performs no unit conversion, sign
+normalization, upper/lower reordering, fit validation, engineering selection,
+or GOST/ESKD tolerance decisions.
+
+Observed Inventor behavior: after `Tolerance.SetToDefault()`, `ToleranceType`
+becomes `kDefaultTolerance` and upper/lower values reset, but previous
+`HoleTolerance` / `ShaftTolerance` strings may remain readable. Runtime must
+not compensate for or clear those strings.
+
+Next correct action: run a Capability Audit to choose the next practical
+drawing engineering layer before writing code.
+
 Current milestone addendum after Package 31-36:
 
 ```text

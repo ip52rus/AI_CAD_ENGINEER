@@ -262,6 +262,30 @@ public class InventorCommandDispatcher
     private readonly SetGeneralDimensionLayerCommand
         _setGeneralDimensionLayerCommand;
 
+    private readonly GetGeneralDimensionToleranceCommand
+        _getGeneralDimensionToleranceCommand;
+
+    private readonly SetGeneralDimensionToleranceDefaultCommand
+        _setGeneralDimensionToleranceDefaultCommand;
+
+    private readonly SetGeneralDimensionToleranceBasicCommand
+        _setGeneralDimensionToleranceBasicCommand;
+
+    private readonly SetGeneralDimensionToleranceReferenceCommand
+        _setGeneralDimensionToleranceReferenceCommand;
+
+    private readonly SetGeneralDimensionToleranceSymmetricCommand
+        _setGeneralDimensionToleranceSymmetricCommand;
+
+    private readonly SetGeneralDimensionToleranceDeviationCommand
+        _setGeneralDimensionToleranceDeviationCommand;
+
+    private readonly SetGeneralDimensionToleranceLimitsCommand
+        _setGeneralDimensionToleranceLimitsCommand;
+
+    private readonly SetGeneralDimensionToleranceFitsCommand
+        _setGeneralDimensionToleranceFitsCommand;
+
     private readonly GetDrawingViewOriginIndicatorCommand
         _getDrawingViewOriginIndicatorCommand;
 
@@ -782,6 +806,38 @@ public class InventorCommandDispatcher
 
         _setGeneralDimensionLayerCommand =
             new SetGeneralDimensionLayerCommand(
+                inventor);
+
+        _getGeneralDimensionToleranceCommand =
+            new GetGeneralDimensionToleranceCommand(
+                inventor);
+
+        _setGeneralDimensionToleranceDefaultCommand =
+            new SetGeneralDimensionToleranceDefaultCommand(
+                inventor);
+
+        _setGeneralDimensionToleranceBasicCommand =
+            new SetGeneralDimensionToleranceBasicCommand(
+                inventor);
+
+        _setGeneralDimensionToleranceReferenceCommand =
+            new SetGeneralDimensionToleranceReferenceCommand(
+                inventor);
+
+        _setGeneralDimensionToleranceSymmetricCommand =
+            new SetGeneralDimensionToleranceSymmetricCommand(
+                inventor);
+
+        _setGeneralDimensionToleranceDeviationCommand =
+            new SetGeneralDimensionToleranceDeviationCommand(
+                inventor);
+
+        _setGeneralDimensionToleranceLimitsCommand =
+            new SetGeneralDimensionToleranceLimitsCommand(
+                inventor);
+
+        _setGeneralDimensionToleranceFitsCommand =
+            new SetGeneralDimensionToleranceFitsCommand(
                 inventor);
 
         _getDrawingViewOriginIndicatorCommand =
@@ -1395,6 +1451,38 @@ public class InventorCommandDispatcher
 
                 "set_general_dimension_layer" =>
                     _setGeneralDimensionLayerCommand.Execute(
+                        root),
+
+                "get_general_dimension_tolerance" =>
+                    _getGeneralDimensionToleranceCommand.Execute(
+                        root),
+
+                "set_general_dimension_tolerance_default" =>
+                    _setGeneralDimensionToleranceDefaultCommand.Execute(
+                        root),
+
+                "set_general_dimension_tolerance_basic" =>
+                    _setGeneralDimensionToleranceBasicCommand.Execute(
+                        root),
+
+                "set_general_dimension_tolerance_reference" =>
+                    _setGeneralDimensionToleranceReferenceCommand.Execute(
+                        root),
+
+                "set_general_dimension_tolerance_symmetric" =>
+                    _setGeneralDimensionToleranceSymmetricCommand.Execute(
+                        root),
+
+                "set_general_dimension_tolerance_deviation" =>
+                    _setGeneralDimensionToleranceDeviationCommand.Execute(
+                        root),
+
+                "set_general_dimension_tolerance_limits" =>
+                    _setGeneralDimensionToleranceLimitsCommand.Execute(
+                        root),
+
+                "set_general_dimension_tolerance_fits" =>
+                    _setGeneralDimensionToleranceFitsCommand.Execute(
                         root),
 
                 "get_drawing_view_origin_indicator" =>

@@ -1,5 +1,49 @@
 # PROJECT REVIEW
 
+## Package 37-39 checkpoint - current state
+
+Package 37-39 closes the verified General Dimension Tolerance Pipeline. The
+new commands read and set `GeneralDimension.Tolerance` state on explicitly
+selected `GeneralDimension` objects.
+
+Current live command inventory after Package 37-39:
+
+```text
+152 registered JSON commands
+152 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified commands:
+
+```text
+get_general_dimension_tolerance
+set_general_dimension_tolerance_default
+set_general_dimension_tolerance_basic
+set_general_dimension_tolerance_reference
+set_general_dimension_tolerance_symmetric
+set_general_dimension_tolerance_deviation
+set_general_dimension_tolerance_limits
+set_general_dimension_tolerance_fits
+```
+
+Verified coverage includes `Tolerance.SetToDefault`, `SetToBasic`,
+`SetToReference`, `SetToSymmetric`, `SetToDeviation`, `SetToLimits`, and
+`SetToFits`.
+
+Observed Inventor API behavior: after `SetToDefault()`, `ToleranceType`
+becomes `kDefaultTolerance` and upper/lower values reset to `0`, but previous
+hole/shaft tolerance strings may remain readable. Runtime does not compensate
+for or clear these strings.
+
+Runtime boundaries remain explicit: no automatic tolerance mode selection, no
+unit conversion, no sign normalization, no upper/lower reordering, no fit
+validation or engineering selection, and no GOST/ESKD tolerance decisions.
+
+Next capability check: choose the next practical drawing engineering layer
+through Capability Audit first.
+
 ## Package 31-36 checkpoint - current state
 
 Package 31-36 closes the verified Drawing Dimensions Creation and Editing

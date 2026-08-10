@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.31 complete drawing dimensions creation and editing pipeline
+v0.32 complete general dimension tolerance pipeline
 ```
 
 ## Ground rules
@@ -41,7 +41,8 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Drawing views | PARTIAL | `get_drawing_views`, `get_drawing_view`, `get_drawing_views_detailed`, `get_drawing_view_relationships`, `get_drawing_curves`, `get_view_model_references`, `get_curve_model_reference`, `create_base_view`, `create_projected_view`, `create_auxiliary_view`, `add_drawing_view_break`, `move_drawing_view`, `delete_drawing_view`, `rename_drawing_view`, `rotate_drawing_view`, `set_drawing_view_scale`, `set_drawing_view_style`, `set_drawing_view_label_visibility`, `set_drawing_view_scale_inheritance`, `set_drawing_view_alignment`, `set_drawing_view_suppressed` | drawing views / relationships / curve geometry, `create_auxiliary_view`, and `add_drawing_view_break` are verified areas | - | detail/crop view improvements not covered by confirmed commands | P1 |
 | Drawing Generation Hands | PARTIAL | `create_drawing_document`, `create_sheet`, `create_base_view`, `create_projected_view`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | `create_drawing_document`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow and other drawing-generation Hands not yet audited | P1 |
 | Drawing Export Hands | VERIFIED | `export_pdf`, `export_dwg`, `export_dxf` | `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow is not implemented | P0 maintained |
-| Drawing dimensions | VERIFIED | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `create_angular_dimension`, `create_ordinate_dimension`, `get_drawing_view_origin_indicator`, `create_drawing_view_origin_indicator`, `create_baseline_dimension`, `create_chain_dimension`, `set_general_dimension_formatted_text`, `set_general_dimension_hide_value`, `set_general_dimension_precision`, `set_general_dimension_model_value_override`, `clear_general_dimension_model_value_override`, `set_general_dimension_style`, `set_general_dimension_layer`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | linear/diameter/radius plus Package 31-36 commands listed in explicit PASS section | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | tolerance capabilities require next audit; symmetric/chamfer dimensions are not confirmed | P0 maintained |
+| Drawing dimensions | VERIFIED | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `create_angular_dimension`, `create_ordinate_dimension`, `get_drawing_view_origin_indicator`, `create_drawing_view_origin_indicator`, `create_baseline_dimension`, `create_chain_dimension`, `set_general_dimension_formatted_text`, `set_general_dimension_hide_value`, `set_general_dimension_precision`, `set_general_dimension_model_value_override`, `clear_general_dimension_model_value_override`, `set_general_dimension_style`, `set_general_dimension_layer`, `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | linear/diameter/radius plus Package 31-39 commands listed in explicit PASS section | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | symmetric/chamfer dimensions are not confirmed | P0 maintained |
+| General Dimension Tolerance Pipeline | VERIFIED | `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits` | all Package 37-39 tolerance commands | - | no automatic tolerance selection, no fit validation, no GOST/ESKD tolerance decisions in Runtime | P0 maintained |
 | Hole/thread notes | IMPLEMENTED_UNTESTED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | not separately recorded | - | stable selector variants are still missing; current commands use indexes | P1 |
 | Basic drawing annotation Eyes | IMPLEMENTED_UNTESTED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | not recorded after Package 15A | - | Inventor PASS still required | P0 test when needed |
 | Drawing Text Objects | VERIFIED | `get_drawing_text_objects` | `get_drawing_text_objects`, `get_drawing_text_objects` with `sheetName` | - | - | P0 maintained |
@@ -128,6 +129,14 @@ Exact commands explicitly confirmed:
 {"command":"clear_general_dimension_model_value_override"}
 {"command":"set_general_dimension_style"}
 {"command":"set_general_dimension_layer"}
+{"command":"get_general_dimension_tolerance"}
+{"command":"set_general_dimension_tolerance_default"}
+{"command":"set_general_dimension_tolerance_basic"}
+{"command":"set_general_dimension_tolerance_reference"}
+{"command":"set_general_dimension_tolerance_symmetric"}
+{"command":"set_general_dimension_tolerance_deviation"}
+{"command":"set_general_dimension_tolerance_limits"}
+{"command":"set_general_dimension_tolerance_fits"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -174,6 +183,18 @@ Baseline and chain dimension creation is verified with explicit ordered
 `GeometryIntent` selectors. General dimension editing commands operate only on
 explicitly selected `GeneralDimension` objects and do not choose formatting,
 style, layer, tolerance, placement, or engineering semantics.
+
+Package 37-39 commands are verified for reading and setting general dimension
+tolerance state through explicit caller-selected `GeneralDimension` objects.
+Coverage includes default, basic, reference, symmetric, deviation, limits, and
+fits tolerance modes. Runtime performs no unit conversion, sign normalization,
+upper/lower reordering, fit validation, engineering selection, or GOST/ESKD
+tolerance decisions.
+
+Observed Inventor API behavior: after `Tolerance.SetToDefault()`,
+`ToleranceType` becomes `kDefaultTolerance` and `Upper` / `Lower` reset to `0`,
+but previous `HoleTolerance` / `ShaftTolerance` strings may remain readable.
+Runtime does not compensate for or clear those strings.
 
 ## Experimental commands
 
@@ -541,6 +562,58 @@ Next capability check:
 
 ```text
 Capability Audit - General Dimension Tolerance capabilities
+```
+
+## Package 37-39 result
+
+General Dimension Tolerance Pipeline: **VERIFIED**
+
+Commands:
+
+```text
+get_general_dimension_tolerance
+set_general_dimension_tolerance_default
+set_general_dimension_tolerance_basic
+set_general_dimension_tolerance_reference
+set_general_dimension_tolerance_symmetric
+set_general_dimension_tolerance_deviation
+set_general_dimension_tolerance_limits
+set_general_dimension_tolerance_fits
+```
+
+Coverage:
+
+```text
+GeneralDimension.Tolerance
+Tolerance.ToleranceType
+Tolerance.Upper
+Tolerance.Lower
+Tolerance.HoleTolerance
+Tolerance.ShaftTolerance
+Tolerance.SetToDefault
+Tolerance.SetToBasic
+Tolerance.SetToReference
+Tolerance.SetToSymmetric
+Tolerance.SetToDeviation
+Tolerance.SetToLimits
+Tolerance.SetToFits
+reference keys where supported
+diagnostics
+```
+
+Runtime boundary remains explicit: caller selects the dimension and tolerance
+mode, supplies numeric values and fit strings, and Runtime performs no unit
+conversion, sign normalization, upper/lower reordering, fit validation,
+engineering selection, or GOST/ESKD tolerance decisions.
+
+Observed Inventor behavior: `SetToDefault()` sets `ToleranceType` to
+`kDefaultTolerance` and resets upper/lower values, but previous hole/shaft
+tolerance strings may remain readable. Runtime records factual API state only.
+
+Next capability check:
+
+```text
+Capability Audit - next practical drawing engineering layer
 ```
 
 ## Package 26 result

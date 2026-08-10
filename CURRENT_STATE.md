@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 31-36 documentation sync:
+Current checkpoint after the Package 37-39 documentation sync:
 
 ```text
-v0.31 complete drawing dimensions creation and editing pipeline
+v0.32 complete general dimension tolerance pipeline
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 31-36 checkpoint:
+Live command audit after Package 37-39 checkpoint:
 
 ```text
-144 registered JSON commands
-144 unique registered JSON commands
+152 registered JSON commands
+152 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -435,12 +435,12 @@ Major verified read areas include:
 Next capability check:
 
 ```text
-Capability Audit - General Dimension Tolerance capabilities
+Capability Audit - next practical drawing engineering layer
 ```
 
 Goal:
 
-- determine existing coverage for general dimension tolerance read/write behavior;
+- determine existing coverage before proposing implementation;
 - run an audit before implementation;
 - keep Runtime limited to Eyes and atomic Hands.
 
@@ -752,4 +752,76 @@ Next capability check:
 
 ```text
 Capability Audit - General Dimension Tolerance capabilities
+```
+
+## Package 37-39 checkpoint
+
+Package 37-39 complete: General Dimension Tolerance Pipeline is VERIFIED.
+
+Verified Eye:
+
+```json
+{"command":"get_general_dimension_tolerance"}
+```
+
+Verified Hands:
+
+```json
+{"command":"set_general_dimension_tolerance_default"}
+{"command":"set_general_dimension_tolerance_basic"}
+{"command":"set_general_dimension_tolerance_reference"}
+{"command":"set_general_dimension_tolerance_symmetric"}
+{"command":"set_general_dimension_tolerance_deviation"}
+{"command":"set_general_dimension_tolerance_limits"}
+{"command":"set_general_dimension_tolerance_fits"}
+```
+
+Confirmed scope:
+
+- reads `GeneralDimension.Tolerance` facts;
+- reads tolerance type, upper/lower values, hole tolerance, and shaft tolerance;
+- calls `Tolerance.SetToDefault()`;
+- calls `Tolerance.SetToBasic()`;
+- calls `Tolerance.SetToReference()`;
+- calls `Tolerance.SetToSymmetric(...)`;
+- calls `Tolerance.SetToDeviation(...)`;
+- calls `Tolerance.SetToLimits(...)`;
+- calls `Tolerance.SetToFits(...)`;
+- returns before/after tolerance state, reference keys where available, and diagnostics.
+
+Verified fits behavior:
+
+```text
+dimensionIndex = 2
+toleranceType = limits_fits_stacked
+holeTolerance = H7
+shaftTolerance = g6
+result toleranceType = kLimitsFitsStackedTolerance
+diagnostics = []
+```
+
+Observed Inventor API behavior:
+
+After `Tolerance.SetToDefault()`, Inventor changes `ToleranceType` to
+`kDefaultTolerance` and resets `Upper` / `Lower` to `0`, but previously assigned
+`HoleTolerance` / `ShaftTolerance` strings may remain readable on the
+`Tolerance` object. Runtime records this fact and does not compensate or clear
+those strings.
+
+Runtime boundary:
+
+- caller selects the dimension;
+- caller selects the tolerance mode;
+- caller supplies numeric tolerance values;
+- caller supplies fit strings;
+- Runtime performs no unit conversion;
+- Runtime performs no sign normalization;
+- Runtime performs no upper/lower reordering;
+- Runtime performs no fit validation or engineering selection;
+- Runtime performs no GOST/ESKD tolerance decisions.
+
+Next capability check:
+
+```text
+Capability Audit - next practical drawing engineering layer
 ```
