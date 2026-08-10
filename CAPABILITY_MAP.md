@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.29 complete DWG/DXF export pipeline
+v0.30 complete parts list and balloon pipeline
 ```
 
 ## Ground rules
@@ -63,7 +63,9 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | GD&T semantic analysis | MISSING | - | - | - | tolerance interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Revision symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Sketched symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
-| Parts Lists | VERIFIED | `get_parts_lists`, legacy aggregate coverage through `get_drawing_tables` | `get_parts_lists` verified for `Sheet.PartsLists`; tested sheet had `Sheet.PartsLists.Count = 0` | - | create/edit/delete/move/format parts list Hands are not confirmed | P1 maintained |
+| Parts Lists | VERIFIED | `get_parts_lists`, `create_parts_list`, legacy aggregate coverage through `get_drawing_tables` | `get_parts_lists` verified for `Sheet.PartsLists`; `create_parts_list` verified for creating one PartsList from an explicit DrawingView and placement point | - | delete/move/edit/format/sort/renumber parts list Hands are not confirmed | P1 maintained |
+| Balloons | VERIFIED | `get_balloons`, `create_balloon` | `create_balloon` verified for one Balloon from explicit DrawingView curve, GeometryIntent, and caller-supplied leader points | - | delete/move/edit balloon Hands are not confirmed | P1 maintained |
+| Parts List + Balloon Pipeline | VERIFIED | `create_parts_list`, `create_balloon` | DrawingView -> Parts List; DrawingView geometry -> GeometryIntent -> Balloon | - | no BOM modification, automatic numbering, automatic placement, geometry selection, layout optimization, or engineering/GOST decisions in Runtime | P0 maintained |
 | Revision Tables | VERIFIED | `get_revision_tables`, legacy aggregate coverage through `get_drawing_tables` | `get_revision_tables` found one revision table with columns, rows, cells, and metadata | - | create/edit/delete/move/format revision table Hands are not confirmed | P1 maintained |
 | Drawing Table Collections Diagnostics | VERIFIED | `get_drawing_table_collections` | confirmed counts and metadata for `CustomTables`, `HoleTables`, `PartsLists`, and `RevisionTables` | - | not intended to read full row/cell content | P0 maintained |
 | CustomTables Discovery | VERIFIED | `get_drawing_table_collections` | confirmed GOST table is `Sheet.CustomTables` / `kCustomTableObject` | - | - | P0 maintained |
@@ -111,6 +113,8 @@ Exact commands explicitly confirmed:
 {"command":"export_pdf"}
 {"command":"export_dwg"}
 {"command":"export_dxf"}
+{"command":"create_parts_list"}
+{"command":"create_balloon"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -138,6 +142,10 @@ Exact commands explicitly confirmed:
 `export_dwg` is verified for exporting the active Autodesk Inventor `DrawingDocument` through the DWG Translator Add-In and `TranslatorAddIn.SaveCopyAs`, with caller-supplied DWG INI, overwrite protection, output file verification, and no interactive dialog.
 
 `export_dxf` is verified for exporting the active Autodesk Inventor `DrawingDocument` through the DXF Translator Add-In and `TranslatorAddIn.SaveCopyAs`, with caller-supplied DXF INI, overwrite protection, output file verification, and no interactive dialog.
+
+`create_parts_list` is verified for creating exactly one Inventor `Sheet.PartsLists` object from an explicitly selected existing `DrawingView` and explicit placement point.
+
+`create_balloon` is verified for creating exactly one Inventor `Balloon` from an explicitly selected `DrawingView` curve through `Sheet.CreateGeometryIntent` and `Sheet.Balloons.Add`.
 
 ## Experimental commands
 
@@ -415,6 +423,41 @@ caller-supplied DXF INI where transmittal is disabled. Runtime does not
 generate INI files, choose AutoCAD versions, choose mappings/layers, choose
 transmittal behavior, create directories, overwrite without explicit
 permission, or perform engineering/GOST decisions.
+
+Next capability check: choose the next practical engineering layer.
+
+## Package 30 result
+
+Parts List + Balloon Pipeline: **VERIFIED**
+
+Commands:
+
+```text
+create_parts_list
+create_balloon
+```
+
+Verified pipelines:
+
+```text
+DrawingView -> Parts List
+DrawingView geometry -> GeometryIntent -> Balloon
+```
+
+Coverage:
+
+```text
+Sheet.PartsLists.Add
+Sheet.CreateGeometryIntent
+Sheet.Balloons.Add
+Balloon reference keys
+Balloon value sets
+diagnostics
+```
+
+Runtime does not modify BOM data, choose item numbering automatically, choose
+balloon placement, select geometry, optimize layout, or perform
+engineering/GOST decisions.
 
 Next capability check: choose the next practical engineering layer.
 

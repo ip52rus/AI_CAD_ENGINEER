@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 29 is complete.
-- Current checkpoint: `v0.29 complete DWG/DXF export pipeline`.
-- Live registry after Package 29: `129 registered / 129 unique`, no duplicate command names.
+- Package 30 is complete.
+- Current checkpoint: `v0.30 complete parts list and balloon pipeline`.
+- Live registry after Package 30: `131 registered / 131 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -34,6 +34,19 @@ Verified Drawing Generation / Export Hands:
 - `export_pdf`
 - `export_dwg`
 - `export_dxf`
+- `create_parts_list`
+- `create_balloon`
+
+Verified Parts List + Balloon pipeline:
+
+```text
+DrawingView -> Parts List
+DrawingView geometry -> GeometryIntent -> Balloon
+```
+
+`create_parts_list` creates one Inventor PartsList from explicit caller inputs.
+`create_balloon` creates one Inventor Balloon from an explicit DrawingView curve
+and caller-supplied leader points.
 
 Verified export command:
 
@@ -89,6 +102,11 @@ Runtime does not:
 - tune PDF/DWG/DXF options semantically;
 - generate INI files;
 - choose AutoCAD versions, mappings/layers, or transmittal behavior;
+- modify BOM data;
+- choose item numbering automatically;
+- choose balloon placement;
+- select drawing geometry automatically;
+- optimize drawing annotation layout;
 - perform engineering or GOST decisions.
 
 Next expected stage:

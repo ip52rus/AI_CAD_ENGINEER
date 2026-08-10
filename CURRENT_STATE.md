@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 29 documentation sync:
+Current checkpoint after the Package 30 documentation sync:
 
 ```text
-v0.29 complete DWG/DXF export pipeline
+v0.30 complete parts list and balloon pipeline
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 29H:
+Live command audit after Package 30 checkpoint:
 
 ```text
-129 registered JSON commands
-129 unique registered JSON commands
+131 registered JSON commands
+131 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -653,5 +653,43 @@ Runtime does not choose output formats automatically, generate INI files,
 choose AutoCAD versions, choose mappings/layers, choose transmittal behavior,
 create directories, overwrite without explicit permission, or perform
 engineering/GOST decisions.
+
+Next capability check: choose the next practical engineering layer.
+
+## Package 30 checkpoint
+
+Package 30 complete: Parts List + Balloon Pipeline is VERIFIED.
+
+Verified commands:
+
+```json
+{"command":"create_parts_list"}
+{"command":"create_balloon"}
+```
+
+Verified pipelines:
+
+```text
+DrawingView
+-> Parts List
+
+DrawingView geometry
+-> GeometryIntent
+-> Balloon
+```
+
+`create_parts_list` creates exactly one Inventor `Sheet.PartsLists` object from
+an explicitly selected existing `DrawingView` and explicit placement point.
+It does not create or modify BOM data, choose item numbering automatically,
+sort rows, format columns, optimize placement, or perform engineering/GOST
+decisions.
+
+`create_balloon` creates exactly one Inventor `Balloon` from an explicitly
+selected `DrawingView` curve. Runtime creates `Sheet.CreateGeometryIntent` for
+the selected `DrawingCurve`, builds the Inventor `LeaderPoints`
+`ObjectCollection` from caller-supplied sheet points followed by the
+`GeometryIntent`, and calls `Sheet.Balloons.Add`. It does not choose geometry,
+choose balloon placement, optimize leaders, renumber items, modify BOM data,
+or perform engineering/GOST decisions.
 
 Next capability check: choose the next practical engineering layer.

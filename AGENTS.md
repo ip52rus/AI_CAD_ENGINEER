@@ -205,6 +205,38 @@ Rules:
 
 ## 11. Current milestone
 
+Current milestone addendum after Package 30:
+
+```text
+Package 30 complete - Parts List + Balloon Pipeline checkpoint
+```
+
+Verified commands:
+
+```text
+create_parts_list
+create_balloon
+```
+
+Verified pipelines:
+
+```text
+DrawingView -> Parts List
+DrawingView geometry -> GeometryIntent -> Balloon
+```
+
+`create_parts_list` creates one Inventor PartsList from an explicit existing
+DrawingView and explicit placement point. `create_balloon` creates one Inventor
+Balloon from an explicit DrawingView curve, `Sheet.CreateGeometryIntent`, and
+caller-supplied leader points.
+
+Runtime still does not modify BOM data, choose item numbering automatically,
+choose balloon placement, select geometry, optimize layout, or perform
+engineering/GOST decisions.
+
+Next correct action: run a Capability Check to choose the next practical
+engineering layer.
+
 Current milestone addendum after Package 29:
 
 ```text

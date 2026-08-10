@@ -1,5 +1,33 @@
 # PROJECT REVIEW
 
+## Package 30 checkpoint - current state
+
+Package 30 closes the verified Parts List + Balloon Pipeline. The commands
+`create_parts_list` and `create_balloon` create one Inventor PartsList and one
+Inventor Balloon from explicit caller inputs.
+
+Current live command inventory after Package 30:
+
+```text
+131 registered JSON commands
+131 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified pipelines:
+
+```text
+DrawingView -> Parts List
+DrawingView geometry -> GeometryIntent -> Balloon
+```
+
+Runtime boundaries remain explicit: no BOM modification, no automatic item
+numbering, no automatic balloon placement, no geometry selection, no layout
+optimization, and no engineering/GOST decisions.
+
+Next capability check: choose the next practical engineering layer.
+
 ## Package 29 checkpoint - current state
 
 Package 29 closes the verified DWG/DXF Export Pipeline. The commands

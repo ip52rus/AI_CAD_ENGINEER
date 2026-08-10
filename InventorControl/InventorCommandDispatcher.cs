@@ -91,6 +91,12 @@ public class InventorCommandDispatcher
     private readonly AddDrawingViewBreakCommand
         _addDrawingViewBreakCommand;
 
+    private readonly CreatePartsListCommand
+        _createPartsListCommand;
+
+    private readonly CreateBalloonCommand
+        _createBalloonCommand;
+
     private readonly ActivateDocumentCommand
         _activateDocumentCommand;
 
@@ -509,6 +515,14 @@ public class InventorCommandDispatcher
 
         _addDrawingViewBreakCommand =
             new AddDrawingViewBreakCommand(
+                inventor);
+
+        _createPartsListCommand =
+            new CreatePartsListCommand(
+                inventor);
+
+        _createBalloonCommand =
+            new CreateBalloonCommand(
                 inventor);
 
         _activateDocumentCommand =
@@ -1062,6 +1076,14 @@ public class InventorCommandDispatcher
 
                 "add_drawing_view_break" =>
                     _addDrawingViewBreakCommand.Execute(
+                        root),
+
+                "create_parts_list" =>
+                    _createPartsListCommand.Execute(
+                        root),
+
+                "create_balloon" =>
+                    _createBalloonCommand.Execute(
                         root),
 
                 "activate_document" =>

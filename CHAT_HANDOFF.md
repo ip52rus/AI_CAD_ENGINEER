@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.29 complete DWG/DXF export pipeline`.
+- Current checkpoint: `v0.30 complete parts list and balloon pipeline`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed package: Package 29 - DWG/DXF Export Pipeline.
-- Registry after Package 29: `129 registered / 129 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 29 checkpoint commit.
+- Latest completed package: Package 30 - Parts List + Balloon Pipeline.
+- Registry after Package 30: `131 registered / 131 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 30 checkpoint commit.
 
 ## Architecture Rules
 
@@ -41,6 +41,42 @@
 - PDF Export Hand: `export_pdf`.
 - DWG Export Hand: `export_dwg`.
 - DXF Export Hand: `export_dxf`.
+- Parts List creation Hand: `create_parts_list`.
+- Balloon creation Hand: `create_balloon`.
+
+## Parts List + Balloon Pipeline
+
+Verified commands:
+
+- `create_parts_list`
+- `create_balloon`
+
+Verified pipelines:
+
+```text
+DrawingView
+-> Parts List
+
+DrawingView geometry
+-> GeometryIntent
+-> Balloon
+```
+
+Runtime coverage:
+
+- `Sheet.PartsLists.Add`;
+- `Sheet.CreateGeometryIntent`;
+- `Sheet.Balloons.Add`;
+- explicit DrawingView selection;
+- explicit DrawingCurve index selection;
+- explicit leader points;
+- PartsList and Balloon reference keys;
+- Balloon value sets;
+- structured diagnostics.
+
+Runtime does not modify BOM data, choose item numbering automatically, choose
+balloon placement, select geometry, optimize layout, or perform
+engineering/GOST decisions.
 
 ## Drawing Generation / Export Hands
 
