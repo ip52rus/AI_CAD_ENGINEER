@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 46 is complete.
-- Current checkpoint: `v0.37 complete surface texture symbol primitives`.
-- Live registry after Package 46: `170 registered / 170 unique`, no duplicate command names.
+- Package 47 is complete.
+- Current checkpoint: `v0.38 complete welding symbol primitives`.
+- Live registry after Package 47: `173 registered / 173 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -80,6 +80,31 @@ Verified Drawing Generation / Export Hands:
 - `create_surface_texture_symbol`
 - `move_surface_texture_symbol`
 - `delete_surface_texture_symbol`
+- `get_welding_symbols`
+- `create_welding_symbol`
+- `move_welding_symbol`
+- `delete_welding_symbol`
+
+Verified Welding Symbol primitives:
+
+```text
+get_welding_symbols
+-> create_welding_symbol
+-> optional GeometryIntent attachment
+-> move_welding_symbol
+-> delete_welding_symbol
+```
+
+Important Inventor API findings:
+
+- `DrawingWeldingSymbolDefinitions.Add(definitionIndex)` is the confirmed
+  working definition initialization pattern.
+- `Type.Missing` for `TargetIndex` was not usable in live Inventor 2027 and
+  produced `DrawingWeldingSymbols.Add` `E_FAIL`.
+- Leader-based welding symbol movement uses
+  `DrawingWeldingSymbol.Leader.RootNode.Position`.
+- `E_FAIL` while reading properties not applicable to a specific weld symbol
+  type remains property-level diagnostics and does not mean the object failed.
 
 Verified Surface Texture Symbol primitives:
 
@@ -344,12 +369,13 @@ Runtime does not:
 - route leaders intelligently;
 - decide roughness values, choose Ra/Rz, infer machining process, choose
   material-removal requirement, choose geometry or placement, apply GOST/ESKD
-  semantics, or perform engineering decisions.
+  semantics, choose weld type/size/placement/attachment, interpret welding
+  standards, modify model weld geometry, or perform engineering decisions.
 
 Next expected stage:
 
 ```text
-Capability Audit - Weld Symbols / Welding Annotations
+Capability Audit - Datum identifiers / Datum Target Symbols
 ```
 
 Required next check:

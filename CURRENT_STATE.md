@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 46 documentation sync:
+Current checkpoint after the Package 47 documentation sync:
 
 ```text
-v0.37 complete surface texture symbol primitives
+v0.38 complete welding symbol primitives
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 46 checkpoint:
+Live command audit after Package 47 checkpoint:
 
 ```text
-170 registered JSON commands
-170 unique registered JSON commands
+173 registered JSON commands
+173 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -618,11 +618,73 @@ Runtime boundary:
 - Runtime does not automatically place annotations;
 - Runtime does not interpret drawing meaning.
 
-Next capability check completed by Package 45 and Package 46. Current next
+Next capability check completed by Package 45, Package 46, and Package 47. Current next
 capability check:
 
 ```text
-Capability Audit - Weld Symbols / Welding Annotations
+Capability Audit - Datum identifiers / Datum Target Symbols
+```
+
+## Package 47 checkpoint
+
+Package 47 complete: native drawing Welding Symbol primitives are VERIFIED.
+
+Verified commands:
+
+```text
+get_welding_symbols
+create_welding_symbol
+move_welding_symbol
+delete_welding_symbol
+```
+
+Verified welding symbol pipeline:
+
+```text
+get_welding_symbols
+-> create_welding_symbol
+-> optional GeometryIntent attachment
+-> move_welding_symbol
+-> delete_welding_symbol
+```
+
+Verified native creation pipeline:
+
+```text
+Sheet.WeldingSymbols
+-> DrawingWeldingSymbols.CreateDefinitions()
+-> DrawingWeldingSymbolDefinitions.Add(definitionIndex)
+-> DrawingWeldingSymbolDefinition / WeldSymbolOne / WeldSymbolTwo fields
+-> caller Point2d leader points
+-> optional GeometryIntent LAST
+-> DrawingWeldingSymbols.Add(...)
+-> native DrawingWeldingSymbol
+-> get_welding_symbols
+```
+
+Important Inventor API findings:
+
+- `DrawingWeldingSymbolDefinitions.Add(definitionIndex)` is the confirmed
+  working initialization pattern for definitions.
+- `Type.Missing` for the `TargetIndex` argument was not usable in live
+  Inventor 2027 creation and produced `DrawingWeldingSymbols.Add` `E_FAIL`.
+- Leader-based welding symbol movement is performed through
+  `DrawingWeldingSymbol.Leader.RootNode.Position`.
+- `E_FAIL` from reading properties that are not applicable to a specific weld
+  symbol type remains property-level diagnostics and does not mean the
+  `DrawingWeldingSymbol` object failed.
+
+Runtime does not decide whether welding is required, choose weld type,
+calculate weld size, choose length or pitch, choose arrow/other side semantics,
+choose contour, choose process/method, choose field/all-around state, choose
+geometry, choose attachment, choose placement, interpret GOST/ESKD/AWS/ISO
+welding rules, or modify model weld geometry. External LLM supplies all
+engineering decisions.
+
+Next capability check:
+
+```text
+Capability Audit - Datum identifiers / Datum Target Symbols
 ```
 
 ## Package 45 checkpoint
@@ -687,7 +749,7 @@ GOST/ESKD engineering logic. External LLM supplies all engineering decisions.
 Next capability check:
 
 ```text
-Capability Audit - Weld Symbols / Welding Annotations
+Capability Audit - Datum identifiers / Datum Target Symbols
 ```
 
 ## Package 46 checkpoint
@@ -753,7 +815,7 @@ decisions.
 Next capability check:
 
 ```text
-Capability Audit - Weld Symbols / Welding Annotations
+Capability Audit - Datum identifiers / Datum Target Symbols
 ```
 
 ## Package 24 checkpoint

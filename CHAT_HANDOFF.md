@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.37 complete surface texture symbol primitives`.
+- Current checkpoint: `v0.38 complete welding symbol primitives`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 46 - Surface Texture Symbol primitives.
-- Registry after Package 46: `170 registered / 170 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 46 checkpoint commit.
+- Latest completed checkpoint: Package 47 - Welding Symbol primitives.
+- Registry after Package 47: `173 registered / 173 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 47 checkpoint commit.
 
 ## Architecture Rules
 
@@ -32,7 +32,7 @@
 - Drawing Text Objects: `get_drawing_text_objects`.
 - Feature Control Frames Eye: `get_feature_control_frames`.
 - Surface Texture Symbols: `get_surface_texture_symbols`, `create_surface_texture_symbol`, `move_surface_texture_symbol`, `delete_surface_texture_symbol`.
-- Welding Symbols Eye: `get_welding_symbols`.
+- Welding Symbols: `get_welding_symbols`, `create_welding_symbol`, `move_welding_symbol`, `delete_welding_symbol`.
 - RevisionClouds Eye: `get_revision_clouds`.
 - EdgeSymbols Eye: `get_edge_symbols`.
 - TransitionSymbols Eye: `get_transition_symbols`.
@@ -88,6 +88,61 @@
 - Surface Texture Symbol Hand: `create_surface_texture_symbol`.
 - Surface Texture Symbol move Hand: `move_surface_texture_symbol`.
 - Surface Texture Symbol delete Hand: `delete_surface_texture_symbol`.
+- Welding Symbol Hand: `create_welding_symbol`.
+- Welding Symbol move Hand: `move_welding_symbol`.
+- Welding Symbol delete Hand: `delete_welding_symbol`.
+
+## Welding Symbol Primitives
+
+Verified Welding Symbol commands:
+
+```text
+get_welding_symbols
+create_welding_symbol
+move_welding_symbol
+delete_welding_symbol
+```
+
+Verified pipeline:
+
+```text
+get_welding_symbols
+-> create_welding_symbol
+-> optional GeometryIntent attachment
+-> move_welding_symbol
+-> delete_welding_symbol
+```
+
+Verified native creation pipeline:
+
+```text
+Sheet.WeldingSymbols
+-> DrawingWeldingSymbols.CreateDefinitions()
+-> DrawingWeldingSymbolDefinitions.Add(definitionIndex)
+-> DrawingWeldingSymbolDefinition / WeldSymbolOne / WeldSymbolTwo fields
+-> caller Point2d leader points
+-> optional GeometryIntent LAST
+-> DrawingWeldingSymbols.Add(...)
+-> native DrawingWeldingSymbol
+-> get_welding_symbols
+```
+
+Important Inventor API findings:
+
+- `DrawingWeldingSymbolDefinitions.Add(definitionIndex)` is the confirmed
+  working definition initialization pattern.
+- `Type.Missing` for `TargetIndex` was not usable in live Inventor 2027 and
+  produced `DrawingWeldingSymbols.Add` `E_FAIL`.
+- Leader-based welding symbol movement uses
+  `DrawingWeldingSymbol.Leader.RootNode.Position`.
+- `E_FAIL` while reading properties not applicable to a specific weld symbol
+  type remains property-level diagnostics and does not mean the object failed.
+
+Runtime does not decide whether welding is required, choose weld type,
+calculate weld size, choose length/pitch, choose arrow/other side semantics,
+choose contour/process/method, choose field/all-around state, choose geometry,
+attachment, or placement, interpret GOST/ESKD/AWS/ISO welding rules, or modify
+model weld geometry.
 
 ## Surface Texture Symbol Primitives
 
@@ -658,7 +713,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - Weld Symbols / Welding Annotations
+Capability Audit - Datum identifiers / Datum Target Symbols
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

@@ -1,6 +1,72 @@
 # PROJECT REVIEW
 
-## Package 46 checkpoint - current state
+## Package 47 checkpoint - current state
+
+Package 47 closes native drawing Welding Symbol primitives.
+
+Current live command inventory after Package 47:
+
+```text
+173 registered JSON commands
+173 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified Welding Symbol commands:
+
+```text
+get_welding_symbols
+create_welding_symbol
+move_welding_symbol
+delete_welding_symbol
+```
+
+Verified Welding Symbol pipeline:
+
+```text
+get_welding_symbols
+-> create_welding_symbol
+-> optional GeometryIntent attachment
+-> move_welding_symbol
+-> delete_welding_symbol
+```
+
+Verified native creation pipeline:
+
+```text
+Sheet.WeldingSymbols
+-> DrawingWeldingSymbols.CreateDefinitions()
+-> DrawingWeldingSymbolDefinitions.Add(definitionIndex)
+-> DrawingWeldingSymbolDefinition / WeldSymbolOne / WeldSymbolTwo fields
+-> caller Point2d leader points
+-> optional GeometryIntent LAST
+-> DrawingWeldingSymbols.Add(...)
+-> native DrawingWeldingSymbol
+-> get_welding_symbols
+```
+
+Important Inventor API findings:
+
+- `DrawingWeldingSymbolDefinitions.Add(definitionIndex)` is the confirmed
+  working way to initialize definitions.
+- `Type.Missing` for `TargetIndex` was not usable in live Inventor 2027 and
+  produced `DrawingWeldingSymbols.Add` `E_FAIL`.
+- Leader-based welding symbol movement uses
+  `DrawingWeldingSymbol.Leader.RootNode.Position`.
+- `E_FAIL` while reading properties not applicable to a specific weld symbol
+  type remains property-level diagnostics and does not invalidate the object.
+
+Runtime boundaries remain explicit: no weld requirement decision, no weld type
+selection, no weld size calculation, no length/pitch decision, no arrow/other
+side semantic choice, no contour/process/method decision, no field/all-around
+state selection, no geometry/attachment/placement choice, no GOST/ESKD/AWS/ISO
+welding interpretation, and no model weld modification. External LLM supplies
+all engineering decisions.
+
+Next capability check: Datum identifiers / Datum Target Symbols.
+
+## Package 46 checkpoint
 
 Package 46 closes native drawing Surface Texture Symbol primitives.
 

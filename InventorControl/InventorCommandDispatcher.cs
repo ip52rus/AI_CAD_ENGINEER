@@ -376,6 +376,15 @@ public class InventorCommandDispatcher
     private readonly GetWeldingSymbolsCommand
         _getWeldingSymbolsCommand;
 
+    private readonly CreateWeldingSymbolCommand
+        _createWeldingSymbolCommand;
+
+    private readonly MoveWeldingSymbolCommand
+        _moveWeldingSymbolCommand;
+
+    private readonly DeleteWeldingSymbolCommand
+        _deleteWeldingSymbolCommand;
+
     private readonly GetRevisionCloudsCommand
         _getRevisionCloudsCommand;
 
@@ -1012,6 +1021,18 @@ public class InventorCommandDispatcher
 
         _getWeldingSymbolsCommand =
             new GetWeldingSymbolsCommand(
+                inventor);
+
+        _createWeldingSymbolCommand =
+            new CreateWeldingSymbolCommand(
+                inventor);
+
+        _moveWeldingSymbolCommand =
+            new MoveWeldingSymbolCommand(
+                inventor);
+
+        _deleteWeldingSymbolCommand =
+            new DeleteWeldingSymbolCommand(
                 inventor);
 
         _getRevisionCloudsCommand =
@@ -1729,6 +1750,18 @@ public class InventorCommandDispatcher
 
                 "get_welding_symbols" =>
                     _getWeldingSymbolsCommand.Execute(
+                        root),
+
+                "create_welding_symbol" =>
+                    _createWeldingSymbolCommand.Execute(
+                        root),
+
+                "move_welding_symbol" =>
+                    _moveWeldingSymbolCommand.Execute(
+                        root),
+
+                "delete_welding_symbol" =>
+                    _deleteWeldingSymbolCommand.Execute(
                         root),
 
                 "get_revision_clouds" =>

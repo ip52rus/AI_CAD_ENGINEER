@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.37 complete surface texture symbol primitives
+v0.38 complete welding symbol primitives
 ```
 
 ## Ground rules
@@ -54,7 +54,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Annotation collision/layout logic | EXPERIMENTAL | - | not applicable | `check_annotation_collisions`, `auto_resolve_annotation_collisions` | should not be expanded as Runtime coverage | no priority |
 | Surface Texture Symbols | VERIFIED | `get_surface_texture_symbols`, `create_surface_texture_symbol`, `move_surface_texture_symbol`, `delete_surface_texture_symbol` | `get_surface_texture_symbols`, `get_surface_texture_symbols` with `sheetName`, Package 46 free and attached SurfaceTextureSymbol create/move/delete validation | - | content-edit/style/layer Hands are not confirmed | P0 maintained |
 | Surface texture semantic interpretation | MISSING | - | - | - | roughness interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
-| Welding Symbols Eye | VERIFIED | `get_welding_symbols` | `get_welding_symbols`, `get_welding_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| Welding Symbols | VERIFIED | `get_welding_symbols`, `create_welding_symbol`, `move_welding_symbol`, `delete_welding_symbol` | `get_welding_symbols`, `get_welding_symbols` with `sheetName`, Package 47 create/move/delete validation | - | content-edit/style/layer Hands are not confirmed | P0 maintained |
 | Welding semantic analysis | MISSING | - | - | - | weld interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Drawing Symbol Layer | VERIFIED | `get_feature_control_frames`, `get_surface_texture_symbols`, `get_welding_symbols`, `get_revision_clouds`, `get_edge_symbols`, `get_transition_symbols` | all six typed symbol Eyes have Inventor PASS recorded through Package 22 | - | semantic interpretation is outside Runtime; create/move/delete/format Hands are not confirmed | P0 maintained |
 | RevisionClouds Eye | VERIFIED | `get_revision_clouds` | `get_revision_clouds`, `get_revision_clouds` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
@@ -162,6 +162,9 @@ Exact commands explicitly confirmed:
 {"command":"create_surface_texture_symbol"}
 {"command":"move_surface_texture_symbol"}
 {"command":"delete_surface_texture_symbol"}
+{"command":"create_welding_symbol"}
+{"command":"move_welding_symbol"}
+{"command":"delete_welding_symbol"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -204,6 +207,22 @@ Verified native facts include `kSurfaceTextureSymbolObject`,
 style `Шероховатость (ГОСТ)`, and referenceKey.
 
 `get_welding_symbols` is verified for reading `Sheet.WeldingSymbols`, DrawingWeldingSymbol metadata, definition fields, weld symbol fields, reference keys, and diagnostics.
+
+Package 47 verifies native drawing Welding Symbol primitives:
+
+```text
+get_welding_symbols -> create_welding_symbol -> optional GeometryIntent attachment -> move_welding_symbol -> delete_welding_symbol
+DrawingWeldingSymbols.CreateDefinitions() -> DrawingWeldingSymbolDefinitions.Add(definitionIndex) -> DrawingWeldingSymbols.Add(...)
+DrawingWeldingSymbol.Leader.RootNode.Position -> get_welding_symbols factual post-move state
+DrawingWeldingSymbol.Delete()
+```
+
+Important Inventor API finding: `DrawingWeldingSymbolDefinitions.Add(definitionIndex)`
+is the confirmed working initialization pattern. `Type.Missing` for
+`TargetIndex` was not usable in live Inventor 2027 and produced
+`DrawingWeldingSymbols.Add` `E_FAIL`. `E_FAIL` while reading properties that
+are not applicable to a specific weld symbol type remains property-level
+diagnostics and does not mean the symbol object failed.
 
 `get_revision_clouds` is verified for reading `Sheet.RevisionClouds`, RevisionCloud metadata, RevisionCloudDefinition data, control points, reference keys, and diagnostics.
 

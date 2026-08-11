@@ -792,8 +792,68 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 46. Current next correct action: run a
-Capability Audit for Weld Symbols / Welding Annotations before writing code.
+Next correct action completed by Package 47. Current next correct action: run a
+Capability Audit for Datum identifiers / Datum Target Symbols before writing
+code.
+
+## Current milestone addendum after Package 47
+
+```text
+Package 47 complete - Welding Symbol primitives checkpoint
+```
+
+Verified Welding Symbol primitives:
+
+```text
+get_welding_symbols
+create_welding_symbol
+move_welding_symbol
+delete_welding_symbol
+```
+
+Verified Welding Symbol pipeline:
+
+```text
+get_welding_symbols
+-> create_welding_symbol
+-> optional GeometryIntent attachment
+-> move_welding_symbol
+-> delete_welding_symbol
+```
+
+Verified native creation pipeline:
+
+```text
+Sheet.WeldingSymbols
+-> DrawingWeldingSymbols.CreateDefinitions()
+-> DrawingWeldingSymbolDefinitions.Add(definitionIndex)
+-> DrawingWeldingSymbolDefinition / WeldSymbolOne / WeldSymbolTwo fields
+-> caller Point2d leader points
+-> optional GeometryIntent LAST
+-> DrawingWeldingSymbols.Add(...)
+-> native DrawingWeldingSymbol
+-> get_welding_symbols
+```
+
+Important Inventor API findings:
+
+- `DrawingWeldingSymbolDefinitions.Add(definitionIndex)` is the confirmed
+  working definition initialization pattern.
+- `Type.Missing` for `TargetIndex` was not usable in live Inventor 2027 and
+  produced `DrawingWeldingSymbols.Add` `E_FAIL`.
+- Leader-based welding symbol movement uses
+  `DrawingWeldingSymbol.Leader.RootNode.Position`.
+- `E_FAIL` while reading properties not applicable to a specific weld symbol
+  type remains property-level diagnostics and does not mean the object failed.
+
+Runtime does not decide whether welding is required, choose weld type,
+calculate weld size, choose length/pitch, choose arrow/other side semantics,
+choose contour, choose process/method, choose field/all-around state, choose
+geometry, attachment, or placement, interpret GOST/ESKD/AWS/ISO welding rules,
+or modify model weld geometry.
+
+Next correct action: run a Capability Audit for Datum identifiers / Datum
+Target Symbols before writing code.
 
 ## Current milestone addendum after Package 46
 
