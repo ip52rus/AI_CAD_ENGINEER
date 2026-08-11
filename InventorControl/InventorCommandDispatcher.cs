@@ -349,6 +349,18 @@ public class InventorCommandDispatcher
     private readonly GetDrawingTextObjectsCommand
         _getDrawingTextObjectsCommand;
 
+    private readonly GetSketchedSymbolDefinitionsCommand
+        _getSketchedSymbolDefinitionsCommand;
+
+    private readonly CreateSketchedSymbolCommand
+        _createSketchedSymbolCommand;
+
+    private readonly MoveSketchedSymbolCommand
+        _moveSketchedSymbolCommand;
+
+    private readonly DeleteSketchedSymbolCommand
+        _deleteSketchedSymbolCommand;
+
     private readonly GetFeatureControlFramesCommand
         _getFeatureControlFramesCommand;
 
@@ -985,6 +997,22 @@ public class InventorCommandDispatcher
 
         _getDrawingTextObjectsCommand =
             new GetDrawingTextObjectsCommand(
+                inventor);
+
+        _getSketchedSymbolDefinitionsCommand =
+            new GetSketchedSymbolDefinitionsCommand(
+                inventor);
+
+        _createSketchedSymbolCommand =
+            new CreateSketchedSymbolCommand(
+                inventor);
+
+        _moveSketchedSymbolCommand =
+            new MoveSketchedSymbolCommand(
+                inventor);
+
+        _deleteSketchedSymbolCommand =
+            new DeleteSketchedSymbolCommand(
                 inventor);
 
         _getFeatureControlFramesCommand =
@@ -1714,6 +1742,22 @@ public class InventorCommandDispatcher
 
                 "get_drawing_text_objects" =>
                     _getDrawingTextObjectsCommand.Execute(
+                        root),
+
+                "get_sketched_symbol_definitions" =>
+                    _getSketchedSymbolDefinitionsCommand.Execute(
+                        root),
+
+                "create_sketched_symbol" =>
+                    _createSketchedSymbolCommand.Execute(
+                        root),
+
+                "move_sketched_symbol" =>
+                    _moveSketchedSymbolCommand.Execute(
+                        root),
+
+                "delete_sketched_symbol" =>
+                    _deleteSketchedSymbolCommand.Execute(
                         root),
 
                 "get_feature_control_frames" =>

@@ -792,9 +792,66 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 47. Current next correct action: run a
-Capability Audit for Datum identifiers / Datum Target Symbols before writing
-code.
+Next correct action completed by Package 48. Current next correct action: run a
+Capability Audit for Parts Lists / Balloons / BOM drawing annotations before
+writing code.
+
+## Current milestone addendum after Package 48
+
+```text
+Package 48 complete - SketchedSymbol primitives checkpoint
+```
+
+Verified SketchedSymbol primitives:
+
+```text
+get_sketched_symbol_definitions
+create_sketched_symbol
+move_sketched_symbol
+delete_sketched_symbol
+```
+
+Verified definition discovery:
+
+```text
+get_sketched_symbol_definitions
+-> external caller selects exact definitionName
+```
+
+Verified free SketchedSymbol pipeline:
+
+```text
+get_sketched_symbol_definitions
+-> create_sketched_symbol [SketchedSymbols.Add]
+-> get_drawing_text_objects
+-> move_sketched_symbol [SketchedSymbol.Position]
+-> get_drawing_text_objects
+-> delete_sketched_symbol
+-> get_drawing_text_objects
+```
+
+Verified leader/attached SketchedSymbol pipeline:
+
+```text
+get_sketched_symbol_definitions
+-> get_drawing_curves
+-> create_sketched_symbol [SketchedSymbols.AddWithLeader]
+-> optional GeometryIntent attachment
+-> get_drawing_text_objects
+```
+
+Important Inventor API finding: local Inventor 2027 `TextBox` Interop exposes
+`Text` and `FormattedText`, but no dedicated prompted-entry flag was confirmed.
+Runtime does not parse `<Prompt>` heuristically and does not fabricate prompted
+values.
+
+Runtime does not know what a sketched symbol means, choose symbol definitions,
+perform fuzzy definition-name matching, assign datum/base semantics, generate
+GOST/ESKD geometry, choose attachment geometry, route leaders automatically,
+choose placement, or perform drawing-layout intelligence.
+
+Next correct action: run a Capability Audit for Parts Lists / Balloons / BOM
+drawing annotations before writing code.
 
 ## Current milestone addendum after Package 47
 

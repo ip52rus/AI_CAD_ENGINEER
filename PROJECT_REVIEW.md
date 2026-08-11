@@ -1,6 +1,72 @@
 # PROJECT REVIEW
 
-## Package 47 checkpoint - current state
+## Package 48 checkpoint - current state
+
+Package 48 closes generic drawing SketchedSymbol definition discovery and
+inserted-symbol primitives.
+
+Current live command inventory after Package 48:
+
+```text
+177 registered JSON commands
+177 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified SketchedSymbol commands:
+
+```text
+get_sketched_symbol_definitions
+create_sketched_symbol
+move_sketched_symbol
+delete_sketched_symbol
+```
+
+Verified definition discovery:
+
+```text
+get_sketched_symbol_definitions
+-> external caller selects exact definitionName
+```
+
+Verified free SketchedSymbol pipeline:
+
+```text
+get_sketched_symbol_definitions
+-> create_sketched_symbol [SketchedSymbols.Add]
+-> get_drawing_text_objects
+-> move_sketched_symbol [SketchedSymbol.Position]
+-> get_drawing_text_objects
+-> delete_sketched_symbol
+-> get_drawing_text_objects
+```
+
+Verified leader/attached SketchedSymbol pipeline:
+
+```text
+get_sketched_symbol_definitions
+-> get_drawing_curves
+-> create_sketched_symbol [SketchedSymbols.AddWithLeader]
+-> optional GeometryIntent attachment
+-> get_drawing_text_objects
+```
+
+Package 48 confirms that generic SketchedSymbols remain template-defined
+drawing primitives. Runtime does not know that a symbol means datum/base,
+select definitions automatically, perform fuzzy name matching, infer prompt
+semantics from formatted text, fabricate prompted values, choose attachment
+geometry, route leaders automatically, generate GOST/ESKD geometry, or perform
+drawing-layout intelligence.
+
+Important Inventor API finding: local Inventor 2027 `TextBox` Interop exposes
+`Text` and `FormattedText`, but no dedicated prompted-entry flag was confirmed.
+This limitation is recorded as factual behavior; Runtime does not parse
+`<Prompt>` heuristically.
+
+Next capability check: Parts Lists / Balloons / BOM drawing annotations.
+
+## Package 47 checkpoint
 
 Package 47 closes native drawing Welding Symbol primitives.
 
@@ -64,7 +130,8 @@ state selection, no geometry/attachment/placement choice, no GOST/ESKD/AWS/ISO
 welding interpretation, and no model weld modification. External LLM supplies
 all engineering decisions.
 
-Next capability check: Datum identifiers / Datum Target Symbols.
+Next capability check completed by Package 48: Drawing Sketched Symbols /
+Template Symbol Insertion.
 
 ## Package 46 checkpoint
 

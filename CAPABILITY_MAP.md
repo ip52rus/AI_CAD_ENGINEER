@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.38 complete welding symbol primitives
+v0.39 complete sketched symbol primitives
 ```
 
 ## Ground rules
@@ -56,6 +56,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Surface texture semantic interpretation | MISSING | - | - | - | roughness interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Welding Symbols | VERIFIED | `get_welding_symbols`, `create_welding_symbol`, `move_welding_symbol`, `delete_welding_symbol` | `get_welding_symbols`, `get_welding_symbols` with `sheetName`, Package 47 create/move/delete validation | - | content-edit/style/layer Hands are not confirmed | P0 maintained |
 | Welding semantic analysis | MISSING | - | - | - | weld interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
+| Sketched Symbols | VERIFIED | `get_sketched_symbol_definitions`, `get_drawing_text_objects`, `create_sketched_symbol`, `move_sketched_symbol`, `delete_sketched_symbol` | Package 48 definition discovery; free `SketchedSymbols.Add` create/move/delete; leader/attached `SketchedSymbols.AddWithLeader` with optional GeometryIntent LAST | - | prompt result editing and definition copy/import/create are deferred | P0 maintained |
 | Drawing Symbol Layer | VERIFIED | `get_feature_control_frames`, `get_surface_texture_symbols`, `get_welding_symbols`, `get_revision_clouds`, `get_edge_symbols`, `get_transition_symbols` | all six typed symbol Eyes have Inventor PASS recorded through Package 22 | - | semantic interpretation is outside Runtime; create/move/delete/format Hands are not confirmed | P0 maintained |
 | RevisionClouds Eye | VERIFIED | `get_revision_clouds` | `get_revision_clouds`, `get_revision_clouds` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
 | EdgeSymbols Eye | VERIFIED | `get_edge_symbols` | `get_edge_symbols`, `get_edge_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
@@ -66,7 +67,6 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Feature Control Frames | VERIFIED | `get_feature_control_frames`, `create_feature_control_frame`, `move_feature_control_frame`, `delete_feature_control_frame` | `get_feature_control_frames`, `get_feature_control_frames` with `sheetName`, Package 45 free and attached FCF create/move/delete validation | - | row/content/style/layer edit Hands are not confirmed | P0 maintained |
 | GD&T semantic analysis | MISSING | - | - | - | tolerance interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Revision symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
-| Sketched symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Parts Lists | VERIFIED | `get_parts_lists`, `create_parts_list`, legacy aggregate coverage through `get_drawing_tables` | `get_parts_lists` verified for `Sheet.PartsLists`; `create_parts_list` verified for creating one PartsList from an explicit DrawingView and placement point | - | delete/move/edit/format/sort/renumber parts list Hands are not confirmed | P1 maintained |
 | Balloons | VERIFIED | `get_balloons`, `create_balloon` | `create_balloon` verified for one Balloon from explicit DrawingView curve, GeometryIntent, and caller-supplied leader points | - | delete/move/edit balloon Hands are not confirmed | P1 maintained |
 | Parts List + Balloon Pipeline | VERIFIED | `create_parts_list`, `create_balloon` | DrawingView -> Parts List; DrawingView geometry -> GeometryIntent -> Balloon | - | no BOM modification, automatic numbering, automatic placement, geometry selection, layout optimization, or engineering/GOST decisions in Runtime | P0 maintained |
@@ -165,6 +165,10 @@ Exact commands explicitly confirmed:
 {"command":"create_welding_symbol"}
 {"command":"move_welding_symbol"}
 {"command":"delete_welding_symbol"}
+{"command":"get_sketched_symbol_definitions"}
+{"command":"create_sketched_symbol"}
+{"command":"move_sketched_symbol"}
+{"command":"delete_sketched_symbol"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -223,6 +227,24 @@ is the confirmed working initialization pattern. `Type.Missing` for
 `DrawingWeldingSymbols.Add` `E_FAIL`. `E_FAIL` while reading properties that
 are not applicable to a specific weld symbol type remains property-level
 diagnostics and does not mean the symbol object failed.
+
+Package 48 verifies generic drawing SketchedSymbol primitives:
+
+```text
+get_sketched_symbol_definitions -> external caller selects exact definitionName
+get_sketched_symbol_definitions -> create_sketched_symbol [SketchedSymbols.Add] -> get_drawing_text_objects -> move_sketched_symbol [SketchedSymbol.Position] -> get_drawing_text_objects -> delete_sketched_symbol -> get_drawing_text_objects
+get_sketched_symbol_definitions -> get_drawing_curves -> create_sketched_symbol [SketchedSymbols.AddWithLeader] -> optional GeometryIntent attachment -> get_drawing_text_objects
+```
+
+Verified native APIs include `DrawingDocument.SketchedSymbolDefinitions`,
+`Sheet.SketchedSymbols`, `SketchedSymbols.Add(...)`,
+`SketchedSymbols.AddWithLeader(...)`, `SketchedSymbol.Position`, and
+`SketchedSymbol.Delete()`.
+
+Prompt-status limitation is intentional: local Inventor 2027 `TextBox` Interop
+exposes `Text` and `FormattedText`, but no dedicated prompted-entry flag was
+confirmed. Runtime does not infer prompt semantics from `<Prompt>` or formatted
+text and does not fabricate prompted values.
 
 `get_revision_clouds` is verified for reading `Sheet.RevisionClouds`, RevisionCloud metadata, RevisionCloudDefinition data, control points, reference keys, and diagnostics.
 

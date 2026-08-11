@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.38 complete welding symbol primitives`.
+- Current checkpoint: `v0.39 complete sketched symbol primitives`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 47 - Welding Symbol primitives.
-- Registry after Package 47: `173 registered / 173 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 47 checkpoint commit.
+- Latest completed checkpoint: Package 48 - SketchedSymbol primitives.
+- Registry after Package 48: `177 registered / 177 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 48 checkpoint commit.
 
 ## Architecture Rules
 
@@ -33,6 +33,7 @@
 - Feature Control Frames Eye: `get_feature_control_frames`.
 - Surface Texture Symbols: `get_surface_texture_symbols`, `create_surface_texture_symbol`, `move_surface_texture_symbol`, `delete_surface_texture_symbol`.
 - Welding Symbols: `get_welding_symbols`, `create_welding_symbol`, `move_welding_symbol`, `delete_welding_symbol`.
+- SketchedSymbols: `get_sketched_symbol_definitions`, `create_sketched_symbol`, `move_sketched_symbol`, `delete_sketched_symbol`.
 - RevisionClouds Eye: `get_revision_clouds`.
 - EdgeSymbols Eye: `get_edge_symbols`.
 - TransitionSymbols Eye: `get_transition_symbols`.
@@ -91,6 +92,60 @@
 - Welding Symbol Hand: `create_welding_symbol`.
 - Welding Symbol move Hand: `move_welding_symbol`.
 - Welding Symbol delete Hand: `delete_welding_symbol`.
+- SketchedSymbol definitions Eye: `get_sketched_symbol_definitions`.
+- SketchedSymbol Hand: `create_sketched_symbol`.
+- SketchedSymbol move Hand: `move_sketched_symbol`.
+- SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## SketchedSymbol Primitives
+
+Verified SketchedSymbol commands:
+
+```text
+get_sketched_symbol_definitions
+create_sketched_symbol
+move_sketched_symbol
+delete_sketched_symbol
+```
+
+Verified definition discovery:
+
+```text
+get_sketched_symbol_definitions
+-> external caller selects exact definitionName
+```
+
+Verified free pipeline:
+
+```text
+get_sketched_symbol_definitions
+-> create_sketched_symbol [SketchedSymbols.Add]
+-> get_drawing_text_objects
+-> move_sketched_symbol [SketchedSymbol.Position]
+-> get_drawing_text_objects
+-> delete_sketched_symbol
+-> get_drawing_text_objects
+```
+
+Verified leader/attached pipeline:
+
+```text
+get_sketched_symbol_definitions
+-> get_drawing_curves
+-> create_sketched_symbol [SketchedSymbols.AddWithLeader]
+-> optional GeometryIntent attachment
+-> get_drawing_text_objects
+```
+
+Inventor 2027 `TextBox` Interop exposes `Text` and `FormattedText`, but no
+dedicated prompted-entry flag was confirmed. Runtime does not infer prompt
+semantics from `<Prompt>` or formatted text and does not fabricate prompted
+values.
+
+Runtime does not know what a sketched symbol means, choose symbol definitions,
+perform fuzzy definition-name matching, assign datum/base semantics, generate
+GOST/ESKD geometry, select attachment geometry, route leaders automatically,
+choose placement, or perform drawing-layout intelligence.
 
 ## Welding Symbol Primitives
 
@@ -713,7 +768,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - Datum identifiers / Datum Target Symbols
+Capability Audit - Parts Lists / Balloons / BOM drawing annotations
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

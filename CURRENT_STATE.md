@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 47 documentation sync:
+Current checkpoint after the Package 48 documentation sync:
 
 ```text
-v0.38 complete welding symbol primitives
+v0.39 complete sketched symbol primitives
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 47 checkpoint:
+Live command audit after Package 48 checkpoint:
 
 ```text
-173 registered JSON commands
-173 unique registered JSON commands
+177 registered JSON commands
+177 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -618,11 +618,96 @@ Runtime boundary:
 - Runtime does not automatically place annotations;
 - Runtime does not interpret drawing meaning.
 
-Next capability check completed by Package 45, Package 46, and Package 47. Current next
+Next capability check completed by Package 45, Package 46, Package 47, and Package 48. Current next
 capability check:
 
 ```text
-Capability Audit - Datum identifiers / Datum Target Symbols
+Capability Audit - Parts Lists / Balloons / BOM drawing annotations
+```
+
+## Package 48 checkpoint
+
+Package 48 complete: generic drawing SketchedSymbol definition discovery and
+inserted-symbol primitives are VERIFIED.
+
+Verified commands:
+
+```text
+get_sketched_symbol_definitions
+create_sketched_symbol
+move_sketched_symbol
+delete_sketched_symbol
+```
+
+Verified definition discovery:
+
+```text
+get_sketched_symbol_definitions
+-> external caller selects exact definitionName
+```
+
+Verified free SketchedSymbol pipeline:
+
+```text
+get_sketched_symbol_definitions
+-> create_sketched_symbol [SketchedSymbols.Add]
+-> get_drawing_text_objects
+-> move_sketched_symbol [SketchedSymbol.Position]
+-> get_drawing_text_objects
+-> delete_sketched_symbol
+-> get_drawing_text_objects
+```
+
+Verified leader/attached SketchedSymbol pipeline:
+
+```text
+get_sketched_symbol_definitions
+-> get_drawing_curves
+-> create_sketched_symbol [SketchedSymbols.AddWithLeader]
+-> optional GeometryIntent attachment
+-> get_drawing_text_objects
+```
+
+Confirmed native APIs:
+
+```text
+DrawingDocument.SketchedSymbolDefinitions
+Sheet.SketchedSymbols
+SketchedSymbols.Add(...)
+SketchedSymbols.AddWithLeader(...)
+SketchedSymbol.Position
+SketchedSymbol.Delete()
+```
+
+Live Inventor validation confirmed free creation with definition
+`ГОСТ - Доп. графы 4`, position `(30,20)`, rotation `0`, scale `1`,
+referenceKey, readable resultTexts, move to `(32,18)` through
+`SketchedSymbol.Position`, and delete with correct remaining count.
+
+Live Inventor validation confirmed leader/attached creation through
+`SketchedSymbols.AddWithLeader(...)` using caller Point2d leader points and
+`GeometryIntent` appended LAST. The created symbol was visible through
+`get_drawing_text_objects`, with `leaderVisible = true`,
+`symbolClipping = true`, unique referenceKey, readable resultTexts, and no
+blocking diagnostics.
+
+Prompt-status limitation:
+
+- Inventor 2027 `TextBox` Interop exposes `Text` and `FormattedText`.
+- No dedicated prompted-entry flag was confirmed.
+- Runtime does not infer prompt semantics from `<Prompt>` or formatted text.
+- Runtime does not fabricate prompted values.
+
+Runtime does not know what a sketched symbol means, choose symbol definitions,
+perform fuzzy definition matching, assign datum/base semantics, generate
+GOST/ESKD geometry, select attachment geometry, route leaders automatically,
+choose placement, or perform drawing-layout intelligence. External LLM supplies
+all definition, value, geometry, and placement choices.
+
+Next capability check:
+
+```text
+Capability Audit - Parts Lists / Balloons / BOM drawing annotations
 ```
 
 ## Package 47 checkpoint
@@ -681,10 +766,10 @@ geometry, choose attachment, choose placement, interpret GOST/ESKD/AWS/ISO
 welding rules, or modify model weld geometry. External LLM supplies all
 engineering decisions.
 
-Next capability check:
+Next capability check completed by Package 48:
 
 ```text
-Capability Audit - Datum identifiers / Datum Target Symbols
+Capability Audit - Drawing Sketched Symbols / Template Symbol Insertion
 ```
 
 ## Package 45 checkpoint
@@ -746,10 +831,10 @@ Runtime does not choose GD&T characteristic, calculate tolerances, assign
 datums, interpret MMC/LMC/RFS, choose geometry, choose placement, or apply
 GOST/ESKD engineering logic. External LLM supplies all engineering decisions.
 
-Next capability check:
+Next capability check completed by Package 48:
 
 ```text
-Capability Audit - Datum identifiers / Datum Target Symbols
+Capability Audit - Drawing Sketched Symbols / Template Symbol Insertion
 ```
 
 ## Package 46 checkpoint
