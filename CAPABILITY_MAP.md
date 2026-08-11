@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.39 complete sketched symbol primitives
+v0.40 complete balloon lifecycle
 ```
 
 ## Ground rules
@@ -45,7 +45,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | General Dimension Tolerance Pipeline | VERIFIED | `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits` | all Package 37-39 tolerance commands | - | no automatic tolerance selection, no fit validation, no GOST/ESKD tolerance decisions in Runtime | P0 maintained |
 | Hole/thread notes | VERIFIED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | `create_hole_thread_note` verified for standalone `ThreadFeature` thread edge annotation; `get_hole_thread_notes` hardened and verified with referenceKey support | - | stable selector variants are still missing; current commands use indexes | P0 maintained |
 | Center Marks / Centerlines | VERIFIED | `get_center_marks`, `get_centerlines`, `create_center_mark`, `create_centerline_bisector`, `create_centerline_centered_pattern` | Package 40-41 commands and referenceKey support | - | generic `create_centerline`, work-feature centerline, delete centerline/center mark deferred | P0 maintained |
-| Basic drawing annotation Eyes | VERIFIED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | `get_general_notes`, `get_leader_notes`, center marks/centerlines, and balloon creation/read coverage are verified areas | - | additional typed Eyes only if future audits prove a gap | P0 maintained |
+| Basic drawing annotation Eyes | VERIFIED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | `get_general_notes`, `get_leader_notes`, `get_balloons` referenceKey support, center marks/centerlines, and balloon creation/read coverage are verified areas | - | additional typed Eyes only if future audits prove a gap | P0 maintained |
 | Drawing Text Objects | VERIFIED | `get_drawing_text_objects` | `get_drawing_text_objects`, `get_drawing_text_objects` with `sheetName` | - | - | P0 maintained |
 | General Notes / Technical Requirements primitives | VERIFIED | `get_general_notes`, `get_drawing_text_objects`, `create_general_note_fitted`, `set_general_note_formatted_text`, `move_general_note`, `delete_general_note` | Package 43 full create/read/edit/read/move/read/delete/read lifecycle; final `get_general_notes` count = 0 | - | rectangular GeneralNotes, text style/layer setters, automatic technical requirement generation are not Runtime scope for this checkpoint | P0 maintained |
 | Leader Notes primitives | VERIFIED | `get_leader_notes`, `get_drawing_text_objects`, `create_leader_note`, `set_leader_note_formatted_text`, `move_leader_note`, `delete_leader_note` | Package 44 free and attached LeaderNote lifecycle; attached `GeometryIntent` with `curveIndex=14`, `intent=mid`; referenceKey and non-blocking diagnostics verified | - | leader path editing, style/layer setters, automatic leader routing are deferred | P0 maintained |
@@ -68,8 +68,8 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | GD&T semantic analysis | MISSING | - | - | - | tolerance interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Revision symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Parts Lists | VERIFIED | `get_parts_lists`, `create_parts_list`, legacy aggregate coverage through `get_drawing_tables` | `get_parts_lists` verified for `Sheet.PartsLists`; `create_parts_list` verified for creating one PartsList from an explicit DrawingView and placement point | - | delete/move/edit/format/sort/renumber parts list Hands are not confirmed | P1 maintained |
-| Balloons | VERIFIED | `get_balloons`, `create_balloon` | `create_balloon` verified for one Balloon from explicit DrawingView curve, GeometryIntent, and caller-supplied leader points | - | delete/move/edit balloon Hands are not confirmed | P1 maintained |
-| Parts List + Balloon Pipeline | VERIFIED | `create_parts_list`, `create_balloon` | DrawingView -> Parts List; DrawingView geometry -> GeometryIntent -> Balloon | - | no BOM modification, automatic numbering, automatic placement, geometry selection, layout optimization, or engineering/GOST decisions in Runtime | P0 maintained |
+| Balloons | VERIFIED | `get_balloons`, `create_balloon`, `move_balloon`, `delete_balloon` | Package 49A complete balloon lifecycle: create/read/move/read/delete/read; `get_balloons` referenceKey support; move preserves referenceKey/value/itemNumber/geometry attachment | - | value override/edit and automatic item-number operations are not Runtime scope | P0 maintained |
+| Parts List + Balloon Pipeline | VERIFIED | `create_parts_list`, `create_balloon`, `get_balloons`, `move_balloon`, `delete_balloon` | DrawingView -> Parts List; DrawingView geometry -> GeometryIntent -> Balloon -> move/delete lifecycle | - | no BOM modification, automatic numbering, automatic placement, geometry selection, layout optimization, or engineering/GOST decisions in Runtime | P0 maintained |
 | Revision Tables | VERIFIED | `get_revision_tables`, legacy aggregate coverage through `get_drawing_tables` | `get_revision_tables` found one revision table with columns, rows, cells, and metadata | - | create/edit/delete/move/format revision table Hands are not confirmed | P1 maintained |
 | Drawing Table Collections Diagnostics | VERIFIED | `get_drawing_table_collections` | confirmed counts and metadata for `CustomTables`, `HoleTables`, `PartsLists`, and `RevisionTables` | - | not intended to read full row/cell content | P0 maintained |
 | CustomTables Discovery | VERIFIED | `get_drawing_table_collections` | confirmed GOST table is `Sheet.CustomTables` / `kCustomTableObject` | - | - | P0 maintained |
@@ -119,6 +119,9 @@ Exact commands explicitly confirmed:
 {"command":"export_dxf"}
 {"command":"create_parts_list"}
 {"command":"create_balloon"}
+{"command":"get_balloons"}
+{"command":"move_balloon"}
+{"command":"delete_balloon"}
 {"command":"create_angular_dimension"}
 {"command":"create_ordinate_dimension"}
 {"command":"get_drawing_view_origin_indicator"}

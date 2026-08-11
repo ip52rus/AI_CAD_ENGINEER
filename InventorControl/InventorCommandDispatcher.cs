@@ -97,6 +97,12 @@ public class InventorCommandDispatcher
     private readonly CreateBalloonCommand
         _createBalloonCommand;
 
+    private readonly MoveBalloonCommand
+        _moveBalloonCommand;
+
+    private readonly DeleteBalloonCommand
+        _deleteBalloonCommand;
+
     private readonly CreateCenterMarkCommand
         _createCenterMarkCommand;
 
@@ -661,6 +667,14 @@ public class InventorCommandDispatcher
 
         _createBalloonCommand =
             new CreateBalloonCommand(
+                inventor);
+
+        _moveBalloonCommand =
+            new MoveBalloonCommand(
+                inventor);
+
+        _deleteBalloonCommand =
+            new DeleteBalloonCommand(
                 inventor);
 
         _createCenterMarkCommand =
@@ -1406,6 +1420,14 @@ public class InventorCommandDispatcher
 
                 "create_balloon" =>
                     _createBalloonCommand.Execute(
+                        root),
+
+                "move_balloon" =>
+                    _moveBalloonCommand.Execute(
+                        root),
+
+                "delete_balloon" =>
+                    _deleteBalloonCommand.Execute(
                         root),
 
                 "create_center_mark" =>

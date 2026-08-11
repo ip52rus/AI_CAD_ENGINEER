@@ -498,7 +498,7 @@ internal static class AnnotationReadSupport
         };
     }
 
-    private static object ReadBalloon(
+    public static object ReadBalloon(
         Balloon balloon,
         Sheet sheet,
         int index)
@@ -535,6 +535,12 @@ internal static class AnnotationReadSupport
                     balloon,
                     "Style",
                     diagnostics),
+                diagnostics);
+
+        object? referenceKey =
+            ReadReferenceKey(
+                sheet,
+                balloon,
                 diagnostics);
 
         return new
@@ -577,10 +583,14 @@ internal static class AnnotationReadSupport
             leader,
             balloonValueSets =
                 valueSets,
+            referenceKey,
             selectorSnapshot =
                 new
                 {
+                    referenceKey,
                     index,
+                    indexIsStable =
+                        false,
                     type =
                         "balloon",
                     position,
@@ -916,6 +926,73 @@ internal static class AnnotationReadSupport
         {
             diagnostics.Add(new { scope = "Centermark.GetReferenceKey", message = exception.Message, exceptionType = exception.GetType().FullName });
             return null;
+        }
+    }
+
+    private static object? ReadReferenceKey(
+        Sheet sheet,
+        Balloon balloon,
+        List<object> diagnostics)
+    {
+        DrawingDocument? drawingDocument =
+            null;
+
+        int keyContext =
+            0;
+
+        try
+        {
+            drawingDocument =
+                (DrawingDocument)sheet.Parent;
+
+            ReferenceKeyManager manager =
+                drawingDocument.ReferenceKeyManager;
+
+            keyContext =
+                manager.CreateKeyContext();
+
+            Array key =
+                Array.CreateInstance(
+                    typeof(byte),
+                    0);
+
+            balloon.GetReferenceKey(
+                ref key,
+                keyContext);
+
+            string keyString =
+                manager.KeyToString(
+                    ref key);
+
+            return new
+            {
+                keyString,
+                byteCount =
+                    key.Length
+            };
+        }
+        catch (Exception exception)
+        {
+            diagnostics.Add(new { scope = "Balloon.GetReferenceKey", message = exception.Message, exceptionType = exception.GetType().FullName });
+            return null;
+        }
+        finally
+        {
+            if (drawingDocument != null &&
+                keyContext != 0)
+            {
+                try
+                {
+                    drawingDocument
+                        .ReferenceKeyManager
+                        .ReleaseKeyContext(
+                            keyContext);
+                }
+                catch (Exception exception)
+                {
+                    diagnostics.Add(new { scope = "Balloon.ReleaseKeyContext", message = exception.Message, exceptionType = exception.GetType().FullName });
+                }
+            }
         }
     }
 

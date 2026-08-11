@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 48 documentation sync:
+Current checkpoint after the Package 49A documentation sync:
 
 ```text
-v0.39 complete sketched symbol primitives
+v0.40 complete balloon lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 48 checkpoint:
+Live command audit after Package 49A checkpoint:
 
 ```text
-177 registered JSON commands
-177 unique registered JSON commands
+179 registered JSON commands
+179 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes

@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 48 is complete.
-- Current checkpoint: `v0.39 complete sketched symbol primitives`.
-- Live registry after Package 48: `177 registered / 177 unique`, no duplicate command names.
+- Package 49A is complete.
+- Current checkpoint: `v0.40 complete balloon lifecycle`.
+- Live registry after Package 49A: `179 registered / 179 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -36,6 +36,9 @@ Verified Drawing Generation / Export Hands:
 - `export_dxf`
 - `create_parts_list`
 - `create_balloon`
+- `get_balloons`
+- `move_balloon`
+- `delete_balloon`
 - `create_angular_dimension`
 - `create_ordinate_dimension`
 - `get_drawing_view_origin_indicator`
@@ -88,6 +91,30 @@ Verified Drawing Generation / Export Hands:
 - `create_sketched_symbol`
 - `move_sketched_symbol`
 - `delete_sketched_symbol`
+
+Verified Balloon lifecycle:
+
+```text
+get_drawing_curves
+-> create_balloon
+-> get_balloons
+-> move_balloon
+-> get_balloons
+-> delete_balloon
+-> get_balloons
+```
+
+`get_balloons` exposes native `Balloon.GetReferenceKey(...)`. Live Inventor
+validation confirmed created `kBalloonObject`, referenceKey byteCount `62`,
+same referenceKey after move, `Balloon.Position = (32,18)`,
+`Leader.RootNode.Position = (32,18)`, unchanged `value = "1"` and
+`itemNumber = "1"`, preserved geometry attachment, delete snapshot, and final
+`get_balloons` count `0`.
+
+Runtime must not choose which components require balloons, choose placement,
+route leaders, renumber/sort BOM, modify `BalloonValueSet.Value`,
+`BalloonValueSet.OverrideValue`, item numbering, PartsLists, assembly/model
+structure, or apply GOST/ESKD layout logic.
 
 Verified SketchedSymbol primitives:
 

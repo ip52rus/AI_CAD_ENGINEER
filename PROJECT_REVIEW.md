@@ -1,6 +1,61 @@
 # PROJECT REVIEW
 
-## Package 48 checkpoint - current state
+## Package 49A checkpoint - current state
+
+Package 49A closes native drawing Balloon lifecycle hardening.
+
+Current live command inventory after Package 49A:
+
+```text
+179 registered JSON commands
+179 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified Balloon commands:
+
+```text
+get_balloons
+create_balloon
+move_balloon
+delete_balloon
+```
+
+Verified Balloon pipeline:
+
+```text
+get_drawing_curves
+-> create_balloon
+-> get_balloons
+-> move_balloon
+-> get_balloons
+-> delete_balloon
+-> get_balloons
+```
+
+Verified native facts:
+
+- created balloon `objectType = kBalloonObject`;
+- attached to parent view `ВИД1`;
+- created position `(30,20)`;
+- moved position `(32,18)`;
+- `Balloon.Position` and `Leader.RootNode.Position` both reported `(32,18)` after move;
+- `referenceKey` present with byteCount `62`;
+- same referenceKey preserved after move;
+- `value = "1"` and `itemNumber = "1"` unchanged;
+- geometry attachment preserved;
+- delete returned deleted snapshot and `remainingBalloonCount = 0`;
+- final `get_balloons` count was `0`.
+
+Runtime does not choose components requiring balloons, choose balloon placement,
+route leaders, renumber BOM, sort BOM, modify `BalloonValueSet.Value`,
+`BalloonValueSet.OverrideValue`, item numbering, PartsLists, assembly/model
+structure, or apply GOST/ESKD layout logic.
+
+Next capability check: PartsList lifecycle.
+
+## Package 48 checkpoint
 
 Package 48 closes generic drawing SketchedSymbol definition discovery and
 inserted-symbol primitives.

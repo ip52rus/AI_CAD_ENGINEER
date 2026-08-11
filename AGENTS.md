@@ -792,9 +792,54 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 48. Current next correct action: run a
-Capability Audit for Parts Lists / Balloons / BOM drawing annotations before
-writing code.
+Next correct action completed by Package 49A. Current next correct action: run
+a Capability Audit for PartsList lifecycle before writing code.
+
+## Current milestone addendum after Package 49A
+
+```text
+Package 49A complete - Balloon lifecycle checkpoint
+```
+
+Verified Balloon commands:
+
+```text
+get_balloons
+create_balloon
+move_balloon
+delete_balloon
+```
+
+Verified Balloon pipeline:
+
+```text
+get_drawing_curves
+-> create_balloon
+-> get_balloons
+-> move_balloon
+-> get_balloons
+-> delete_balloon
+-> get_balloons
+```
+
+Verified facts:
+
+- `get_balloons` exposes native `Balloon.GetReferenceKey(...)`.
+- Created balloon was `kBalloonObject`, attached to parent view `ВИД1`, with
+  position `(30,20)`.
+- `referenceKey` was present with byteCount `62`.
+- Move requested `(32,18)` and factual readback reported
+  `Balloon.Position = (32,18)` and `Leader.RootNode.Position = (32,18)`.
+- Same referenceKey was preserved after move.
+- `value = "1"` and `itemNumber = "1"` were unchanged.
+- Geometry attachment was preserved.
+- Delete returned deleted balloon snapshot and `remainingBalloonCount = 0`.
+- Final `get_balloons` returned `count = 0`.
+
+Runtime does not choose which components require balloons, choose balloon
+placement, route leaders, renumber/sort BOM, modify `BalloonValueSet.Value`,
+`BalloonValueSet.OverrideValue`, item numbering, PartsLists, assembly/model
+structure, or apply GOST/ESKD layout logic.
 
 ## Current milestone addendum after Package 48
 
@@ -850,8 +895,7 @@ perform fuzzy definition-name matching, assign datum/base semantics, generate
 GOST/ESKD geometry, choose attachment geometry, route leaders automatically,
 choose placement, or perform drawing-layout intelligence.
 
-Next correct action: run a Capability Audit for Parts Lists / Balloons / BOM
-drawing annotations before writing code.
+Next correct action completed by Package 49A.
 
 ## Current milestone addendum after Package 47
 

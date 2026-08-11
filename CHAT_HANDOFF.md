@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.39 complete sketched symbol primitives`.
+- Current checkpoint: `v0.40 complete balloon lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 48 - SketchedSymbol primitives.
-- Registry after Package 48: `177 registered / 177 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 48 checkpoint commit.
+- Latest completed checkpoint: Package 49A - Balloon lifecycle.
+- Registry after Package 49A: `179 registered / 179 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 49A checkpoint commit.
 
 ## Architecture Rules
 
@@ -43,7 +43,10 @@
 - DWG Export Hand: `export_dwg`.
 - DXF Export Hand: `export_dxf`.
 - Parts List creation Hand: `create_parts_list`.
+- Balloon Eye: `get_balloons` with referenceKey support.
 - Balloon creation Hand: `create_balloon`.
+- Balloon move Hand: `move_balloon`.
+- Balloon delete Hand: `delete_balloon`.
 - Angular dimension Hand: `create_angular_dimension`.
 - Ordinate dimension Hand: `create_ordinate_dimension`.
 - DrawingView OriginIndicator Eye: `get_drawing_view_origin_indicator`.
@@ -96,6 +99,46 @@
 - SketchedSymbol Hand: `create_sketched_symbol`.
 - SketchedSymbol move Hand: `move_sketched_symbol`.
 - SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## Balloon Lifecycle
+
+Verified Balloon commands:
+
+```text
+get_balloons
+create_balloon
+move_balloon
+delete_balloon
+```
+
+Verified pipeline:
+
+```text
+get_drawing_curves
+-> create_balloon
+-> get_balloons
+-> move_balloon
+-> get_balloons
+-> delete_balloon
+-> get_balloons
+```
+
+Verified facts:
+
+- `get_balloons` exposes native `Balloon.GetReferenceKey(...)` output.
+- Created balloon was `kBalloonObject`, attached to parent view `ВИД1`.
+- Created position was `(30,20)`.
+- Move requested `(32,18)` and factual readback reported `Balloon.Position = (32,18)` and `Leader.RootNode.Position = (32,18)`.
+- Same referenceKey was preserved after move.
+- `value = "1"` and `itemNumber = "1"` were unchanged.
+- Geometry attachment was preserved.
+- Delete returned deleted balloon snapshot and `remainingBalloonCount = 0`.
+- Final `get_balloons` returned `count = 0`.
+
+Runtime does not choose which components require balloons, choose balloon
+placement, route leaders, renumber/sort BOM, modify `BalloonValueSet.Value`,
+`BalloonValueSet.OverrideValue`, item numbering, PartsLists, assembly/model
+structure, or apply GOST/ESKD layout logic.
 
 ## SketchedSymbol Primitives
 
