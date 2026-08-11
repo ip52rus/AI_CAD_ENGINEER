@@ -1,6 +1,80 @@
 # PROJECT REVIEW
 
-## Package 42 checkpoint - current state
+## Package 43-44 checkpoint - current state
+
+Package 43-44 closes the verified General Note and Leader Note primitives
+needed for technical requirements and free-text production drawing annotations.
+
+Current live command inventory after Package 43-44:
+
+```text
+164 registered JSON commands
+164 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified General Note commands:
+
+```text
+get_general_notes
+create_general_note_fitted
+set_general_note_formatted_text
+move_general_note
+delete_general_note
+```
+
+Verified General Note lifecycle:
+
+```text
+create -> get_general_notes -> edit -> get_general_notes -> move -> get_general_notes -> delete -> get_general_notes
+final count = 0
+```
+
+Verified Leader Note commands:
+
+```text
+get_leader_notes
+get_drawing_text_objects
+create_leader_note
+set_leader_note_formatted_text
+move_leader_note
+delete_leader_note
+```
+
+Verified Leader Note pipeline:
+
+```text
+get_leader_notes / get_drawing_text_objects
+-> create_leader_note
+-> optional GeometryIntent attachment
+-> set_leader_note_formatted_text
+-> move_leader_note
+-> delete_leader_note
+```
+
+Free LeaderNote lifecycle is verified. `attachedEntity = null` is a valid
+factual state for free leader notes and is handled without failure.
+
+Attached LeaderNote is verified with explicit `viewName = ВИД1`,
+`curveIndex = 14`, and `intent = mid`. Inventor returned
+`pointOnSheet = (23.65, 15.6)`, matching the selected DrawingCurve midpoint;
+the final leader node is attached to the `GeometryIntent`; referenceKey exists;
+property diagnostics are non-blocking.
+
+Observed Inventor API behavior: setting `LeaderNote.Position` may not produce
+an actual `noteAfter.position` exactly equal to requested coordinates because
+Inventor may constrain/reposition the note according to leader geometry.
+Runtime reports requested and actual positions without compensation.
+
+Runtime boundaries remain explicit: no technical requirement text generation,
+no semantic numbering, no GOST/ESKD content decisions, no automatic geometry
+selection, no automatic annotation placement, and no drawing-meaning
+interpretation. External LLM owns those decisions.
+
+Next capability check: GD&T / Feature Control Frames / Datum identifiers.
+
+## Package 42 checkpoint
 
 Package 42 closes the verified Hole and Thread Annotation Pipeline. The runtime
 now exposes hardened factual model hole/thread Eyes and robust drawing

@@ -743,6 +743,58 @@ decisions. Inventor remains responsible for native hole/thread note text.
 Next correct action: run a Capability Audit for General Notes / Leader Notes /
 technical requirements before writing code.
 
+## Current milestone addendum after Package 43-44
+
+```text
+Package 43-44 complete - General and Leader Note primitives checkpoint
+```
+
+Verified General Note primitives:
+
+```text
+get_general_notes
+create_general_note_fitted
+set_general_note_formatted_text
+move_general_note
+delete_general_note
+```
+
+Verified General Note lifecycle:
+
+```text
+create -> read -> edit -> read -> move -> read -> delete -> read
+final get_general_notes count = 0
+```
+
+Verified Leader Note primitives:
+
+```text
+get_leader_notes
+get_drawing_text_objects
+create_leader_note
+set_leader_note_formatted_text
+move_leader_note
+delete_leader_note
+```
+
+Free LeaderNote lifecycle is verified. `attachedEntity = null` is a valid
+factual state for free leader notes. Attached LeaderNote is verified through an
+explicit `GeometryIntent` using `viewName = ВИД1`, `curveIndex = 14`, and
+`intent = mid`; `pointOnSheet = (23.65, 15.6)` matched the selected curve
+midpoint; referenceKey and non-blocking diagnostics were returned.
+
+Observed Inventor behavior: setting `LeaderNote.Position` can produce an
+actual position different from the requested coordinates because Inventor may
+constrain/reposition the note according to leader geometry. Runtime reports
+both requested and actual values and does not compensate.
+
+Runtime does not generate technical requirement text, choose requirements,
+number requirements semantically, decide GOST/ESKD content, automatically
+choose geometry, automatically place annotations, or interpret drawing meaning.
+
+Next correct action: run a Capability Audit for GD&T / Feature Control Frames /
+Datum identifiers before writing code.
+
 ## Current milestone addendum after Package 26
 
 ```text

@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.34 complete hole and thread annotation pipeline
+v0.35 complete general and leader note primitives
 ```
 
 ## Ground rules
@@ -45,8 +45,10 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | General Dimension Tolerance Pipeline | VERIFIED | `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits` | all Package 37-39 tolerance commands | - | no automatic tolerance selection, no fit validation, no GOST/ESKD tolerance decisions in Runtime | P0 maintained |
 | Hole/thread notes | VERIFIED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | `create_hole_thread_note` verified for standalone `ThreadFeature` thread edge annotation; `get_hole_thread_notes` hardened and verified with referenceKey support | - | stable selector variants are still missing; current commands use indexes | P0 maintained |
 | Center Marks / Centerlines | VERIFIED | `get_center_marks`, `get_centerlines`, `create_center_mark`, `create_centerline_bisector`, `create_centerline_centered_pattern` | Package 40-41 commands and referenceKey support | - | generic `create_centerline`, work-feature centerline, delete centerline/center mark deferred | P0 maintained |
-| Basic drawing annotation Eyes | PARTIAL | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | center marks/centerlines are verified; remaining basic note/balloon read Eyes not all separately recorded after Package 15A | - | Inventor PASS still required for remaining basic annotation Eyes when needed | P1 |
+| Basic drawing annotation Eyes | VERIFIED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | `get_general_notes`, `get_leader_notes`, center marks/centerlines, and balloon creation/read coverage are verified areas | - | additional typed Eyes only if future audits prove a gap | P0 maintained |
 | Drawing Text Objects | VERIFIED | `get_drawing_text_objects` | `get_drawing_text_objects`, `get_drawing_text_objects` with `sheetName` | - | - | P0 maintained |
+| General Notes / Technical Requirements primitives | VERIFIED | `get_general_notes`, `get_drawing_text_objects`, `create_general_note_fitted`, `set_general_note_formatted_text`, `move_general_note`, `delete_general_note` | Package 43 full create/read/edit/read/move/read/delete/read lifecycle; final `get_general_notes` count = 0 | - | rectangular GeneralNotes, text style/layer setters, automatic technical requirement generation are not Runtime scope for this checkpoint | P0 maintained |
+| Leader Notes primitives | VERIFIED | `get_leader_notes`, `get_drawing_text_objects`, `create_leader_note`, `set_leader_note_formatted_text`, `move_leader_note`, `delete_leader_note` | Package 44 free and attached LeaderNote lifecycle; attached `GeometryIntent` with `curveIndex=14`, `intent=mid`; referenceKey and non-blocking diagnostics verified | - | leader path editing, style/layer setters, automatic leader routing are deferred | P0 maintained |
 | Drawing Text semantic analysis | MISSING | - | - | - | semantic text understanding, GOST interpretation, TT/TU recognition; belongs to external LLM, not Runtime | no Runtime priority |
 | Annotation summary and bounds | PARTIAL | `get_drawing_annotation_summary`, `get_annotation_bounds` | annotation summary recorded as verified area; exact PASS command not separately recorded | - | typed bounds for all annotation classes; current bounds coverage is incomplete | P1 |
 | Annotation collision/layout logic | EXPERIMENTAL | - | not applicable | `check_annotation_collisions`, `auto_resolve_annotation_collisions` | should not be expanded as Runtime coverage | no priority |
@@ -146,6 +148,14 @@ Exact commands explicitly confirmed:
 {"command":"get_curve_model_reference"}
 {"command":"create_hole_thread_note"}
 {"command":"get_hole_thread_notes"}
+{"command":"create_general_note_fitted"}
+{"command":"set_general_note_formatted_text"}
+{"command":"move_general_note"}
+{"command":"delete_general_note"}
+{"command":"create_leader_note"}
+{"command":"set_leader_note_formatted_text"}
+{"command":"move_leader_note"}
+{"command":"delete_leader_note"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -234,6 +244,17 @@ get_thread_features
 
 Runtime does not parse thread designations, choose curves automatically,
 reconstruct note text, modify the model, or perform GOST/ESKD decisions.
+
+Package 43-44 commands are verified for native Inventor GeneralNote and
+LeaderNote primitives. GeneralNote lifecycle is verified as
+`create -> read -> edit -> read -> move -> read -> delete -> read`, with final
+`get_general_notes` count `0`. LeaderNote lifecycle is verified for both free
+and attached leader notes. A free LeaderNote has `attachedEntity = null` as a
+valid factual state. An attached LeaderNote is verified with explicit
+`viewName = ВИД1`, `curveIndex = 14`, and `intent = mid`; Inventor returned
+`pointOnSheet = (23.65, 15.6)` for the selected curve midpoint, leader
+attachment metadata, and a reference key. Runtime reports requested and actual
+positions without compensating for Inventor leader-geometry constraints.
 
 ## Experimental commands
 

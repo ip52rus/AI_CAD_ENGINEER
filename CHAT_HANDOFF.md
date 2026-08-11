@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.34 complete hole and thread annotation pipeline`.
+- Current checkpoint: `v0.35 complete general and leader note primitives`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 42 - Hole and Thread Annotation Pipeline.
-- Registry after Package 42: `156 registered / 156 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 42 checkpoint commit.
+- Latest completed checkpoint: Package 43-44 - General and Leader Note primitives.
+- Registry after Package 43-44: `164 registered / 164 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 43-44 checkpoint commit.
 
 ## Architecture Rules
 
@@ -73,6 +73,79 @@
 - Standalone ThreadFeature Eye: `get_thread_features`.
 - Hole/thread note Hand: `create_hole_thread_note`.
 - Hardened hole/thread note Eye: `get_hole_thread_notes`.
+- General note Hand: `create_general_note_fitted`.
+- General note edit Hand: `set_general_note_formatted_text`.
+- General note move Hand: `move_general_note`.
+- General note delete Hand: `delete_general_note`.
+- Leader note Hand: `create_leader_note`.
+- Leader note edit Hand: `set_leader_note_formatted_text`.
+- Leader note move Hand: `move_leader_note`.
+- Leader note delete Hand: `delete_leader_note`.
+
+## General and Leader Note Primitives
+
+Verified General Note pipeline:
+
+```text
+get_general_notes
+-> create_general_note_fitted
+-> set_general_note_formatted_text
+-> move_general_note
+-> delete_general_note
+```
+
+Manual Inventor validation confirmed:
+
+- creation works;
+- Inventor GOST text style/layer are used by native/default behavior;
+- formatted text editing works;
+- movement works;
+- deletion works;
+- final `get_general_notes` count is `0`.
+
+Verified Leader Note pipeline:
+
+```text
+get_leader_notes / get_drawing_text_objects
+-> create_leader_note
+-> optional GeometryIntent attachment
+-> set_leader_note_formatted_text
+-> move_leader_note
+-> delete_leader_note
+```
+
+Free LeaderNote lifecycle is verified. `attachedEntity = null` is a valid
+factual state for a free LeaderNote and null optional `GeometryIntent` is
+handled without failure.
+
+Attached LeaderNote is verified with:
+
+```text
+viewName = ВИД1
+curveIndex = 14
+intent = mid
+```
+
+Confirmed:
+
+- `attached = true`;
+- `GeometryIntent` creation succeeds;
+- `attachmentSelector` is preserved;
+- `pointOnSheet = (23.65, 15.6)`, matching the selected DrawingCurve midpoint;
+- final leader node is attached to the `GeometryIntent`;
+- `get_leader_notes` reads `attachedEntity`;
+- `referenceKey` exists;
+- property diagnostics are non-blocking.
+
+Observed Inventor API behavior: setting `LeaderNote.Position` may not produce
+an actual `noteAfter.position` exactly equal to the requested coordinates
+because Inventor may constrain/reposition the note according to leader
+geometry. Runtime reports requested and actual values without compensation.
+
+Runtime does not generate technical requirement text, choose technical
+requirements, number requirements semantically, decide GOST/ESKD content,
+automatically choose geometry, automatically place annotations, or interpret
+drawing meaning.
 
 ## Hole and Thread Annotation Pipeline
 
@@ -482,7 +555,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - General Notes / Leader Notes / technical requirements
+Capability Audit - GD&T / Feature Control Frames / Datum identifiers
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

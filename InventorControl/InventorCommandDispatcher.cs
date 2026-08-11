@@ -319,8 +319,32 @@ public class InventorCommandDispatcher
     private readonly GetGeneralNotesCommand
         _getGeneralNotesCommand;
 
+    private readonly CreateGeneralNoteFittedCommand
+        _createGeneralNoteFittedCommand;
+
+    private readonly SetGeneralNoteFormattedTextCommand
+        _setGeneralNoteFormattedTextCommand;
+
+    private readonly MoveGeneralNoteCommand
+        _moveGeneralNoteCommand;
+
+    private readonly DeleteGeneralNoteCommand
+        _deleteGeneralNoteCommand;
+
     private readonly GetLeaderNotesCommand
         _getLeaderNotesCommand;
+
+    private readonly CreateLeaderNoteCommand
+        _createLeaderNoteCommand;
+
+    private readonly SetLeaderNoteFormattedTextCommand
+        _setLeaderNoteFormattedTextCommand;
+
+    private readonly MoveLeaderNoteCommand
+        _moveLeaderNoteCommand;
+
+    private readonly DeleteLeaderNoteCommand
+        _deleteLeaderNoteCommand;
 
     private readonly GetDrawingTextObjectsCommand
         _getDrawingTextObjectsCommand;
@@ -896,8 +920,40 @@ public class InventorCommandDispatcher
             new GetGeneralNotesCommand(
                 inventor);
 
+        _createGeneralNoteFittedCommand =
+            new CreateGeneralNoteFittedCommand(
+                inventor);
+
+        _setGeneralNoteFormattedTextCommand =
+            new SetGeneralNoteFormattedTextCommand(
+                inventor);
+
+        _moveGeneralNoteCommand =
+            new MoveGeneralNoteCommand(
+                inventor);
+
+        _deleteGeneralNoteCommand =
+            new DeleteGeneralNoteCommand(
+                inventor);
+
         _getLeaderNotesCommand =
             new GetLeaderNotesCommand(
+                inventor);
+
+        _createLeaderNoteCommand =
+            new CreateLeaderNoteCommand(
+                inventor);
+
+        _setLeaderNoteFormattedTextCommand =
+            new SetLeaderNoteFormattedTextCommand(
+                inventor);
+
+        _moveLeaderNoteCommand =
+            new MoveLeaderNoteCommand(
+                inventor);
+
+        _deleteLeaderNoteCommand =
+            new DeleteLeaderNoteCommand(
                 inventor);
 
         _getDrawingTextObjectsCommand =
@@ -1557,8 +1613,40 @@ public class InventorCommandDispatcher
                     _getGeneralNotesCommand.Execute(
                         root),
 
+                "create_general_note_fitted" =>
+                    _createGeneralNoteFittedCommand.Execute(
+                        root),
+
+                "set_general_note_formatted_text" =>
+                    _setGeneralNoteFormattedTextCommand.Execute(
+                        root),
+
+                "move_general_note" =>
+                    _moveGeneralNoteCommand.Execute(
+                        root),
+
+                "delete_general_note" =>
+                    _deleteGeneralNoteCommand.Execute(
+                        root),
+
                 "get_leader_notes" =>
                     _getLeaderNotesCommand.Execute(
+                        root),
+
+                "create_leader_note" =>
+                    _createLeaderNoteCommand.Execute(
+                        root),
+
+                "set_leader_note_formatted_text" =>
+                    _setLeaderNoteFormattedTextCommand.Execute(
+                        root),
+
+                "move_leader_note" =>
+                    _moveLeaderNoteCommand.Execute(
+                        root),
+
+                "delete_leader_note" =>
+                    _deleteLeaderNoteCommand.Execute(
                         root),
 
                 "get_drawing_text_objects" =>

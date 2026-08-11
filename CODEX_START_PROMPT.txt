@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 42 is complete.
-- Current checkpoint: `v0.34 complete hole and thread annotation pipeline`.
-- Live registry after Package 42: `156 registered / 156 unique`, no duplicate command names.
+- Package 43-44 are complete.
+- Current checkpoint: `v0.35 complete general and leader note primitives`.
+- Live registry after Package 43-44: `164 registered / 164 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -64,6 +64,45 @@ Verified Drawing Generation / Export Hands:
 - `get_thread_features`
 - `create_hole_thread_note`
 - `get_hole_thread_notes`
+- `create_general_note_fitted`
+- `set_general_note_formatted_text`
+- `move_general_note`
+- `delete_general_note`
+- `create_leader_note`
+- `set_leader_note_formatted_text`
+- `move_leader_note`
+- `delete_leader_note`
+
+Verified General Note / Leader Note primitives:
+
+```text
+get_general_notes
+-> create_general_note_fitted
+-> set_general_note_formatted_text
+-> move_general_note
+-> delete_general_note
+
+get_leader_notes / get_drawing_text_objects
+-> create_leader_note
+-> optional GeometryIntent attachment
+-> set_leader_note_formatted_text
+-> move_leader_note
+-> delete_leader_note
+```
+
+General Note lifecycle is verified through create/read/edit/read/move/read/delete/read,
+with final `get_general_notes` count `0`.
+
+Free LeaderNote lifecycle is verified and `attachedEntity = null` is a valid
+factual state. Attached LeaderNote is verified with explicit `viewName = ВИД1`,
+`curveIndex = 14`, and `intent = mid`; Inventor returned
+`pointOnSheet = (23.65, 15.6)`, matching the selected DrawingCurve midpoint.
+ReferenceKey and non-blocking property diagnostics are verified.
+
+Observed Inventor behavior: setting `LeaderNote.Position` may not result in
+actual `noteAfter.position` exactly equal to requested coordinates because
+Inventor can constrain/reposition the note according to leader geometry.
+Runtime reports requested and actual positions without compensation.
 
 Verified Hole / Thread annotation pipeline:
 
@@ -227,12 +266,17 @@ Runtime does not:
 - select thread curves automatically;
 - reconstruct hole/thread note text;
 - modify HoleFeature or ThreadFeature objects;
+- generate technical requirement text;
+- choose or number technical requirements semantically;
+- decide GOST/ESKD free-text content;
+- automatically place GeneralNotes or LeaderNotes;
+- route leaders intelligently;
 - perform engineering or GOST decisions.
 
 Next expected stage:
 
 ```text
-Capability Audit - General Notes / Leader Notes / technical requirements
+Capability Audit - GD&T / Feature Control Frames / Datum identifiers
 ```
 
 Required next check:

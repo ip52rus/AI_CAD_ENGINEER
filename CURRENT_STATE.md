@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 42 documentation sync:
+Current checkpoint after the Package 43-44 documentation sync:
 
 ```text
-v0.34 complete hole and thread annotation pipeline
+v0.35 complete general and leader note primitives
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 42 checkpoint:
+Live command audit after Package 43-44 checkpoint:
 
 ```text
-156 registered JSON commands
-156 unique registered JSON commands
+164 registered JSON commands
+164 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -526,6 +526,103 @@ Goal:
   capabilities are already sufficient;
 - run an audit before implementation;
 - keep Runtime limited to Eyes and atomic Hands.
+
+## Package 43-44 checkpoint
+
+Package 43-44 complete: General Note and Leader Note primitives are VERIFIED.
+
+Verified General Note pipeline:
+
+```text
+get_general_notes
+-> create_general_note_fitted
+-> set_general_note_formatted_text
+-> move_general_note
+-> delete_general_note
+```
+
+Inventor validation confirmed the full lifecycle:
+
+```text
+create -> read -> edit -> read -> move -> read -> delete -> read
+final get_general_notes count = 0
+```
+
+Confirmed GeneralNote facts:
+
+- native fitted `GeneralNote` creation works;
+- Inventor GOST text style/layer are used by native/default behavior;
+- formatted text editing works;
+- movement works;
+- deletion works.
+
+Verified Leader Note pipeline:
+
+```text
+get_leader_notes / get_drawing_text_objects
+-> create_leader_note
+-> optional GeometryIntent attachment
+-> set_leader_note_formatted_text
+-> move_leader_note
+-> delete_leader_note
+```
+
+Free LeaderNote lifecycle is VERIFIED:
+
+```text
+create -> get_leader_notes -> edit -> move -> delete -> get_leader_notes
+final get_leader_notes count = 0
+```
+
+Confirmed free LeaderNote facts:
+
+- free `LeaderNote` creation works;
+- `attachedEntity = null` is a valid factual state;
+- null optional `GeometryIntent` is handled without failure;
+- edit, move, and delete work.
+
+Observed Inventor API behavior:
+
+- setting `LeaderNote.Position` does not necessarily produce an actual
+  `noteAfter.position` exactly equal to requested `x/y`;
+- Inventor may constrain or reposition the note according to leader geometry;
+- Runtime reports `requestedPosition` and actual `noteAfter.position` without
+  compensation.
+
+Attached LeaderNote is VERIFIED with:
+
+```text
+viewName = ВИД1
+curveIndex = 14
+intent = mid
+```
+
+Confirmed attached LeaderNote facts:
+
+- `attached = true`;
+- `GeometryIntent` creation succeeds;
+- `attachmentSelector` is preserved;
+- `pointOnSheet = (23.65, 15.6)`, matching the selected DrawingCurve midpoint;
+- final leader node is attached to the `GeometryIntent`;
+- `get_leader_notes` reads `attachedEntity`;
+- `referenceKey` exists;
+- property diagnostics are non-blocking.
+
+Runtime boundary:
+
+- Runtime does not generate technical requirement text;
+- Runtime does not choose technical requirements;
+- Runtime does not number requirements semantically;
+- Runtime does not decide GOST/ESKD content;
+- Runtime does not automatically choose geometry;
+- Runtime does not automatically place annotations;
+- Runtime does not interpret drawing meaning.
+
+Next capability check:
+
+```text
+Capability Audit - GD&T / Feature Control Frames / Datum identifiers
+```
 
 ## Package 24 checkpoint
 
