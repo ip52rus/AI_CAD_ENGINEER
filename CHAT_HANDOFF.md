@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.36 complete feature control frame primitives`.
+- Current checkpoint: `v0.37 complete surface texture symbol primitives`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 45 - Feature Control Frame primitives.
-- Registry after Package 45: `167 registered / 167 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 45 checkpoint commit.
+- Latest completed checkpoint: Package 46 - Surface Texture Symbol primitives.
+- Registry after Package 46: `170 registered / 170 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 46 checkpoint commit.
 
 ## Architecture Rules
 
@@ -31,7 +31,7 @@
 - CustomTables Detailed Reading: `get_custom_tables`.
 - Drawing Text Objects: `get_drawing_text_objects`.
 - Feature Control Frames Eye: `get_feature_control_frames`.
-- Surface Texture Symbols Eye: `get_surface_texture_symbols`.
+- Surface Texture Symbols: `get_surface_texture_symbols`, `create_surface_texture_symbol`, `move_surface_texture_symbol`, `delete_surface_texture_symbol`.
 - Welding Symbols Eye: `get_welding_symbols`.
 - RevisionClouds Eye: `get_revision_clouds`.
 - EdgeSymbols Eye: `get_edge_symbols`.
@@ -85,6 +85,54 @@
 - Feature Control Frame Hand: `create_feature_control_frame`.
 - Feature Control Frame move Hand: `move_feature_control_frame`.
 - Feature Control Frame delete Hand: `delete_feature_control_frame`.
+- Surface Texture Symbol Hand: `create_surface_texture_symbol`.
+- Surface Texture Symbol move Hand: `move_surface_texture_symbol`.
+- Surface Texture Symbol delete Hand: `delete_surface_texture_symbol`.
+
+## Surface Texture Symbol Primitives
+
+Verified Surface Texture Symbol commands:
+
+```text
+get_surface_texture_symbols
+create_surface_texture_symbol
+move_surface_texture_symbol
+delete_surface_texture_symbol
+```
+
+Verified free pipeline:
+
+```text
+explicit native roughness fields
+-> SurfaceTextureSymbols.Add(...)
+-> native SurfaceTextureSymbol
+-> get_surface_texture_symbols
+```
+
+Verified attached pipeline:
+
+```text
+DrawingView
+-> DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader points
+-> GeometryIntent LAST
+-> SurfaceTextureSymbols.Add(...)
+```
+
+Verified native facts include `kSurfaceTextureSymbolObject`,
+`kMaterialRemovalRequiredSurfaceType`, maximum roughness `"Ra 3.2"`,
+`kParallelToPlaneOfProjection`, `kSurfaceTextureGOSTDefinitionObject`,
+style `Шероховатость (ГОСТ)`, and referenceKey.
+
+Move is verified through `SurfaceTextureSymbol.Leader.RootNode.Position` when
+a leader root exists. Delete is verified through
+`SurfaceTextureSymbol.Delete()`, with final read `count = 0`.
+
+Runtime does not decide roughness values, choose Ra/Rz, infer machining
+process, choose material-removal requirement, choose geometry, choose
+placement, or apply GOST/ESKD semantics. External LLM supplies all engineering
+decisions.
 
 ## Feature Control Frame Primitives
 
@@ -610,7 +658,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - Surface Texture / Surface Finish symbols
+Capability Audit - Weld Symbols / Welding Annotations
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

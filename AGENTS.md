@@ -792,9 +792,61 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 45. Current next correct action: run a
-Capability Audit for Surface Texture / Surface Finish symbols before writing
-code.
+Next correct action completed by Package 46. Current next correct action: run a
+Capability Audit for Weld Symbols / Welding Annotations before writing code.
+
+## Current milestone addendum after Package 46
+
+```text
+Package 46 complete - Surface Texture Symbol primitives checkpoint
+```
+
+Verified Surface Texture Symbol primitives:
+
+```text
+get_surface_texture_symbols
+create_surface_texture_symbol
+move_surface_texture_symbol
+delete_surface_texture_symbol
+```
+
+Verified free Surface Texture Symbol pipeline:
+
+```text
+explicit native roughness fields
+-> SurfaceTextureSymbols.Add(...)
+-> native SurfaceTextureSymbol
+-> get_surface_texture_symbols
+```
+
+Verified attached Surface Texture Symbol pipeline:
+
+```text
+DrawingView
+-> DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader points
+-> GeometryIntent LAST
+-> SurfaceTextureSymbols.Add(...)
+```
+
+Verified native facts include `kSurfaceTextureSymbolObject`,
+`kMaterialRemovalRequiredSurfaceType`, maximum roughness `"Ra 3.2"`,
+`kParallelToPlaneOfProjection`, `kSurfaceTextureGOSTDefinitionObject`,
+style `Шероховатость (ГОСТ)`, and referenceKey.
+
+Verified move uses `SurfaceTextureSymbol.Leader.RootNode.Position` when a
+leader root exists, with factual post-move state confirmed by
+`get_surface_texture_symbols`. Verified delete uses
+`SurfaceTextureSymbol.Delete()`, and final read returned `count = 0`.
+
+Runtime does not decide roughness values, choose Ra/Rz, infer machining
+process, choose material-removal requirement, choose geometry, choose
+placement, or apply GOST/ESKD semantics. External LLM supplies all engineering
+decisions.
+
+Next correct action: run a Capability Audit for Weld Symbols / Welding
+Annotations before writing code.
 
 ## Current milestone addendum after Package 45
 

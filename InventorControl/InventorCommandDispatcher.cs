@@ -364,6 +364,15 @@ public class InventorCommandDispatcher
     private readonly GetSurfaceTextureSymbolsCommand
         _getSurfaceTextureSymbolsCommand;
 
+    private readonly CreateSurfaceTextureSymbolCommand
+        _createSurfaceTextureSymbolCommand;
+
+    private readonly MoveSurfaceTextureSymbolCommand
+        _moveSurfaceTextureSymbolCommand;
+
+    private readonly DeleteSurfaceTextureSymbolCommand
+        _deleteSurfaceTextureSymbolCommand;
+
     private readonly GetWeldingSymbolsCommand
         _getWeldingSymbolsCommand;
 
@@ -987,6 +996,18 @@ public class InventorCommandDispatcher
 
         _getSurfaceTextureSymbolsCommand =
             new GetSurfaceTextureSymbolsCommand(
+                inventor);
+
+        _createSurfaceTextureSymbolCommand =
+            new CreateSurfaceTextureSymbolCommand(
+                inventor);
+
+        _moveSurfaceTextureSymbolCommand =
+            new MoveSurfaceTextureSymbolCommand(
+                inventor);
+
+        _deleteSurfaceTextureSymbolCommand =
+            new DeleteSurfaceTextureSymbolCommand(
                 inventor);
 
         _getWeldingSymbolsCommand =
@@ -1692,6 +1713,18 @@ public class InventorCommandDispatcher
 
                 "get_surface_texture_symbols" =>
                     _getSurfaceTextureSymbolsCommand.Execute(
+                        root),
+
+                "create_surface_texture_symbol" =>
+                    _createSurfaceTextureSymbolCommand.Execute(
+                        root),
+
+                "move_surface_texture_symbol" =>
+                    _moveSurfaceTextureSymbolCommand.Execute(
+                        root),
+
+                "delete_surface_texture_symbol" =>
+                    _deleteSurfaceTextureSymbolCommand.Execute(
                         root),
 
                 "get_welding_symbols" =>

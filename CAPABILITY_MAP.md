@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.36 complete feature control frame primitives
+v0.37 complete surface texture symbol primitives
 ```
 
 ## Ground rules
@@ -52,7 +52,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Drawing Text semantic analysis | MISSING | - | - | - | semantic text understanding, GOST interpretation, TT/TU recognition; belongs to external LLM, not Runtime | no Runtime priority |
 | Annotation summary and bounds | PARTIAL | `get_drawing_annotation_summary`, `get_annotation_bounds` | annotation summary recorded as verified area; exact PASS command not separately recorded | - | typed bounds for all annotation classes; current bounds coverage is incomplete | P1 |
 | Annotation collision/layout logic | EXPERIMENTAL | - | not applicable | `check_annotation_collisions`, `auto_resolve_annotation_collisions` | should not be expanded as Runtime coverage | no priority |
-| Surface Texture Symbols Eye | VERIFIED | `get_surface_texture_symbols` | `get_surface_texture_symbols`, `get_surface_texture_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| Surface Texture Symbols | VERIFIED | `get_surface_texture_symbols`, `create_surface_texture_symbol`, `move_surface_texture_symbol`, `delete_surface_texture_symbol` | `get_surface_texture_symbols`, `get_surface_texture_symbols` with `sheetName`, Package 46 free and attached SurfaceTextureSymbol create/move/delete validation | - | content-edit/style/layer Hands are not confirmed | P0 maintained |
 | Surface texture semantic interpretation | MISSING | - | - | - | roughness interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Welding Symbols Eye | VERIFIED | `get_welding_symbols` | `get_welding_symbols`, `get_welding_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
 | Welding semantic analysis | MISSING | - | - | - | weld interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
@@ -159,6 +159,9 @@ Exact commands explicitly confirmed:
 {"command":"create_feature_control_frame"}
 {"command":"move_feature_control_frame"}
 {"command":"delete_feature_control_frame"}
+{"command":"create_surface_texture_symbol"}
+{"command":"move_surface_texture_symbol"}
+{"command":"delete_surface_texture_symbol"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -185,6 +188,20 @@ placement primitive is `FeatureControlFrame.Leader.RootNode.Position`. Runtime
 reports factual state and does not compensate geometrically.
 
 `get_surface_texture_symbols` is verified for reading `Sheet.SurfaceTextureSymbols`, SurfaceTextureSymbol metadata, surface texture fields, definition data, reference keys, and diagnostics.
+
+Package 46 verifies native drawing Surface Texture Symbol primitives:
+
+```text
+explicit native roughness fields -> SurfaceTextureSymbols.Add(...) -> native SurfaceTextureSymbol -> get_surface_texture_symbols
+DrawingView/DrawingCurve -> Sheet.CreateGeometryIntent(...) -> GeometryIntent LAST -> SurfaceTextureSymbols.Add(...)
+SurfaceTextureSymbol.Leader.RootNode.Position -> get_surface_texture_symbols factual post-move state
+SurfaceTextureSymbol.Delete() -> get_surface_texture_symbols count = 0
+```
+
+Verified native facts include `kSurfaceTextureSymbolObject`,
+`kMaterialRemovalRequiredSurfaceType`, maximum roughness `"Ra 3.2"`,
+`kParallelToPlaneOfProjection`, `kSurfaceTextureGOSTDefinitionObject`,
+style `Шероховатость (ГОСТ)`, and referenceKey.
 
 `get_welding_symbols` is verified for reading `Sheet.WeldingSymbols`, DrawingWeldingSymbol metadata, definition fields, weld symbol fields, reference keys, and diagnostics.
 

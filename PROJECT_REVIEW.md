@@ -1,6 +1,69 @@
 # PROJECT REVIEW
 
-## Package 45 checkpoint - current state
+## Package 46 checkpoint - current state
+
+Package 46 closes native drawing Surface Texture Symbol primitives.
+
+Current live command inventory after Package 46:
+
+```text
+170 registered JSON commands
+170 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified Surface Texture Symbol commands:
+
+```text
+get_surface_texture_symbols
+create_surface_texture_symbol
+move_surface_texture_symbol
+delete_surface_texture_symbol
+```
+
+Verified free Surface Texture Symbol pipeline:
+
+```text
+explicit native roughness fields
+-> SurfaceTextureSymbols.Add(...)
+-> native SurfaceTextureSymbol
+-> get_surface_texture_symbols
+```
+
+Verified attached Surface Texture Symbol pipeline:
+
+```text
+DrawingView
+-> DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader points
+-> GeometryIntent LAST
+-> SurfaceTextureSymbols.Add(...)
+```
+
+Verified native facts include `objectType = kSurfaceTextureSymbolObject`,
+`surfaceTextureType = kMaterialRemovalRequiredSurfaceType`,
+`maximumRoughness = "Ra 3.2"`,
+`layDirection = kParallelToPlaneOfProjection`,
+`definition = kSurfaceTextureGOSTDefinitionObject`,
+style `Шероховатость (ГОСТ)`, and referenceKey.
+
+Move is verified through `SurfaceTextureSymbol.Leader.RootNode.Position` when
+a leader root node exists, with factual post-move state confirmed by
+`get_surface_texture_symbols`.
+
+Delete is verified through `SurfaceTextureSymbol.Delete()`, followed by
+`get_surface_texture_symbols` returning `count = 0`.
+
+Runtime boundaries remain explicit: no roughness value decisions, no Ra/Rz
+choice, no machining-process inference, no material-removal decision, no
+geometry or placement choice, and no GOST/ESKD semantic logic. External LLM
+supplies all engineering decisions.
+
+Next capability check: Weld Symbols / Welding Annotations.
+
+## Package 45 checkpoint
 
 Package 45 closes native drawing Feature Control Frame creation primitives.
 
@@ -58,7 +121,8 @@ tolerance calculation, no datum assignment, no MMC/LMC/RFS interpretation, no
 geometry or placement choice, and no GOST/ESKD engineering logic. External LLM
 supplies all engineering decisions.
 
-Next capability check: Surface Texture / Surface Finish symbols.
+Next capability check completed by Package 46. Current next capability check:
+Weld Symbols / Welding Annotations.
 
 ## Package 43-44 checkpoint
 
@@ -132,8 +196,8 @@ no semantic numbering, no GOST/ESKD content decisions, no automatic geometry
 selection, no automatic annotation placement, and no drawing-meaning
 interpretation. External LLM owns those decisions.
 
-Next capability check completed by Package 45. Current next capability check:
-Surface Texture / Surface Finish symbols.
+Next capability check completed by Package 45 and Package 46. Current next
+capability check: Weld Symbols / Welding Annotations.
 
 ## Package 42 checkpoint
 

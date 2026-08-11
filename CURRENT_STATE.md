@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 45 documentation sync:
+Current checkpoint after the Package 46 documentation sync:
 
 ```text
-v0.36 complete feature control frame primitives
+v0.37 complete surface texture symbol primitives
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 45 checkpoint:
+Live command audit after Package 46 checkpoint:
 
 ```text
-167 registered JSON commands
-167 unique registered JSON commands
+170 registered JSON commands
+170 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -618,10 +618,11 @@ Runtime boundary:
 - Runtime does not automatically place annotations;
 - Runtime does not interpret drawing meaning.
 
-Next capability check:
+Next capability check completed by Package 45 and Package 46. Current next
+capability check:
 
 ```text
-Capability Audit - Surface Texture / Surface Finish symbols
+Capability Audit - Weld Symbols / Welding Annotations
 ```
 
 ## Package 45 checkpoint
@@ -686,7 +687,73 @@ GOST/ESKD engineering logic. External LLM supplies all engineering decisions.
 Next capability check:
 
 ```text
-Capability Audit - Surface Texture / Surface Finish symbols
+Capability Audit - Weld Symbols / Welding Annotations
+```
+
+## Package 46 checkpoint
+
+Package 46 complete: native drawing Surface Texture Symbol primitives are
+VERIFIED.
+
+Verified commands:
+
+```text
+get_surface_texture_symbols
+create_surface_texture_symbol
+move_surface_texture_symbol
+delete_surface_texture_symbol
+```
+
+Verified free surface texture pipeline:
+
+```text
+explicit native roughness fields
+-> SurfaceTextureSymbols.Add(...)
+-> native SurfaceTextureSymbol
+-> get_surface_texture_symbols
+```
+
+Verified attached surface texture pipeline:
+
+```text
+DrawingView
+-> DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader points
+-> GeometryIntent LAST
+-> SurfaceTextureSymbols.Add(...)
+```
+
+Verified native facts:
+
+- `objectType = kSurfaceTextureSymbolObject`;
+- `surfaceTextureType = kMaterialRemovalRequiredSurfaceType`;
+- `maximumRoughness = "Ra 3.2"`;
+- `layDirection = kParallelToPlaneOfProjection`;
+- `definition = kSurfaceTextureGOSTDefinitionObject`;
+- `style = Шероховатость (ГОСТ)`;
+- referenceKey present.
+
+Verified move behavior:
+
+- `SurfaceTextureSymbol.Leader.RootNode.Position` is used when a leader root
+  node exists;
+- factual post-move state is confirmed by `get_surface_texture_symbols`.
+
+Verified delete behavior:
+
+- `SurfaceTextureSymbol.Delete()` removes the native symbol;
+- final `get_surface_texture_symbols` read returned `count = 0`.
+
+Runtime does not decide roughness values, choose Ra/Rz, infer machining
+process, choose material-removal requirement, choose geometry, choose
+placement, or apply GOST/ESKD semantics. External LLM supplies all engineering
+decisions.
+
+Next capability check:
+
+```text
+Capability Audit - Weld Symbols / Welding Annotations
 ```
 
 ## Package 24 checkpoint

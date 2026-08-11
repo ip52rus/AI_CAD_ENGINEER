@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 45 is complete.
-- Current checkpoint: `v0.36 complete feature control frame primitives`.
-- Live registry after Package 45: `167 registered / 167 unique`, no duplicate command names.
+- Package 46 is complete.
+- Current checkpoint: `v0.37 complete surface texture symbol primitives`.
+- Live registry after Package 46: `170 registered / 170 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -76,6 +76,34 @@ Verified Drawing Generation / Export Hands:
 - `create_feature_control_frame`
 - `move_feature_control_frame`
 - `delete_feature_control_frame`
+- `get_surface_texture_symbols`
+- `create_surface_texture_symbol`
+- `move_surface_texture_symbol`
+- `delete_surface_texture_symbol`
+
+Verified Surface Texture Symbol primitives:
+
+```text
+explicit native roughness fields
+-> SurfaceTextureSymbols.Add(...)
+-> native SurfaceTextureSymbol
+-> get_surface_texture_symbols
+
+DrawingView
+-> DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader points
+-> GeometryIntent LAST
+-> SurfaceTextureSymbols.Add(...)
+```
+
+Verified facts include `kSurfaceTextureSymbolObject`,
+`kMaterialRemovalRequiredSurfaceType`, maximum roughness `"Ra 3.2"`,
+`kParallelToPlaneOfProjection`, `kSurfaceTextureGOSTDefinitionObject`,
+style `Шероховатость (ГОСТ)`, and referenceKey.
+
+Move uses `SurfaceTextureSymbol.Leader.RootNode.Position` when a leader root
+exists. Delete uses `SurfaceTextureSymbol.Delete()`.
 
 Verified Feature Control Frame primitives:
 
@@ -314,12 +342,14 @@ Runtime does not:
 - decide GOST/ESKD free-text content;
 - automatically place GeneralNotes or LeaderNotes;
 - route leaders intelligently;
-- perform engineering or GOST decisions.
+- decide roughness values, choose Ra/Rz, infer machining process, choose
+  material-removal requirement, choose geometry or placement, apply GOST/ESKD
+  semantics, or perform engineering decisions.
 
 Next expected stage:
 
 ```text
-Capability Audit - Surface Texture / Surface Finish symbols
+Capability Audit - Weld Symbols / Welding Annotations
 ```
 
 Required next check:
