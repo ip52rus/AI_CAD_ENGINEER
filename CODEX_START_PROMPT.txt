@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 43-44 are complete.
-- Current checkpoint: `v0.35 complete general and leader note primitives`.
-- Live registry after Package 43-44: `164 registered / 164 unique`, no duplicate command names.
+- Package 45 is complete.
+- Current checkpoint: `v0.36 complete feature control frame primitives`.
+- Live registry after Package 45: `167 registered / 167 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -72,6 +72,49 @@ Verified Drawing Generation / Export Hands:
 - `set_leader_note_formatted_text`
 - `move_leader_note`
 - `delete_leader_note`
+- `get_feature_control_frames`
+- `create_feature_control_frame`
+- `move_feature_control_frame`
+- `delete_feature_control_frame`
+
+Verified Feature Control Frame primitives:
+
+```text
+get_feature_control_frames
+-> create_feature_control_frame
+-> move_feature_control_frame
+-> delete_feature_control_frame
+```
+
+Verified free FCF pipeline:
+
+```text
+explicit leader points
+-> CreateFeatureControlFrameRows
+-> rows.Add(...)
+-> FeatureControlFrames.Add(...)
+-> native Inventor FeatureControlFrame
+-> get_feature_control_frames
+```
+
+Verified attached FCF pipeline:
+
+```text
+explicit DrawingView
+-> explicit DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader vertices
+-> GeometryIntent LAST
+-> FeatureControlFrames.Add(...)
+```
+
+Observed Inventor behavior: for leader-based drawing `FeatureControlFrame`,
+`FeatureControlFrame.Position` may not move the object. Verified placement
+primitive is `FeatureControlFrame.Leader.RootNode.Position`.
+
+Runtime does not choose GD&T characteristics, calculate tolerances, assign
+datums, interpret MMC/LMC/RFS, choose geometry or placement, or apply
+GOST/ESKD engineering logic.
 
 Verified General Note / Leader Note primitives:
 
@@ -276,7 +319,7 @@ Runtime does not:
 Next expected stage:
 
 ```text
-Capability Audit - GD&T / Feature Control Frames / Datum identifiers
+Capability Audit - Surface Texture / Surface Finish symbols
 ```
 
 Required next check:

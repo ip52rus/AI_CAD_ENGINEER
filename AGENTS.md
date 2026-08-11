@@ -792,8 +792,61 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action: run a Capability Audit for GD&T / Feature Control Frames /
-Datum identifiers before writing code.
+Next correct action completed by Package 45. Current next correct action: run a
+Capability Audit for Surface Texture / Surface Finish symbols before writing
+code.
+
+## Current milestone addendum after Package 45
+
+```text
+Package 45 complete - Feature Control Frame primitives checkpoint
+```
+
+Verified Feature Control Frame primitives:
+
+```text
+get_feature_control_frames
+create_feature_control_frame
+move_feature_control_frame
+delete_feature_control_frame
+```
+
+Verified free FCF pipeline:
+
+```text
+explicit leader points
+-> CreateFeatureControlFrameRows
+-> rows.Add(...)
+-> FeatureControlFrames.Add(...)
+-> native Inventor FeatureControlFrame
+-> get_feature_control_frames
+```
+
+Verified attached FCF pipeline:
+
+```text
+explicit DrawingView
+-> explicit DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader vertices
+-> GeometryIntent LAST
+-> FeatureControlFrames.Add(...)
+```
+
+Verified structured row content includes `kPosition`, tolerance `"0.1"`, datum
+references `A` and `B`, empty third datum, and referenceKey.
+
+Observed Inventor behavior: for leader-based drawing FeatureControlFrame
+objects, setting `FeatureControlFrame.Position` may not move the object. The
+verified native placement primitive is
+`FeatureControlFrame.Leader.RootNode.Position`.
+
+Runtime does not choose GD&T characteristics, calculate tolerances, assign
+datums, interpret MMC/LMC/RFS, choose geometry or placement, or apply
+GOST/ESKD engineering logic.
+
+Next correct action: run a Capability Audit for Surface Texture / Surface
+Finish symbols before writing code.
 
 ## Current milestone addendum after Package 26
 

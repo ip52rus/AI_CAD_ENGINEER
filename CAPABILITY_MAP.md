@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.35 complete general and leader note primitives
+v0.36 complete feature control frame primitives
 ```
 
 ## Ground rules
@@ -63,7 +63,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Drawing symbol semantic interpretation | MISSING | - | - | - | symbol interpretation, GOST/ISO validation, correctness checking, and engineering analysis belong to external LLM, not Runtime | no Runtime priority |
 | Datum identifiers | MISSING | placeholder count only; no confirmed API coverage | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Datum target symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
-| Feature Control Frames | VERIFIED | `get_feature_control_frames` | `get_feature_control_frames`, `get_feature_control_frames` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| Feature Control Frames | VERIFIED | `get_feature_control_frames`, `create_feature_control_frame`, `move_feature_control_frame`, `delete_feature_control_frame` | `get_feature_control_frames`, `get_feature_control_frames` with `sheetName`, Package 45 free and attached FCF create/move/delete validation | - | row/content/style/layer edit Hands are not confirmed | P0 maintained |
 | GD&T semantic analysis | MISSING | - | - | - | tolerance interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Revision symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Sketched symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
@@ -156,6 +156,9 @@ Exact commands explicitly confirmed:
 {"command":"set_leader_note_formatted_text"}
 {"command":"move_leader_note"}
 {"command":"delete_leader_note"}
+{"command":"create_feature_control_frame"}
+{"command":"move_feature_control_frame"}
+{"command":"delete_feature_control_frame"}
 ```
 
 `get_parts_lists` is verified for reading `Sheet.PartsLists`, not for reading GOST custom specification tables.
@@ -165,6 +168,21 @@ Exact commands explicitly confirmed:
 `get_drawing_text_objects` is verified for reading DrawingNotes collections, DrawingSketch TextBoxes, and SketchedSymbols as Inventor API facts.
 
 `get_feature_control_frames` is verified for reading `Sheet.FeatureControlFrames`, frame metadata, rows, tolerance fields, datum fields, reference keys, and diagnostics.
+
+Package 45 verifies native drawing Feature Control Frame primitives:
+
+```text
+explicit leader points -> CreateFeatureControlFrameRows -> rows.Add(...) -> FeatureControlFrames.Add(...) -> native FeatureControlFrame -> get_feature_control_frames
+explicit DrawingView/DrawingCurve -> Sheet.CreateGeometryIntent(...) -> GeometryIntent LAST -> FeatureControlFrames.Add(...)
+```
+
+Verified structured content includes `kPosition`, tolerance `"0.1"`, datum
+references `A` and `B`, empty third datum, and referenceKey.
+
+Observed Inventor behavior: for leader-based drawing `FeatureControlFrame`,
+setting `FeatureControlFrame.Position` may not move the object. The verified
+placement primitive is `FeatureControlFrame.Leader.RootNode.Position`. Runtime
+reports factual state and does not compensate geometrically.
 
 `get_surface_texture_symbols` is verified for reading `Sheet.SurfaceTextureSymbols`, SurfaceTextureSymbol metadata, surface texture fields, definition data, reference keys, and diagnostics.
 

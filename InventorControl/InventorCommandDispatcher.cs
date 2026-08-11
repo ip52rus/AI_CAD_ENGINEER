@@ -352,6 +352,15 @@ public class InventorCommandDispatcher
     private readonly GetFeatureControlFramesCommand
         _getFeatureControlFramesCommand;
 
+    private readonly CreateFeatureControlFrameCommand
+        _createFeatureControlFrameCommand;
+
+    private readonly MoveFeatureControlFrameCommand
+        _moveFeatureControlFrameCommand;
+
+    private readonly DeleteFeatureControlFrameCommand
+        _deleteFeatureControlFrameCommand;
+
     private readonly GetSurfaceTextureSymbolsCommand
         _getSurfaceTextureSymbolsCommand;
 
@@ -962,6 +971,18 @@ public class InventorCommandDispatcher
 
         _getFeatureControlFramesCommand =
             new GetFeatureControlFramesCommand(
+                inventor);
+
+        _createFeatureControlFrameCommand =
+            new CreateFeatureControlFrameCommand(
+                inventor);
+
+        _moveFeatureControlFrameCommand =
+            new MoveFeatureControlFrameCommand(
+                inventor);
+
+        _deleteFeatureControlFrameCommand =
+            new DeleteFeatureControlFrameCommand(
                 inventor);
 
         _getSurfaceTextureSymbolsCommand =
@@ -1655,6 +1676,18 @@ public class InventorCommandDispatcher
 
                 "get_feature_control_frames" =>
                     _getFeatureControlFramesCommand.Execute(
+                        root),
+
+                "create_feature_control_frame" =>
+                    _createFeatureControlFrameCommand.Execute(
+                        root),
+
+                "move_feature_control_frame" =>
+                    _moveFeatureControlFrameCommand.Execute(
+                        root),
+
+                "delete_feature_control_frame" =>
+                    _deleteFeatureControlFrameCommand.Execute(
                         root),
 
                 "get_surface_texture_symbols" =>

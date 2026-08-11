@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 43-44 documentation sync:
+Current checkpoint after the Package 45 documentation sync:
 
 ```text
-v0.35 complete general and leader note primitives
+v0.36 complete feature control frame primitives
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 43-44 checkpoint:
+Live command audit after Package 45 checkpoint:
 
 ```text
-164 registered JSON commands
-164 unique registered JSON commands
+167 registered JSON commands
+167 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -621,7 +621,72 @@ Runtime boundary:
 Next capability check:
 
 ```text
-Capability Audit - GD&T / Feature Control Frames / Datum identifiers
+Capability Audit - Surface Texture / Surface Finish symbols
+```
+
+## Package 45 checkpoint
+
+Package 45 complete: native drawing Feature Control Frame primitives are
+VERIFIED.
+
+Verified commands:
+
+```text
+get_feature_control_frames
+create_feature_control_frame
+move_feature_control_frame
+delete_feature_control_frame
+```
+
+Verified free FCF pipeline:
+
+```text
+explicit leader points
+-> CreateFeatureControlFrameRows
+-> rows.Add(...)
+-> FeatureControlFrames.Add(...)
+-> native Inventor FeatureControlFrame
+-> get_feature_control_frames
+```
+
+Verified attached FCF pipeline:
+
+```text
+explicit DrawingView
+-> explicit DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader vertices
+-> GeometryIntent LAST
+-> FeatureControlFrames.Add(...)
+```
+
+Verified structured content:
+
+- `geometricCharacteristic = kPosition`;
+- `tolerance = "0.1"`;
+- `datumOne = "A"`;
+- `datumTwo = "B"`;
+- `datumThree = ""`;
+- referenceKey present.
+
+Verified Inventor placement behavior:
+
+- `FeatureControlFrame.Position = Point2d` did not move the factual/visible
+  leader-based FCF;
+- the verified native placement primitive is
+  `FeatureControlFrame.Leader.RootNode.Position = Point2d`;
+- after the fix, requested `(32,18)` resulted in `frame.position = (32,18)`
+  and `leader.rootNodePosition = (32,18)`;
+- `get_feature_control_frames` independently confirmed the new position.
+
+Runtime does not choose GD&T characteristic, calculate tolerances, assign
+datums, interpret MMC/LMC/RFS, choose geometry, choose placement, or apply
+GOST/ESKD engineering logic. External LLM supplies all engineering decisions.
+
+Next capability check:
+
+```text
+Capability Audit - Surface Texture / Surface Finish symbols
 ```
 
 ## Package 24 checkpoint

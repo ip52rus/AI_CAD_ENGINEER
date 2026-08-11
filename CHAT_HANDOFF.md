@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.35 complete general and leader note primitives`.
+- Current checkpoint: `v0.36 complete feature control frame primitives`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 43-44 - General and Leader Note primitives.
-- Registry after Package 43-44: `164 registered / 164 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 43-44 checkpoint commit.
+- Latest completed checkpoint: Package 45 - Feature Control Frame primitives.
+- Registry after Package 45: `167 registered / 167 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 45 checkpoint commit.
 
 ## Architecture Rules
 
@@ -81,6 +81,61 @@
 - Leader note edit Hand: `set_leader_note_formatted_text`.
 - Leader note move Hand: `move_leader_note`.
 - Leader note delete Hand: `delete_leader_note`.
+- Feature Control Frame Eye: `get_feature_control_frames`.
+- Feature Control Frame Hand: `create_feature_control_frame`.
+- Feature Control Frame move Hand: `move_feature_control_frame`.
+- Feature Control Frame delete Hand: `delete_feature_control_frame`.
+
+## Feature Control Frame Primitives
+
+Verified Feature Control Frame commands:
+
+```text
+get_feature_control_frames
+create_feature_control_frame
+move_feature_control_frame
+delete_feature_control_frame
+```
+
+Verified free FCF pipeline:
+
+```text
+explicit leader points
+-> CreateFeatureControlFrameRows
+-> rows.Add(...)
+-> FeatureControlFrames.Add(...)
+-> native Inventor FeatureControlFrame
+-> get_feature_control_frames
+```
+
+Verified attached FCF pipeline:
+
+```text
+explicit DrawingView
+-> explicit DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader vertices
+-> GeometryIntent LAST
+-> FeatureControlFrames.Add(...)
+```
+
+Verified structured content:
+
+- `geometricCharacteristic = kPosition`;
+- `tolerance = "0.1"`;
+- `datumOne = "A"`;
+- `datumTwo = "B"`;
+- `datumThree = ""`;
+- referenceKey present.
+
+Verified Inventor placement behavior: for leader-based drawing
+`FeatureControlFrame`, setting `FeatureControlFrame.Position` may not move the
+object. The verified native placement primitive is
+`FeatureControlFrame.Leader.RootNode.Position`.
+
+Runtime does not choose GD&T characteristics, calculate tolerances, assign
+datums, interpret MMC/LMC/RFS, choose geometry or placement, or apply
+GOST/ESKD engineering logic.
 
 ## General and Leader Note Primitives
 
@@ -555,7 +610,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - GD&T / Feature Control Frames / Datum identifiers
+Capability Audit - Surface Texture / Surface Finish symbols
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

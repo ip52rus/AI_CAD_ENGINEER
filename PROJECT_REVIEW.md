@@ -1,6 +1,66 @@
 # PROJECT REVIEW
 
-## Package 43-44 checkpoint - current state
+## Package 45 checkpoint - current state
+
+Package 45 closes native drawing Feature Control Frame creation primitives.
+
+Current live command inventory after Package 45:
+
+```text
+167 registered JSON commands
+167 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified Feature Control Frame commands:
+
+```text
+get_feature_control_frames
+create_feature_control_frame
+move_feature_control_frame
+delete_feature_control_frame
+```
+
+Verified free FCF pipeline:
+
+```text
+explicit leader points
+-> CreateFeatureControlFrameRows
+-> rows.Add(...)
+-> FeatureControlFrames.Add(...)
+-> native Inventor FeatureControlFrame
+-> get_feature_control_frames
+```
+
+Verified attached FCF pipeline:
+
+```text
+explicit DrawingView
+-> explicit DrawingCurve
+-> Sheet.CreateGeometryIntent(...)
+-> caller Point2d leader vertices
+-> GeometryIntent LAST
+-> FeatureControlFrames.Add(...)
+```
+
+Verified structured content includes `geometricCharacteristic = kPosition`,
+`tolerance = "0.1"`, `datumOne = "A"`, `datumTwo = "B"`,
+`datumThree = ""`, and referenceKey.
+
+Observed Inventor API behavior: setting `FeatureControlFrame.Position` did not
+move the factual/visible leader-based FCF. The verified native placement
+primitive is `FeatureControlFrame.Leader.RootNode.Position`. Runtime preserves
+this behavior and does not compensate or reroute leaders.
+
+Runtime boundaries remain explicit: no GD&T characteristic selection, no
+tolerance calculation, no datum assignment, no MMC/LMC/RFS interpretation, no
+geometry or placement choice, and no GOST/ESKD engineering logic. External LLM
+supplies all engineering decisions.
+
+Next capability check: Surface Texture / Surface Finish symbols.
+
+## Package 43-44 checkpoint
 
 Package 43-44 closes the verified General Note and Leader Note primitives
 needed for technical requirements and free-text production drawing annotations.
@@ -72,7 +132,8 @@ no semantic numbering, no GOST/ESKD content decisions, no automatic geometry
 selection, no automatic annotation placement, and no drawing-meaning
 interpretation. External LLM owns those decisions.
 
-Next capability check: GD&T / Feature Control Frames / Datum identifiers.
+Next capability check completed by Package 45. Current next capability check:
+Surface Texture / Surface Finish symbols.
 
 ## Package 42 checkpoint
 
