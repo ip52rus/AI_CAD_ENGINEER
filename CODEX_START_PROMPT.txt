@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 49B is complete.
-- Current checkpoint: `v0.41 complete parts list lifecycle`.
-- Live registry after Package 49B: `181 registered / 181 unique`, no duplicate command names.
+- Package 50A is complete.
+- Current checkpoint: `v0.42 complete hole table eye`.
+- Live registry after Package 50A: `182 registered / 182 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -93,6 +93,34 @@ Verified Drawing Generation / Export Hands:
 - `create_sketched_symbol`
 - `move_sketched_symbol`
 - `delete_sketched_symbol`
+- `get_hole_tables`
+
+Verified HoleTable detailed Eye:
+
+```text
+get_hole_tables
+```
+
+Live Inventor validation used a real manually-created `HoleTable`.
+
+Verified factual coverage includes title, position, origin, rangeBox, parent
+view / referenced view, `HoleTableType`, style, layer, title/header/data text
+styles, `ShowTitle`, HoleTable-specific factual flags, rows, columns, cells,
+`HoleTags`, generic `ReferencedHole` metadata, referenceKey, selectorSnapshot,
+and propertyDiagnostics.
+
+Rows expose holeTag, cells, referencedHole, height, and count. Columns expose
+title, width, propertyType, and unitsFormatting. Cells expose text,
+formattedText, and stackedTextPosition. HoleTags expose text, position,
+rangeBox, visible, showLeader, layer, and dimensionStyle where Inventor returns
+them.
+
+`HoleTable.GetReferenceKey(...)` is exposed using the established Runtime
+reference-key shape. Live validation returned `byteCount = 62`.
+
+Runtime must not decide whether a HoleTable is required, choose the DrawingView,
+placement, columns, tags, numbering, or sorting, interpret hole semantics, apply
+GOST/ESKD HoleTable rules, edit cells automatically, or modify model holes.
 
 Verified PartsList lifecycle:
 
@@ -458,7 +486,7 @@ Runtime does not:
 Next expected stage:
 
 ```text
-Capability Audit - Parts Lists / Balloons / BOM drawing annotations
+Capability Audit - HoleTable lifecycle
 ```
 
 Required next check:

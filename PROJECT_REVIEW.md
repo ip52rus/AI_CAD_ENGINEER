@@ -1,6 +1,49 @@
 # PROJECT REVIEW
 
-## Package 49B checkpoint - current state
+## Package 50A checkpoint - current state
+
+Package 50A adds and verifies the detailed native drawing HoleTable Eye.
+
+Current live command inventory after Package 50A:
+
+```text
+182 registered JSON commands
+182 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified HoleTable command:
+
+```text
+get_hole_tables
+```
+
+Live Inventor validation used a real manually-created `HoleTable`.
+
+Verified factual coverage:
+
+- title, position, origin, rangeBox, parent view / referenced view, `HoleTableType`, style, layer, title/header/data text styles, `ShowTitle`, and HoleTable-specific factual flags;
+- rows, columns, cells, `HoleTags`, generic `ReferencedHole` metadata, referenceKey, selectorSnapshot, and propertyDiagnostics;
+- row facts including holeTag, cells, referencedHole, height, and count;
+- column facts including title, width, propertyType, and unitsFormatting;
+- cell facts including text, formattedText, and stackedTextPosition;
+- HoleTag facts including text, position, rangeBox, visible, showLeader, layer, and dimensionStyle.
+
+`HoleTable.GetReferenceKey(...)` is exposed using the established Runtime
+reference-key shape. Live validation returned `byteCount = 62`.
+
+Unavailable COM properties such as `DeleteTagsOnRollup`,
+`SecondaryTagModifierOnRollup`, and limited `ReferencedHole` metadata such as
+`Name` are isolated as property-level diagnostics and do not invalidate the Eye.
+
+Runtime does not decide whether a HoleTable is required, choose the DrawingView,
+placement, columns, tags, numbering, or sorting, interpret hole semantics, apply
+GOST/ESKD HoleTable rules, edit cells automatically, or modify model holes.
+
+Next capability check: HoleTable lifecycle.
+
+## Package 49B checkpoint
 
 Package 49B closes native drawing PartsList lifecycle primitives.
 

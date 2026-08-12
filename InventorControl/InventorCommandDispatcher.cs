@@ -550,6 +550,9 @@ public class InventorCommandDispatcher
     private readonly GetRevisionTablesCommand
         _getRevisionTablesCommand;
 
+    private readonly GetHoleTablesCommand
+        _getHoleTablesCommand;
+
     public InventorCommandDispatcher(
         Inventor.Application inventor)
     {
@@ -1277,6 +1280,10 @@ public class InventorCommandDispatcher
 
         _getRevisionTablesCommand =
             new GetRevisionTablesCommand(
+                inventor);
+
+        _getHoleTablesCommand =
+            new GetHoleTablesCommand(
                 inventor);
     }
 
@@ -2038,6 +2045,10 @@ public class InventorCommandDispatcher
 
                 "get_revision_tables" =>
                     _getRevisionTablesCommand.Execute(
+                        root),
+
+                "get_hole_tables" =>
+                    _getHoleTablesCommand.Execute(
                         root),
 
                 _ =>

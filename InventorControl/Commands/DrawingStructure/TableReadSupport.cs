@@ -927,6 +927,62 @@ internal static class TableReadSupport
             diagnostics);
     }
 
+    public static TableReadResult ReadHoleTablesDetailed(
+        DrawingDocument drawingDocument,
+        Sheet sheet)
+    {
+        List<object> items =
+            new();
+
+        List<object> diagnostics =
+            new();
+
+        HoleTables? holeTables =
+            ReadProperty(
+                diagnostics,
+                "Sheet.HoleTables",
+                () => sheet.HoleTables);
+
+        if (holeTables == null)
+        {
+            return new TableReadResult(
+                0,
+                items,
+                diagnostics);
+        }
+
+        int index =
+            0;
+
+        try
+        {
+            foreach (HoleTable holeTable
+                     in holeTables)
+            {
+                index++;
+
+                items.Add(
+                    ReadHoleTableDetailed(
+                        drawingDocument,
+                        sheet,
+                        holeTable,
+                        index));
+            }
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                diagnostics,
+                "Sheet.HoleTables.Enumeration",
+                exception);
+        }
+
+        return new TableReadResult(
+            items.Count,
+            items,
+            diagnostics);
+    }
+
     public static TableReadResult ReadCustomTablesDetailed(
         DrawingDocument drawingDocument,
         Sheet sheet)
@@ -1901,6 +1957,297 @@ internal static class TableReadSupport
         };
     }
 
+    private static object ReadHoleTableDetailed(
+        DrawingDocument drawingDocument,
+        Sheet sheet,
+        HoleTable holeTable,
+        int index)
+    {
+        List<object> diagnostics =
+            new();
+
+        string title =
+            ReadString(
+                ReadProperty(
+                    diagnostics,
+                    "Title",
+                    () => holeTable.Title));
+
+        object? position =
+            ReadPoint2d(
+                ReadProperty(
+                    diagnostics,
+                    "Position",
+                    () => holeTable.Position),
+                diagnostics,
+                "Position");
+
+        object? rangeBox =
+            ReadBox2d(
+                ReadProperty(
+                    diagnostics,
+                    "RangeBox",
+                    () => holeTable.RangeBox),
+                diagnostics,
+                "RangeBox");
+
+        object? referenceKey =
+            ReadReferenceKey(
+                drawingDocument,
+                diagnostics,
+                keyContext =>
+                {
+                    Array referenceKeyArray =
+                        Array.CreateInstance(
+                            typeof(byte),
+                            0);
+
+                    holeTable.GetReferenceKey(
+                        ref referenceKeyArray,
+                        keyContext);
+
+                    return referenceKeyArray;
+                });
+
+        HoleTableColumnRead columns =
+            ReadHoleTableColumns(
+                holeTable,
+                diagnostics);
+
+        object? parentView =
+            ReadDrawingViewMetadata(
+                ReadProperty(
+                    diagnostics,
+                    "ParentView",
+                    () => holeTable.ParentView),
+                diagnostics,
+                "ParentView");
+
+        return new
+        {
+            index,
+            indexIsStable =
+                false,
+            objectTypeRaw =
+                ReadObjectTypeRaw(
+                    holeTable.Type),
+            objectType =
+                ReadEnumName(
+                    holeTable.Type),
+            parentSheet =
+                ReadSheetMetadata(
+                    sheet),
+            title,
+            position,
+            origin =
+                position,
+            rangeBox,
+            parentView,
+            referencedView =
+                parentView,
+            holeTableTypeRaw =
+                ReadEnumRaw(
+                    ReadProperty(
+                        diagnostics,
+                        "HoleTableType",
+                        () => holeTable.HoleTableType)),
+            holeTableType =
+                ReadEnumName(
+                    ReadProperty(
+                        diagnostics,
+                        "HoleTableType",
+                        () => holeTable.HoleTableType)),
+            style =
+                ReadNamedObject(
+                    ReadProperty(
+                        diagnostics,
+                        "Style",
+                        () => holeTable.Style),
+                    diagnostics,
+                    "Style"),
+            layer =
+                ReadNamedObject(
+                    ReadProperty(
+                        diagnostics,
+                        "Layer",
+                        () => holeTable.Layer),
+                    diagnostics,
+                    "Layer"),
+            titleTextStyle =
+                ReadNamedObject(
+                    ReadProperty(
+                        diagnostics,
+                        "TitleTextStyle",
+                        () => holeTable.TitleTextStyle),
+                    diagnostics,
+                    "TitleTextStyle"),
+            columnHeaderTextStyle =
+                ReadNamedObject(
+                    ReadProperty(
+                        diagnostics,
+                        "ColumnHeaderTextStyle",
+                        () => holeTable.ColumnHeaderTextStyle),
+                    diagnostics,
+                    "ColumnHeaderTextStyle"),
+            dataTextStyle =
+                ReadNamedObject(
+                    ReadProperty(
+                        diagnostics,
+                        "DataTextStyle",
+                        () => holeTable.DataTextStyle),
+                    diagnostics,
+                    "DataTextStyle"),
+            showTitle =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "ShowTitle",
+                    () => holeTable.ShowTitle),
+            arrangeByPosition =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "ArrangeByPosition",
+                    () => holeTable.ArrangeByPosition),
+            deleteTagsOnRollup =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "DeleteTagsOnRollup",
+                    () => holeTable.DeleteTagsOnRollup),
+            groupHoleTypes =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "GroupHoleTypes",
+                    () => holeTable.GroupHoleTypes),
+            includeCentermarks =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "IncludeCentermarks",
+                    () => holeTable.IncludeCentermarks),
+            includeCircularCuts =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "IncludeCircularCuts",
+                    () => holeTable.IncludeCircularCuts),
+            includeCounterBoreHoleFeatures =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "IncludeCounterBoreHoleFeatures",
+                    () => holeTable.IncludeCounterBoreHoleFeatures),
+            includeCounterSinkHoleFeatures =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "IncludeCounterSinkHoleFeatures",
+                    () => holeTable.IncludeCounterSinkHoleFeatures),
+            includeDrilledHoleFeatures =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "IncludeDrilledHoleFeatures",
+                    () => holeTable.IncludeDrilledHoleFeatures),
+            includeHoleFeatures =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "IncludeHoleFeatures",
+                    () => holeTable.IncludeHoleFeatures),
+            includeRecoveredPunchCenters =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "IncludeRecoveredPunchCenters",
+                    () => holeTable.IncludeRecoveredPunchCenters),
+            includeThreadedHoleFeatures =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "IncludeThreadedHoleFeatures",
+                    () => holeTable.IncludeThreadedHoleFeatures),
+            preserveTagging =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "PreserveTagging",
+                    () => holeTable.PreserveTagging),
+            reformatOnCustomHoleMatch =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "ReformatOnCustomHoleMatch",
+                    () => holeTable.ReformatOnCustomHoleMatch),
+            rowMergeTypeRaw =
+                ReadEnumRaw(
+                    ReadProperty(
+                        diagnostics,
+                        "RowMergeType",
+                        () => holeTable.RowMergeType)),
+            rowMergeType =
+                ReadEnumName(
+                    ReadProperty(
+                        diagnostics,
+                        "RowMergeType",
+                        () => holeTable.RowMergeType)),
+            secondaryTagModifierOnRollup =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "SecondaryTagModifierOnRollup",
+                    () => holeTable.SecondaryTagModifierOnRollup),
+            sequentialNumbering =
+                ReadNullableBoolean(
+                    diagnostics,
+                    "SequentialNumbering",
+                    () => holeTable.SequentialNumbering),
+            headingPlacementRaw =
+                ReadEnumRaw(
+                    ReadProperty(
+                        diagnostics,
+                        "HeadingPlacement",
+                        () => holeTable.HeadingPlacement)),
+            headingPlacement =
+                ReadEnumName(
+                    ReadProperty(
+                        diagnostics,
+                        "HeadingPlacement",
+                        () => holeTable.HeadingPlacement)),
+            rowRawCount =
+                ReadNullableInt32(
+                    diagnostics,
+                    "HoleTableRows.Count",
+                    () => holeTable.HoleTableRows.Count),
+            rowCount =
+                ReadNullableInt32(
+                    diagnostics,
+                    "HoleTableRows.Count",
+                    () => holeTable.HoleTableRows.Count),
+            rows =
+                ReadHoleTableRows(
+                    holeTable,
+                    columns.Columns,
+                    diagnostics),
+            columnRawCount =
+                ReadNullableInt32(
+                    diagnostics,
+                    "HoleTableColumns.Count",
+                    () => holeTable.HoleTableColumns.Count),
+            columnCount =
+                ReadNullableInt32(
+                    diagnostics,
+                    "HoleTableColumns.Count",
+                    () => holeTable.HoleTableColumns.Count),
+            columns =
+                columns.Items,
+            referenceKey,
+            selectorSnapshot =
+                new
+                {
+                    referenceKey,
+                    index,
+                    indexIsStable =
+                        false,
+                    type =
+                        "hole_table",
+                    title,
+                    position,
+                    rangeBox,
+                    parentView
+                },
+            propertyDiagnostics =
+                diagnostics
+        };
+    }
+
     private static object ReadRevisionTable(
         DrawingDocument drawingDocument,
         Sheet sheet,
@@ -2414,6 +2761,114 @@ internal static class TableReadSupport
             items);
     }
 
+    private static HoleTableColumnRead ReadHoleTableColumns(
+        HoleTable holeTable,
+        List<object> tableDiagnostics)
+    {
+        List<TableColumnInfo> columns =
+            new();
+
+        List<object> items =
+            new();
+
+        HoleTableColumns? holeTableColumns =
+            ReadProperty(
+                tableDiagnostics,
+                "HoleTableColumns",
+                () => holeTable.HoleTableColumns);
+
+        if (holeTableColumns == null)
+        {
+            return new HoleTableColumnRead(
+                columns,
+                items);
+        }
+
+        int index =
+            0;
+
+        try
+        {
+            foreach (HoleTableColumn column
+                     in holeTableColumns)
+            {
+                index++;
+
+                List<object> diagnostics =
+                    new();
+
+                string title =
+                    ReadString(
+                        ReadProperty(
+                            diagnostics,
+                            "Title",
+                            () => column.Title));
+
+                columns.Add(
+                    new TableColumnInfo(
+                        index,
+                        title));
+
+                object? propertyType =
+                    ReadProperty(
+                        diagnostics,
+                        "PropertyType",
+                        () => column.PropertyType);
+
+                items.Add(
+                    new
+                    {
+                        index,
+                        objectTypeRaw =
+                            ReadObjectTypeRaw(
+                                column.Type),
+                        objectType =
+                            ReadEnumName(
+                                column.Type),
+                        title,
+                        width =
+                            ReadNullableDouble(
+                                diagnostics,
+                                "Width",
+                                () => column.Width),
+                        propertyTypeRaw =
+                            ReadEnumRaw(
+                                propertyType),
+                        propertyType =
+                            ReadEnumName(
+                                propertyType),
+                        customPropertyName =
+                            ReadString(
+                                ReadProperty(
+                                    diagnostics,
+                                    "CustomPropertyName",
+                                    () => column.CustomPropertyName)),
+                        unitsFormatting =
+                            ReadUnitsFormatting(
+                                ReadProperty(
+                                    diagnostics,
+                                    "UnitsFormatting",
+                                    () => column.UnitsFormatting),
+                                diagnostics,
+                                "UnitsFormatting"),
+                        propertyDiagnostics =
+                            diagnostics
+                    });
+            }
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                tableDiagnostics,
+                "HoleTableColumns",
+                exception);
+        }
+
+        return new HoleTableColumnRead(
+            columns,
+            items);
+    }
+
     private static List<object> ReadPartsListRows(
         PartsList partsList,
         IReadOnlyList<TableColumnInfo> columns,
@@ -2605,6 +3060,191 @@ internal static class TableReadSupport
             AddDiagnostic(
                 rowDiagnostics,
                 "PartsListRow.Cells",
+                exception);
+        }
+
+        return cells;
+    }
+
+    private static List<object> ReadHoleTableRows(
+        HoleTable holeTable,
+        IReadOnlyList<TableColumnInfo> columns,
+        List<object> tableDiagnostics)
+    {
+        List<object> rows =
+            new();
+
+        HoleTableRows? holeTableRows =
+            ReadProperty(
+                tableDiagnostics,
+                "HoleTableRows",
+                () => holeTable.HoleTableRows);
+
+        if (holeTableRows == null)
+        {
+            return rows;
+        }
+
+        int rowIndex =
+            0;
+
+        try
+        {
+            foreach (HoleTableRow row
+                     in holeTableRows)
+            {
+                rowIndex++;
+
+                rows.Add(
+                    ReadHoleTableRow(
+                        row,
+                        rowIndex,
+                        columns));
+            }
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                tableDiagnostics,
+                "HoleTableRows",
+                exception);
+        }
+
+        return rows;
+    }
+
+    private static object ReadHoleTableRow(
+        HoleTableRow row,
+        int rowIndex,
+        IReadOnlyList<TableColumnInfo> columns)
+    {
+        List<object> diagnostics =
+            new();
+
+        return new
+        {
+            index =
+                rowIndex,
+            indexIsStable =
+                false,
+            objectTypeRaw =
+                ReadObjectTypeRaw(
+                    row.Type),
+            objectType =
+                ReadEnumName(
+                    row.Type),
+            count =
+                ReadNullableInt32(
+                    diagnostics,
+                    "Count",
+                    () => row.Count),
+            height =
+                ReadNullableDouble(
+                    diagnostics,
+                    "Height",
+                    () => row.Height),
+            holeTag =
+                ReadHoleTag(
+                    ReadProperty(
+                        diagnostics,
+                        "HoleTag",
+                        () => row.HoleTag),
+                    diagnostics,
+                    "HoleTag"),
+            referencedHole =
+                ReadGenericEntity(
+                    ReadProperty(
+                        diagnostics,
+                        "ReferencedHole",
+                        () => row.ReferencedHole),
+                    diagnostics,
+                    "ReferencedHole"),
+            cells =
+                ReadHoleTableCells(
+                    row,
+                    rowIndex,
+                    columns,
+                    diagnostics),
+            propertyDiagnostics =
+                diagnostics
+        };
+    }
+
+    private static List<object> ReadHoleTableCells(
+        HoleTableRow row,
+        int rowIndex,
+        IReadOnlyList<TableColumnInfo> columns,
+        List<object> rowDiagnostics)
+    {
+        List<object> cells =
+            new();
+
+        int columnIndex =
+            0;
+
+        try
+        {
+            foreach (HoleTableCell cell
+                     in row)
+            {
+                columnIndex++;
+
+                List<object> diagnostics =
+                    new();
+
+                TableColumnInfo? column =
+                    FindColumn(
+                        columns,
+                        columnIndex);
+
+                cells.Add(
+                    new
+                    {
+                        rowIndex,
+                        columnIndex,
+                        columnTitle =
+                            column?.Title
+                            ?? string.Empty,
+                        objectTypeRaw =
+                            ReadObjectTypeRaw(
+                                cell.Type),
+                        objectType =
+                            ReadEnumName(
+                                cell.Type),
+                        text =
+                            ReadString(
+                                ReadProperty(
+                                    diagnostics,
+                                    "Text",
+                                    () => cell.Text)),
+                        formattedText =
+                            ReadString(
+                                ReadProperty(
+                                    diagnostics,
+                                    "FormattedText",
+                                    () => cell.FormattedText)),
+                        stackedTextPositionRaw =
+                            ReadEnumRaw(
+                                ReadProperty(
+                                    diagnostics,
+                                    "StackedTextPosition",
+                                    () => cell.StackedTextPosition)),
+                        stackedTextPosition =
+                            ReadEnumName(
+                                ReadProperty(
+                                    diagnostics,
+                                    "StackedTextPosition",
+                                    () => cell.StackedTextPosition)),
+                        propertyDiagnostics =
+                            diagnostics
+                    });
+            }
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                rowDiagnostics,
+                "HoleTableRow.Cells",
                 exception);
         }
 
@@ -3582,6 +4222,215 @@ internal static class TableReadSupport
         };
     }
 
+    private static object? ReadHoleTag(
+        HoleTag? holeTag,
+        List<object> diagnostics,
+        string propertyName)
+    {
+        if (holeTag == null)
+        {
+            return null;
+        }
+
+        List<object> propertyDiagnostics =
+            new();
+
+        object? position =
+            ReadPoint2d(
+                ReadProperty(
+                    propertyDiagnostics,
+                    "Position",
+                    () => holeTag.Position),
+                propertyDiagnostics,
+                "Position");
+
+        return new
+        {
+            objectTypeRaw =
+                ReadObjectTypeRaw(
+                    holeTag.Type),
+            objectType =
+                ReadEnumName(
+                    holeTag.Type),
+            text =
+                ReadString(
+                    ReadProperty(
+                        propertyDiagnostics,
+                        "Text",
+                        () => holeTag.Text)),
+            formattedText =
+                ReadString(
+                    ReadProperty(
+                        propertyDiagnostics,
+                        "FormattedText",
+                        () => holeTag.FormattedText)),
+            position,
+            origin =
+                position,
+            rangeBox =
+                ReadBox2d(
+                    ReadProperty(
+                        propertyDiagnostics,
+                        "RangeBox",
+                        () => holeTag.RangeBox),
+                    propertyDiagnostics,
+                    "RangeBox"),
+            visible =
+                ReadNullableBoolean(
+                    propertyDiagnostics,
+                    "Visible",
+                    () => holeTag.Visible),
+            showLeader =
+                ReadNullableBoolean(
+                    propertyDiagnostics,
+                    "ShowLeader",
+                    () => holeTag.ShowLeader),
+            layer =
+                ReadNamedObject(
+                    ReadProperty(
+                        propertyDiagnostics,
+                        "Layer",
+                        () => holeTag.Layer),
+                    propertyDiagnostics,
+                    "Layer"),
+            dimensionStyle =
+                ReadNamedObject(
+                    ReadProperty(
+                        propertyDiagnostics,
+                        "DimensionStyle",
+                        () => holeTag.DimensionStyle),
+                    propertyDiagnostics,
+                    "DimensionStyle"),
+            stackedTextPositionRaw =
+                ReadEnumRaw(
+                    ReadProperty(
+                        propertyDiagnostics,
+                        "StackedTextPosition",
+                        () => holeTag.StackedTextPosition)),
+            stackedTextPosition =
+                ReadEnumName(
+                    ReadProperty(
+                        propertyDiagnostics,
+                        "StackedTextPosition",
+                        () => holeTag.StackedTextPosition)),
+            propertyDiagnostics =
+                MergeDiagnostics(
+                    diagnostics,
+                    propertyName,
+                    propertyDiagnostics)
+        };
+    }
+
+    private static object? ReadGenericEntity(
+        object? entity,
+        List<object> diagnostics,
+        string propertyName)
+    {
+        if (entity == null)
+        {
+            return null;
+        }
+
+        List<object> propertyDiagnostics =
+            new();
+
+        object? type =
+            ReadDynamicProperty(
+                entity,
+                propertyDiagnostics,
+                "Type");
+
+        object? name =
+            ReadDynamicProperty(
+                entity,
+                propertyDiagnostics,
+                "Name");
+
+        return new
+        {
+            objectTypeRaw =
+                ReadEnumRaw(
+                    type),
+            objectType =
+                ReadEnumName(
+                    type),
+            name =
+                ReadString(
+                    name),
+            runtimeType =
+                entity.GetType()
+                    .FullName,
+            text =
+                entity.ToString()
+                ?? string.Empty,
+            propertyDiagnostics =
+                MergeDiagnostics(
+                    diagnostics,
+                    propertyName,
+                    propertyDiagnostics)
+        };
+    }
+
+    private static object? ReadDynamicProperty(
+        object owner,
+        List<object> diagnostics,
+        string propertyName)
+    {
+        try
+        {
+            dynamic dynamicOwner =
+                owner;
+
+            return propertyName switch
+            {
+                "Name" =>
+                    dynamicOwner.Name,
+                "Type" =>
+                    dynamicOwner.Type,
+                _ =>
+                    null
+            };
+        }
+        catch (Exception exception)
+        {
+            AddDiagnostic(
+                diagnostics,
+                propertyName,
+                exception);
+
+            return null;
+        }
+    }
+
+    private static object? ReadUnitsFormatting(
+        UnitsFormatting? unitsFormatting,
+        List<object> diagnostics,
+        string propertyName)
+    {
+        if (unitsFormatting == null)
+        {
+            return null;
+        }
+
+        List<object> propertyDiagnostics =
+            new();
+
+        return new
+        {
+            objectTypeRaw =
+                ReadObjectTypeRaw(
+                    unitsFormatting.Type),
+            objectType =
+                ReadEnumName(
+                    unitsFormatting.Type),
+            propertyDiagnostics =
+                MergeDiagnostics(
+                    diagnostics,
+                    propertyName,
+                    propertyDiagnostics)
+        };
+    }
+
     private static object? ReadNamedObject(
         object? namedObject,
         List<object> diagnostics,
@@ -4200,6 +5049,10 @@ internal sealed record TableColumnRead(
 internal sealed record TableColumnInfo(
     int Index,
     string Title);
+
+internal sealed record HoleTableColumnRead(
+    List<TableColumnInfo> Columns,
+    List<object> Items);
 
 internal sealed record GenericTableColumnRead(
     List<GenericTableColumnInfo> Columns,

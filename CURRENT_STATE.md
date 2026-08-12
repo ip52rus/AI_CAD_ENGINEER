@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 49B documentation sync:
+Current checkpoint after the Package 50A documentation sync:
 
 ```text
-v0.41 complete parts list lifecycle
+v0.42 complete hole table eye
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 49B checkpoint:
+Live command audit after Package 50A checkpoint:
 
 ```text
-181 registered JSON commands
-181 unique registered JSON commands
+182 registered JSON commands
+182 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -397,6 +397,7 @@ Major verified read areas include:
 - `Sheet.RevisionTables` typed Eye;
 - drawing table collection diagnostics;
 - `Sheet.CustomTables` detailed typed Eye;
+- `Sheet.HoleTables` detailed typed Eye;
 - drawing text objects;
 - feature control frames;
 - surface texture symbols;
@@ -421,7 +422,7 @@ Major verified read areas include:
 
 ## Known gaps
 
-- Typed detailed Eye for `Sheet.HoleTables` is not implemented yet.
+- HoleTable lifecycle Hands are not implemented yet.
 - Drawing Generation Hands are still partial outside the verified view/export pipeline; print workflow is not implemented yet.
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
@@ -431,6 +432,37 @@ Major verified read areas include:
 - Do not describe GOST `CustomTable` objects as `PartsList` objects.
 
 ## Next task
+
+## Package 50A checkpoint
+
+Package 50A complete: detailed HoleTable Eye is VERIFIED.
+
+Verified command:
+
+```json
+{"command":"get_hole_tables","sheetName":"Лист:1"}
+```
+
+Live Inventor validation used a real manually-created `HoleTable`.
+
+Verified factual coverage includes:
+
+- title, position, origin, rangeBox, parent view / referenced view, `HoleTableType`, style, layer, title/header/data text styles, `ShowTitle`, and HoleTable-specific factual flags;
+- rows, columns, cells, `HoleTags`, generic `ReferencedHole` metadata, referenceKey, selectorSnapshot, and propertyDiagnostics;
+- row facts including holeTag, cells, referencedHole, height, and count;
+- column facts including title, width, propertyType, and unitsFormatting;
+- cell facts including text, formattedText, and stackedTextPosition;
+- HoleTag facts including text, position, rangeBox, visible, showLeader, layer, and dimensionStyle.
+
+`HoleTable.GetReferenceKey(...)` is exposed using the established Runtime reference-key shape. Live validation returned `byteCount = 62`.
+
+Observed unavailable COM properties such as `DeleteTagsOnRollup`,
+`SecondaryTagModifierOnRollup`, and limited `ReferencedHole` metadata such as
+`Name` are isolated as property-level diagnostics and do not invalidate the Eye.
+
+Runtime does not decide whether a HoleTable is required, choose the DrawingView,
+placement, columns, tags, numbering, or sorting, interpret hole semantics, apply
+GOST/ESKD HoleTable rules, edit cells automatically, or modify model holes.
 
 ## Package 42 checkpoint
 
@@ -618,11 +650,11 @@ Runtime boundary:
 - Runtime does not automatically place annotations;
 - Runtime does not interpret drawing meaning.
 
-Next capability check completed by Package 45, Package 46, Package 47, and Package 48. Current next
-capability check:
+Next capability check completed by Package 45, Package 46, Package 47, Package
+48, Package 49, and Package 50A. Current next capability check:
 
 ```text
-Capability Audit - Parts Lists / Balloons / BOM drawing annotations
+Capability Audit - HoleTable lifecycle
 ```
 
 ## Package 48 checkpoint
@@ -704,10 +736,10 @@ GOST/ESKD geometry, select attachment geometry, route leaders automatically,
 choose placement, or perform drawing-layout intelligence. External LLM supplies
 all definition, value, geometry, and placement choices.
 
-Next capability check:
+Next capability check completed by Package 49. Current next capability check:
 
 ```text
-Capability Audit - Parts Lists / Balloons / BOM drawing annotations
+Capability Audit - HoleTable lifecycle
 ```
 
 ## Package 47 checkpoint

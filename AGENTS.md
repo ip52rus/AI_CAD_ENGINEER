@@ -792,9 +792,45 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 49B. Current next correct action: run
-a Capability Audit for Drawing Tables / Revision Tables / Hole Tables lifecycle
-before writing code.
+Next correct action completed by Package 50A. Current next correct action: run
+a Capability Audit for HoleTable lifecycle before writing code.
+
+## Current milestone addendum after Package 50A
+
+```text
+Package 50A complete - detailed HoleTable Eye checkpoint
+```
+
+Verified command:
+
+```text
+get_hole_tables
+```
+
+Live Inventor validation used a real manually-created `HoleTable`.
+
+Verified factual coverage includes title, position, origin, rangeBox, parent
+view / referenced view, `HoleTableType`, style, layer, title/header/data text
+styles, `ShowTitle`, HoleTable-specific factual flags, rows, columns, cells,
+`HoleTags`, generic `ReferencedHole` metadata, referenceKey, selectorSnapshot,
+and propertyDiagnostics.
+
+Rows expose holeTag, cells, referencedHole, height, and count. Columns expose
+title, width, propertyType, and unitsFormatting. Cells expose text,
+formattedText, and stackedTextPosition. HoleTags expose text, position,
+rangeBox, visible, showLeader, layer, and dimensionStyle where Inventor returns
+them.
+
+`HoleTable.GetReferenceKey(...)` is exposed using the established Runtime
+reference-key shape. Live validation returned `byteCount = 62`.
+
+Unavailable COM properties such as `DeleteTagsOnRollup`,
+`SecondaryTagModifierOnRollup`, and limited `ReferencedHole` metadata such as
+`Name` are property-level diagnostics only.
+
+Runtime does not decide whether a HoleTable is required, choose the DrawingView,
+placement, columns, tags, numbering, or sorting, interpret hole semantics, apply
+GOST/ESKD HoleTable rules, edit cells automatically, or modify model holes.
 
 ## Current milestone addendum after Package 49B
 

@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.41 complete parts list lifecycle
+v0.42 complete hole table eye
 ```
 
 ## Ground rules
@@ -74,7 +74,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Drawing Table Collections Diagnostics | VERIFIED | `get_drawing_table_collections` | confirmed counts and metadata for `CustomTables`, `HoleTables`, `PartsLists`, and `RevisionTables` | - | not intended to read full row/cell content | P0 maintained |
 | CustomTables Discovery | VERIFIED | `get_drawing_table_collections` | confirmed GOST table is `Sheet.CustomTables` / `kCustomTableObject` | - | - | P0 maintained |
 | CustomTables Detailed Reading | VERIFIED | `get_custom_tables` | reads CustomTable metadata, Columns, Rows, Cells, MergedCells, and reference keys | - | write Hands are not confirmed | P0 maintained |
-| Hole Tables detailed Eye | MISSING | - | - | - | typed detailed Eye for `Sheet.HoleTables` | P2 |
+| Hole Tables detailed Eye | VERIFIED | `get_hole_tables` | Package 50A detailed HoleTable Eye: title/position/rangeBox/parentView/HoleTableType/styles/flags/rows/columns/cells/HoleTags/ReferencedHole generic metadata/referenceKey/selectorSnapshot | - | create/move/delete HoleTable Hands are not implemented | P0 maintained |
 | Legacy drawing table aggregate | PARTIAL | `get_drawing_tables` | legacy parts/revision table aggregate exists; does not cover `CustomTables` or `HoleTables` | - | not a complete all-table reader | compatibility |
 | Document properties | PARTIAL | `get_document_properties`, `get_document_property`, `get_document_property_by_id`, `get_document_property_sets`, `set_document_property`, `set_document_property_by_id` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P2 |
 | Model feature Eyes | VERIFIED | `get_model_feature_tree`, `get_hole_features`, `get_thread_features`, `get_feature_details`, `get_model_parameters` | `get_hole_features` hardened and verified; `get_thread_features` verified for standalone external ThreadFeature; feature tree, feature details, parameters recorded as verified areas | - | write commands for model features are not part of confirmed Runtime scope | P0 maintained |
@@ -98,6 +98,7 @@ Exact commands explicitly confirmed:
 {"command":"get_drawing_table_collections"}
 {"command":"get_drawing_table_collections","sheetName":"Лист:1"}
 {"command":"get_custom_tables"}
+{"command":"get_hole_tables"}
 {"command":"get_surface_texture_symbols"}
 {"command":"get_welding_symbols"}
 {"command":"get_welding_symbols","sheetName":"Лист:1"}

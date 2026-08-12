@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.41 complete parts list lifecycle`.
+- Current checkpoint: `v0.42 complete hole table eye`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 49B - PartsList lifecycle.
-- Registry after Package 49B: `181 registered / 181 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 49B checkpoint commit.
+- Latest completed checkpoint: Package 50A - detailed HoleTable Eye.
+- Registry after Package 50A: `182 registered / 182 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 50A checkpoint commit.
 
 ## Architecture Rules
 
@@ -29,6 +29,7 @@
 - Drawing Table Collections: `get_drawing_table_collections`.
 - CustomTables Discovery: `get_drawing_table_collections`.
 - CustomTables Detailed Reading: `get_custom_tables`.
+- HoleTables Detailed Reading: `get_hole_tables`.
 - Drawing Text Objects: `get_drawing_text_objects`.
 - Feature Control Frames Eye: `get_feature_control_frames`.
 - Surface Texture Symbols: `get_surface_texture_symbols`, `create_surface_texture_symbol`, `move_surface_texture_symbol`, `delete_surface_texture_symbol`.
@@ -102,6 +103,39 @@
 - SketchedSymbol Hand: `create_sketched_symbol`.
 - SketchedSymbol move Hand: `move_sketched_symbol`.
 - SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## HoleTable Detailed Eye
+
+Verified command:
+
+```text
+get_hole_tables
+```
+
+Live Inventor validation used a real manually-created `HoleTable`.
+
+Verified factual coverage includes title, position, origin, rangeBox, parent
+view / referenced view, `HoleTableType`, style, layer, title/header/data text
+styles, `ShowTitle`, HoleTable-specific factual flags, rows, columns, cells,
+`HoleTags`, generic `ReferencedHole` metadata, referenceKey, selectorSnapshot,
+and propertyDiagnostics.
+
+Rows expose holeTag, cells, referencedHole, height, and count. Columns expose
+title, width, propertyType, and unitsFormatting. Cells expose text,
+formattedText, and stackedTextPosition. HoleTags expose text, position,
+rangeBox, visible, showLeader, layer, and dimensionStyle where Inventor returns
+them.
+
+`HoleTable.GetReferenceKey(...)` is exposed using the established Runtime
+reference-key shape. Live validation returned `byteCount = 62`.
+
+Unavailable COM properties such as `DeleteTagsOnRollup`,
+`SecondaryTagModifierOnRollup`, and limited `ReferencedHole` metadata such as
+`Name` are property-level diagnostics only.
+
+Runtime does not decide whether a HoleTable is required, choose the DrawingView,
+placement, columns, tags, numbering, or sorting, interpret hole semantics, apply
+GOST/ESKD HoleTable rules, edit cells automatically, or modify model holes.
 
 ## PartsList Lifecycle
 
@@ -840,7 +874,7 @@ Verified runtime tests:
 - Welding semantic interpretation is outside Runtime.
 - Drawing symbol semantic interpretation is outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
-- Typed detailed Eye for `Sheet.HoleTables` is still missing.
+- HoleTable lifecycle Hands are not implemented yet.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`
@@ -854,7 +888,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - Parts Lists / Balloons / BOM drawing annotations
+Capability Audit - HoleTable lifecycle
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,
