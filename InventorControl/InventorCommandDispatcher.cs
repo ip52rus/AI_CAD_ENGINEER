@@ -553,6 +553,15 @@ public class InventorCommandDispatcher
     private readonly GetHoleTablesCommand
         _getHoleTablesCommand;
 
+    private readonly CreateHoleTableCommand
+        _createHoleTableCommand;
+
+    private readonly MoveHoleTableCommand
+        _moveHoleTableCommand;
+
+    private readonly DeleteHoleTableCommand
+        _deleteHoleTableCommand;
+
     public InventorCommandDispatcher(
         Inventor.Application inventor)
     {
@@ -1284,6 +1293,18 @@ public class InventorCommandDispatcher
 
         _getHoleTablesCommand =
             new GetHoleTablesCommand(
+                inventor);
+
+        _createHoleTableCommand =
+            new CreateHoleTableCommand(
+                inventor);
+
+        _moveHoleTableCommand =
+            new MoveHoleTableCommand(
+                inventor);
+
+        _deleteHoleTableCommand =
+            new DeleteHoleTableCommand(
                 inventor);
     }
 
@@ -2049,6 +2070,18 @@ public class InventorCommandDispatcher
 
                 "get_hole_tables" =>
                     _getHoleTablesCommand.Execute(
+                        root),
+
+                "create_hole_table" =>
+                    _createHoleTableCommand.Execute(
+                        root),
+
+                "move_hole_table" =>
+                    _moveHoleTableCommand.Execute(
+                        root),
+
+                "delete_hole_table" =>
+                    _deleteHoleTableCommand.Execute(
                         root),
 
                 _ =>

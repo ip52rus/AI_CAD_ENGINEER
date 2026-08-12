@@ -983,6 +983,19 @@ internal static class TableReadSupport
             diagnostics);
     }
 
+    public static object ReadHoleTable(
+        DrawingDocument drawingDocument,
+        Sheet sheet,
+        HoleTable holeTable,
+        int index)
+    {
+        return ReadHoleTableDetailed(
+            drawingDocument,
+            sheet,
+            holeTable,
+            index);
+    }
+
     public static TableReadResult ReadCustomTablesDetailed(
         DrawingDocument drawingDocument,
         Sheet sheet)

@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.42 complete hole table eye`.
+- Current checkpoint: `v0.43 complete hole table lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 50A - detailed HoleTable Eye.
-- Registry after Package 50A: `182 registered / 182 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 50A checkpoint commit.
+- Latest completed checkpoint: Package 50B - HoleTable lifecycle.
+- Registry after Package 50B: `185 registered / 185 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 50B checkpoint commit.
 
 ## Architecture Rules
 
@@ -30,6 +30,7 @@
 - CustomTables Discovery: `get_drawing_table_collections`.
 - CustomTables Detailed Reading: `get_custom_tables`.
 - HoleTables Detailed Reading: `get_hole_tables`.
+- HoleTable lifecycle Hands: `create_hole_table`, `move_hole_table`, `delete_hole_table`.
 - Drawing Text Objects: `get_drawing_text_objects`.
 - Feature Control Frames Eye: `get_feature_control_frames`.
 - Surface Texture Symbols: `get_surface_texture_symbols`, `create_surface_texture_symbol`, `move_surface_texture_symbol`, `delete_surface_texture_symbol`.
@@ -136,6 +137,38 @@ Unavailable COM properties such as `DeleteTagsOnRollup`,
 Runtime does not decide whether a HoleTable is required, choose the DrawingView,
 placement, columns, tags, numbering, or sorting, interpret hole semantics, apply
 GOST/ESKD HoleTable rules, edit cells automatically, or modify model holes.
+
+## HoleTable Lifecycle
+
+Verified commands:
+
+```text
+get_hole_tables
+create_hole_table
+move_hole_table
+delete_hole_table
+```
+
+Verified lifecycle:
+
+```text
+get_hole_tables
+-> create_hole_table
+-> get_hole_tables
+-> move_hole_table
+-> get_hole_tables
+-> delete_hole_table
+-> get_hole_tables
+```
+
+Live Inventor validation confirmed native creation from an explicit
+caller-selected DrawingView and placement, `HoleTable.Position` movement to
+`(12,23)`, stable referenceKey after move, unchanged parentView `ВИД4`,
+readable rows/columns/cells/HoleTags after move, `HoleTable.Delete()`, and
+final `get_hole_tables` count `0`.
+
+Runtime performs no tag renumbering, table-content mutation, sorting,
+formatting, GOST/ESKD logic, view selection, or automatic placement.
 
 ## PartsList Lifecycle
 
@@ -874,7 +907,7 @@ Verified runtime tests:
 - Welding semantic interpretation is outside Runtime.
 - Drawing symbol semantic interpretation is outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
-- HoleTable lifecycle Hands are not implemented yet.
+- CustomTable lifecycle Hands are not implemented yet.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`
@@ -888,7 +921,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - HoleTable lifecycle
+Capability Audit - CustomTable lifecycle
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

@@ -1,6 +1,63 @@
 # PROJECT REVIEW
 
-## Package 50A checkpoint - current state
+## Package 50B checkpoint - current state
+
+Package 50B closes native drawing HoleTable lifecycle primitives.
+
+Current live command inventory after Package 50B:
+
+```text
+185 registered JSON commands
+185 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified HoleTable commands:
+
+```text
+get_hole_tables
+create_hole_table
+move_hole_table
+delete_hole_table
+```
+
+Verified lifecycle:
+
+```text
+get_hole_tables
+-> create_hole_table
+-> get_hole_tables
+-> move_hole_table
+-> get_hole_tables
+-> delete_hole_table
+-> get_hole_tables
+```
+
+Live Inventor validation confirmed:
+
+- create uses an explicit caller-selected `DrawingView` and explicit placement;
+- created native `HoleTable` remains readable through detailed rows, columns, cells, HoleTags, referenceKey, and selectorSnapshot;
+- move uses `HoleTable.Position`; factual resulting position was `(12,23)`;
+- referenceKey remained the same after move;
+- parentView remained `ВИД4`;
+- table structure remained readable and HoleTags remained associated;
+- Runtime performed no tag renumbering or table-content mutation;
+- delete uses `HoleTable.Delete()`;
+- `remainingHoleTableCount = 0`;
+- final `get_hole_tables` count was `0`.
+
+Observed `DeleteTagsOnRollup` E_FAIL, `SecondaryTagModifierOnRollup` E_FAIL,
+and limited generic `ReferencedHole` COM metadata remain property-level
+diagnostics only.
+
+Runtime does not decide whether a HoleTable is needed, choose view or placement,
+interpret engineering meaning, apply GOST/ESKD decisions, choose numbering/tag
+strategy, sort, format, edit cells, or mutate model holes.
+
+Next capability check: CustomTable lifecycle.
+
+## Package 50A checkpoint
 
 Package 50A adds and verifies the detailed native drawing HoleTable Eye.
 

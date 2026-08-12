@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 50A is complete.
-- Current checkpoint: `v0.42 complete hole table eye`.
-- Live registry after Package 50A: `182 registered / 182 unique`, no duplicate command names.
+- Package 50B is complete.
+- Current checkpoint: `v0.43 complete hole table lifecycle`.
+- Live registry after Package 50B: `185 registered / 185 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -94,6 +94,9 @@ Verified Drawing Generation / Export Hands:
 - `move_sketched_symbol`
 - `delete_sketched_symbol`
 - `get_hole_tables`
+- `create_hole_table`
+- `move_hole_table`
+- `delete_hole_table`
 
 Verified HoleTable detailed Eye:
 
@@ -121,6 +124,28 @@ reference-key shape. Live validation returned `byteCount = 62`.
 Runtime must not decide whether a HoleTable is required, choose the DrawingView,
 placement, columns, tags, numbering, or sorting, interpret hole semantics, apply
 GOST/ESKD HoleTable rules, edit cells automatically, or modify model holes.
+
+Verified HoleTable lifecycle:
+
+```text
+get_hole_tables
+-> create_hole_table
+-> get_hole_tables
+-> move_hole_table
+-> get_hole_tables
+-> delete_hole_table
+-> get_hole_tables
+```
+
+`create_hole_table` uses an explicit caller-selected DrawingView and explicit
+placement. `move_hole_table` uses native `HoleTable.Position`; live validation
+confirmed factual resulting position `(12,23)`, stable referenceKey, unchanged
+parentView `ВИД4`, readable table structure, and associated HoleTags.
+`delete_hole_table` uses native `HoleTable.Delete()` with final
+`get_hole_tables` count `0`.
+
+Runtime performs no tag renumbering, table-content mutation, sorting,
+formatting, view selection, automatic placement, or GOST/ESKD table logic.
 
 Verified PartsList lifecycle:
 
@@ -486,7 +511,7 @@ Runtime does not:
 Next expected stage:
 
 ```text
-Capability Audit - HoleTable lifecycle
+Capability Audit - CustomTable lifecycle
 ```
 
 Required next check:

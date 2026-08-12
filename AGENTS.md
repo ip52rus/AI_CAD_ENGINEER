@@ -792,8 +792,49 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 50A. Current next correct action: run
-a Capability Audit for HoleTable lifecycle before writing code.
+Next correct action completed by Package 50B. Current next correct action: run
+a Capability Audit for CustomTable lifecycle before writing code.
+
+## Current milestone addendum after Package 50B
+
+```text
+Package 50B complete - HoleTable lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_hole_tables
+create_hole_table
+move_hole_table
+delete_hole_table
+```
+
+Verified lifecycle:
+
+```text
+get_hole_tables
+-> create_hole_table
+-> get_hole_tables
+-> move_hole_table
+-> get_hole_tables
+-> delete_hole_table
+-> get_hole_tables
+```
+
+Live Inventor validation confirmed native creation from an explicit
+caller-selected DrawingView and placement, `HoleTable.Position` movement to
+`(12,23)`, stable referenceKey after move, unchanged parentView `ВИД4`,
+readable rows/columns/cells/HoleTags after move, `HoleTable.Delete()`, and
+final `get_hole_tables` count `0`.
+
+Observed `DeleteTagsOnRollup` E_FAIL, `SecondaryTagModifierOnRollup` E_FAIL,
+and limited generic `ReferencedHole` COM metadata remain property-level
+diagnostics only.
+
+Runtime performs no tag renumbering, table-content mutation, sorting,
+formatting, GOST/ESKD logic, view selection, automatic placement, engineering
+interpretation, or model-hole mutation.
 
 ## Current milestone addendum after Package 50A
 

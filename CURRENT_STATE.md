@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 50A documentation sync:
+Current checkpoint after the Package 50B documentation sync:
 
 ```text
-v0.42 complete hole table eye
+v0.43 complete hole table lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 50A checkpoint:
+Live command audit after Package 50B checkpoint:
 
 ```text
-182 registered JSON commands
-182 unique registered JSON commands
+185 registered JSON commands
+185 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -422,7 +422,7 @@ Major verified read areas include:
 
 ## Known gaps
 
-- HoleTable lifecycle Hands are not implemented yet.
+- CustomTable lifecycle Hands are not implemented yet.
 - Drawing Generation Hands are still partial outside the verified view/export pipeline; print workflow is not implemented yet.
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
@@ -463,6 +463,52 @@ Observed unavailable COM properties such as `DeleteTagsOnRollup`,
 Runtime does not decide whether a HoleTable is required, choose the DrawingView,
 placement, columns, tags, numbering, or sorting, interpret hole semantics, apply
 GOST/ESKD HoleTable rules, edit cells automatically, or modify model holes.
+
+## Package 50B checkpoint
+
+Package 50B complete: native HoleTable lifecycle primitives are VERIFIED.
+
+Verified commands:
+
+```text
+get_hole_tables
+create_hole_table
+move_hole_table
+delete_hole_table
+```
+
+Verified lifecycle:
+
+```text
+get_hole_tables
+-> create_hole_table
+-> get_hole_tables
+-> move_hole_table
+-> get_hole_tables
+-> delete_hole_table
+-> get_hole_tables
+```
+
+Live Inventor validation confirmed:
+
+- `create_hole_table` creates a native `HoleTable` from an explicit caller-selected `DrawingView` and explicit placement;
+- the created table remains readable through detailed snapshots with rows, columns, cells, HoleTags, referenceKey, and selectorSnapshot;
+- `move_hole_table` uses native `HoleTable.Position`; factual position after move was `(12,23)`;
+- referenceKey remained stable after move;
+- parentView remained `ВИД4`;
+- table structure and HoleTags remained associated;
+- Runtime performed no tag renumbering or table-content mutation;
+- `delete_hole_table` uses native `HoleTable.Delete()`;
+- `remainingHoleTableCount = 0`;
+- final `get_hole_tables` returned `count = 0`.
+
+Known non-blocking diagnostics remain property-level only: `DeleteTagsOnRollup`
+E_FAIL, `SecondaryTagModifierOnRollup` E_FAIL, and limited generic
+`ReferencedHole` COM metadata.
+
+Runtime still does not decide whether a HoleTable is needed, choose view or
+placement, interpret engineering meaning, apply GOST/ESKD decisions, choose
+numbering/tag strategy, sort, format, edit cells, or mutate model holes.
 
 ## Package 42 checkpoint
 
