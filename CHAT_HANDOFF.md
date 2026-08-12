@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.40 complete balloon lifecycle`.
+- Current checkpoint: `v0.41 complete parts list lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 49A - Balloon lifecycle.
-- Registry after Package 49A: `179 registered / 179 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 49A checkpoint commit.
+- Latest completed checkpoint: Package 49B - PartsList lifecycle.
+- Registry after Package 49B: `181 registered / 181 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 49B checkpoint commit.
 
 ## Architecture Rules
 
@@ -42,7 +42,10 @@
 - PDF Export Hand: `export_pdf`.
 - DWG Export Hand: `export_dwg`.
 - DXF Export Hand: `export_dxf`.
-- Parts List creation Hand: `create_parts_list`.
+- PartsList Eye: `get_parts_lists`.
+- PartsList creation Hand: `create_parts_list`.
+- PartsList move Hand: `move_parts_list`.
+- PartsList delete Hand: `delete_parts_list`.
 - Balloon Eye: `get_balloons` with referenceKey support.
 - Balloon creation Hand: `create_balloon`.
 - Balloon move Hand: `move_balloon`.
@@ -99,6 +102,46 @@
 - SketchedSymbol Hand: `create_sketched_symbol`.
 - SketchedSymbol move Hand: `move_sketched_symbol`.
 - SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## PartsList Lifecycle
+
+Verified PartsList commands:
+
+```text
+get_parts_lists
+create_parts_list
+move_parts_list
+delete_parts_list
+```
+
+Verified lifecycle:
+
+```text
+get_parts_lists
+-> create_parts_list
+-> get_parts_lists
+-> move_parts_list
+-> get_parts_lists
+-> delete_parts_list
+-> get_parts_lists
+```
+
+Verified facts:
+
+- `move_parts_list` uses native `PartsList.Position = Point2d`.
+- Factual resulting position was `(32,18)`.
+- Same PartsList identity/referenceKey was preserved.
+- Rows, columns, and cell values were unchanged.
+- Referenced document/view facts were unchanged.
+- `delete_parts_list` uses native `PartsList.Delete()`.
+- Deleted PartsList snapshot was preserved.
+- `remainingPartsListCount = 0`.
+- Final `get_parts_lists` returned `count = 0`.
+
+Runtime does not decide PartsList placement, sort rows semantically, renumber
+item numbers, edit BOM-derived cells, override BOM facts, modify visibility
+automatically, modify BOMView or assembly BOM, export PartsLists unless
+explicitly audited later, or apply GOST/ESKD table-placement logic.
 
 ## Balloon Lifecycle
 

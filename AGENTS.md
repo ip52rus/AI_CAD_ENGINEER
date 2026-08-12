@@ -792,8 +792,53 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 49A. Current next correct action: run
-a Capability Audit for PartsList lifecycle before writing code.
+Next correct action completed by Package 49B. Current next correct action: run
+a Capability Audit for Drawing Tables / Revision Tables / Hole Tables lifecycle
+before writing code.
+
+## Current milestone addendum after Package 49B
+
+```text
+Package 49B complete - PartsList lifecycle checkpoint
+```
+
+Verified PartsList commands:
+
+```text
+get_parts_lists
+create_parts_list
+move_parts_list
+delete_parts_list
+```
+
+Verified PartsList lifecycle:
+
+```text
+get_parts_lists
+-> create_parts_list
+-> get_parts_lists
+-> move_parts_list
+-> get_parts_lists
+-> delete_parts_list
+-> get_parts_lists
+```
+
+Verified facts:
+
+- `move_parts_list` uses native `PartsList.Position = Point2d`.
+- Factual resulting position was `(32,18)`.
+- Same PartsList identity/referenceKey was preserved.
+- Rows, columns, and cell values were unchanged.
+- Referenced document/view facts were unchanged.
+- `delete_parts_list` uses native `PartsList.Delete()`.
+- Deleted PartsList snapshot was preserved.
+- `remainingPartsListCount = 0`.
+- Final `get_parts_lists` returned `count = 0`.
+
+Runtime does not decide PartsList placement, sort rows semantically, renumber
+item numbers, edit BOM-derived cells, override BOM facts, modify visibility
+automatically, modify BOMView or assembly BOM, export PartsLists unless
+explicitly audited later, or apply GOST/ESKD table-placement logic.
 
 ## Current milestone addendum after Package 49A
 

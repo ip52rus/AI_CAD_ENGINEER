@@ -1,6 +1,59 @@
 # PROJECT REVIEW
 
-## Package 49A checkpoint - current state
+## Package 49B checkpoint - current state
+
+Package 49B closes native drawing PartsList lifecycle primitives.
+
+Current live command inventory after Package 49B:
+
+```text
+181 registered JSON commands
+181 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified PartsList commands:
+
+```text
+get_parts_lists
+create_parts_list
+move_parts_list
+delete_parts_list
+```
+
+Verified PartsList lifecycle:
+
+```text
+get_parts_lists
+-> create_parts_list
+-> get_parts_lists
+-> move_parts_list
+-> get_parts_lists
+-> delete_parts_list
+-> get_parts_lists
+```
+
+Verified native facts:
+
+- move uses `PartsList.Position = Point2d`;
+- factual resulting position was `(32,18)`;
+- same PartsList identity/referenceKey was preserved;
+- rows, columns, and cell values were unchanged;
+- referenced document/view facts were unchanged;
+- delete uses `PartsList.Delete()`;
+- deleted PartsList snapshot was preserved;
+- `remainingPartsListCount = 0`;
+- final `get_parts_lists` count was `0`.
+
+Runtime does not decide PartsList placement, sort rows semantically, renumber
+item numbers, edit BOM-derived cells, override BOM facts, modify visibility
+automatically, modify BOMView or assembly BOM, export PartsLists unless
+explicitly audited later, or apply GOST/ESKD table-placement logic.
+
+Next capability check: Drawing Tables / Revision Tables / Hole Tables lifecycle.
+
+## Package 49A checkpoint
 
 Package 49A closes native drawing Balloon lifecycle hardening.
 

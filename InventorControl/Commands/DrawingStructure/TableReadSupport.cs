@@ -1610,7 +1610,7 @@ internal static class TableReadSupport
         return result;
     }
 
-    private static object ReadPartsList(
+    public static object ReadPartsList(
         DrawingDocument drawingDocument,
         Sheet sheet,
         PartsList partsList,

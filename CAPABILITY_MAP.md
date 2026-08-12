@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.40 complete balloon lifecycle
+v0.41 complete parts list lifecycle
 ```
 
 ## Ground rules
@@ -67,9 +67,9 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Feature Control Frames | VERIFIED | `get_feature_control_frames`, `create_feature_control_frame`, `move_feature_control_frame`, `delete_feature_control_frame` | `get_feature_control_frames`, `get_feature_control_frames` with `sheetName`, Package 45 free and attached FCF create/move/delete validation | - | row/content/style/layer edit Hands are not confirmed | P0 maintained |
 | GD&T semantic analysis | MISSING | - | - | - | tolerance interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Revision symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
-| Parts Lists | VERIFIED | `get_parts_lists`, `create_parts_list`, legacy aggregate coverage through `get_drawing_tables` | `get_parts_lists` verified for `Sheet.PartsLists`; `create_parts_list` verified for creating one PartsList from an explicit DrawingView and placement point | - | delete/move/edit/format/sort/renumber parts list Hands are not confirmed | P1 maintained |
+| Parts Lists | VERIFIED | `get_parts_lists`, `create_parts_list`, `move_parts_list`, `delete_parts_list`, legacy aggregate coverage through `get_drawing_tables` | Package 49B complete PartsList lifecycle: get/create/get/move/get/delete/get; move preserves referenceKey, rows, columns, cells, and referenced document/view facts | - | export/sort/renumber/cell editing/BOM mutation are not Runtime scope for this checkpoint | P0 maintained |
 | Balloons | VERIFIED | `get_balloons`, `create_balloon`, `move_balloon`, `delete_balloon` | Package 49A complete balloon lifecycle: create/read/move/read/delete/read; `get_balloons` referenceKey support; move preserves referenceKey/value/itemNumber/geometry attachment | - | value override/edit and automatic item-number operations are not Runtime scope | P0 maintained |
-| Parts List + Balloon Pipeline | VERIFIED | `create_parts_list`, `create_balloon`, `get_balloons`, `move_balloon`, `delete_balloon` | DrawingView -> Parts List; DrawingView geometry -> GeometryIntent -> Balloon -> move/delete lifecycle | - | no BOM modification, automatic numbering, automatic placement, geometry selection, layout optimization, or engineering/GOST decisions in Runtime | P0 maintained |
+| Parts List + Balloon Pipeline | VERIFIED | `get_parts_lists`, `create_parts_list`, `move_parts_list`, `delete_parts_list`, `create_balloon`, `get_balloons`, `move_balloon`, `delete_balloon` | DrawingView -> PartsList lifecycle; DrawingView geometry -> GeometryIntent -> Balloon lifecycle | - | no BOM modification, automatic numbering, automatic placement, geometry selection, layout optimization, or engineering/GOST decisions in Runtime | P0 maintained |
 | Revision Tables | VERIFIED | `get_revision_tables`, legacy aggregate coverage through `get_drawing_tables` | `get_revision_tables` found one revision table with columns, rows, cells, and metadata | - | create/edit/delete/move/format revision table Hands are not confirmed | P1 maintained |
 | Drawing Table Collections Diagnostics | VERIFIED | `get_drawing_table_collections` | confirmed counts and metadata for `CustomTables`, `HoleTables`, `PartsLists`, and `RevisionTables` | - | not intended to read full row/cell content | P0 maintained |
 | CustomTables Discovery | VERIFIED | `get_drawing_table_collections` | confirmed GOST table is `Sheet.CustomTables` / `kCustomTableObject` | - | - | P0 maintained |
@@ -118,6 +118,8 @@ Exact commands explicitly confirmed:
 {"command":"export_dwg"}
 {"command":"export_dxf"}
 {"command":"create_parts_list"}
+{"command":"move_parts_list"}
+{"command":"delete_parts_list"}
 {"command":"create_balloon"}
 {"command":"get_balloons"}
 {"command":"move_balloon"}

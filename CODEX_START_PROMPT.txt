@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 49A is complete.
-- Current checkpoint: `v0.40 complete balloon lifecycle`.
-- Live registry after Package 49A: `179 registered / 179 unique`, no duplicate command names.
+- Package 49B is complete.
+- Current checkpoint: `v0.41 complete parts list lifecycle`.
+- Live registry after Package 49B: `181 registered / 181 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -35,6 +35,8 @@ Verified Drawing Generation / Export Hands:
 - `export_dwg`
 - `export_dxf`
 - `create_parts_list`
+- `move_parts_list`
+- `delete_parts_list`
 - `create_balloon`
 - `get_balloons`
 - `move_balloon`
@@ -91,6 +93,29 @@ Verified Drawing Generation / Export Hands:
 - `create_sketched_symbol`
 - `move_sketched_symbol`
 - `delete_sketched_symbol`
+
+Verified PartsList lifecycle:
+
+```text
+get_parts_lists
+-> create_parts_list
+-> get_parts_lists
+-> move_parts_list
+-> get_parts_lists
+-> delete_parts_list
+-> get_parts_lists
+```
+
+`move_parts_list` uses native `PartsList.Position = Point2d`. Live Inventor
+validation confirmed resulting position `(32,18)`, same referenceKey, unchanged
+rows/columns/cell values, unchanged referenced document/view facts, and
+`delete_parts_list` through `PartsList.Delete()` with final `get_parts_lists`
+count `0`.
+
+Runtime must not decide PartsList placement, sort rows semantically, renumber
+item numbers, edit BOM-derived cells, override BOM facts, modify visibility,
+modify BOMView or assembly BOM, export PartsLists unless explicitly audited
+later, or apply GOST/ESKD table-placement logic.
 
 Verified Balloon lifecycle:
 

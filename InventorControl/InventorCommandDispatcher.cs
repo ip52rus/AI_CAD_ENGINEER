@@ -94,6 +94,12 @@ public class InventorCommandDispatcher
     private readonly CreatePartsListCommand
         _createPartsListCommand;
 
+    private readonly MovePartsListCommand
+        _movePartsListCommand;
+
+    private readonly DeletePartsListCommand
+        _deletePartsListCommand;
+
     private readonly CreateBalloonCommand
         _createBalloonCommand;
 
@@ -663,6 +669,14 @@ public class InventorCommandDispatcher
 
         _createPartsListCommand =
             new CreatePartsListCommand(
+                inventor);
+
+        _movePartsListCommand =
+            new MovePartsListCommand(
+                inventor);
+
+        _deletePartsListCommand =
+            new DeletePartsListCommand(
                 inventor);
 
         _createBalloonCommand =
@@ -1416,6 +1430,14 @@ public class InventorCommandDispatcher
 
                 "create_parts_list" =>
                     _createPartsListCommand.Execute(
+                        root),
+
+                "move_parts_list" =>
+                    _movePartsListCommand.Execute(
+                        root),
+
+                "delete_parts_list" =>
+                    _deletePartsListCommand.Execute(
                         root),
 
                 "create_balloon" =>
