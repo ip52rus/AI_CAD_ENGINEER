@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 51A documentation sync:
+Current checkpoint after the Package 52A documentation sync:
 
 ```text
-v0.44 complete custom table lifecycle
+v0.45 complete revision table lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 51A checkpoint:
+Live command audit after Package 52A checkpoint:
 
 ```text
-188 registered JSON commands
-188 unique registered JSON commands
+191 registered JSON commands
+191 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -422,7 +422,7 @@ Major verified read areas include:
 
 ## Known gaps
 
-- RevisionTable lifecycle Hands are not implemented yet.
+- RevisionCloud lifecycle Hands are not implemented yet.
 - Drawing Generation Hands are still partial outside the verified view/export pipeline; print workflow is not implemented yet.
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
@@ -561,6 +561,53 @@ Runtime does not decide whether a CustomTable is needed, invent content or
 column titles, choose row/column counts or placement, populate cells
 automatically, sort, merge, resize automatically, apply GOST/ESKD semantics,
 perform engineering calculations, or interpret arbitrary table content.
+
+## Package 52A checkpoint
+
+Package 52A complete: native RevisionTable lifecycle primitives are VERIFIED.
+
+Verified commands:
+
+```text
+get_revision_tables
+create_revision_table
+move_revision_table
+delete_revision_table
+```
+
+Verified lifecycle:
+
+```text
+get_revision_tables
+-> create_revision_table
+-> get_revision_tables
+-> move_revision_table
+-> get_revision_tables
+-> delete_revision_table
+-> get_revision_tables
+```
+
+Live Inventor validation confirmed:
+
+- `create_revision_table` calls native `RevisionTables.Add(Point2d)`;
+- created table title was `ЖУРНАЛ ИЗМЕНЕНИЙ`;
+- initial position matched caller-requested placement;
+- referenceKey and selectorSnapshot were present;
+- created table had `rowCount = 1`, `columnCount = 5`, and columns `ЗОНА`, `ИЗМ`, `ОПИСАНИЕ`, `ДАТА`, `УТВЕРЖДЕНО`;
+- row/cell data was readable;
+- Inventor/template behavior generated native revision row content including revision value `1` and date `14.08.2026`;
+- Runtime did not generate revision numbering or date content;
+- `move_revision_table` uses native `RevisionTable.Position = Point2d`; factual position after move was `(12,18)`;
+- same referenceKey was preserved, with unchanged title, structure, revision row/cell content, style/layer, and rotation;
+- `delete_revision_table` uses native `RevisionTable.Delete()`;
+- deleted table snapshot was returned, `remainingRevisionTableCount = 0`, and final `get_revision_tables` returned `count = 0`.
+
+Observed `MaximumRows` E_FAIL remains a property-level diagnostic and does not invalidate the lifecycle.
+
+Runtime does not invent revision numbers, dates, or descriptions, decide when a
+revision is required, edit revision rows, apply revision numbering policy,
+create revision clouds automatically, interpret GOST/ESKD revision semantics,
+or mutate style/layer automatically.
 
 ## Package 42 checkpoint
 

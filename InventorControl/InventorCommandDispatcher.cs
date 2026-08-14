@@ -559,6 +559,15 @@ public class InventorCommandDispatcher
     private readonly GetRevisionTablesCommand
         _getRevisionTablesCommand;
 
+    private readonly CreateRevisionTableCommand
+        _createRevisionTableCommand;
+
+    private readonly MoveRevisionTableCommand
+        _moveRevisionTableCommand;
+
+    private readonly DeleteRevisionTableCommand
+        _deleteRevisionTableCommand;
+
     private readonly GetHoleTablesCommand
         _getHoleTablesCommand;
 
@@ -1310,6 +1319,18 @@ public class InventorCommandDispatcher
 
         _getRevisionTablesCommand =
             new GetRevisionTablesCommand(
+                inventor);
+
+        _createRevisionTableCommand =
+            new CreateRevisionTableCommand(
+                inventor);
+
+        _moveRevisionTableCommand =
+            new MoveRevisionTableCommand(
+                inventor);
+
+        _deleteRevisionTableCommand =
+            new DeleteRevisionTableCommand(
                 inventor);
 
         _getHoleTablesCommand =
@@ -2099,6 +2120,18 @@ public class InventorCommandDispatcher
 
                 "get_revision_tables" =>
                     _getRevisionTablesCommand.Execute(
+                        root),
+
+                "create_revision_table" =>
+                    _createRevisionTableCommand.Execute(
+                        root),
+
+                "move_revision_table" =>
+                    _moveRevisionTableCommand.Execute(
+                        root),
+
+                "delete_revision_table" =>
+                    _deleteRevisionTableCommand.Execute(
                         root),
 
                 "get_hole_tables" =>

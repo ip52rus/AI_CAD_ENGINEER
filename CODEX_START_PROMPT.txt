@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 51A is complete.
-- Current checkpoint: `v0.44 complete custom table lifecycle`.
-- Live registry after Package 51A: `188 registered / 188 unique`, no duplicate command names.
+- Package 52A is complete.
+- Current checkpoint: `v0.45 complete revision table lifecycle`.
+- Live registry after Package 52A: `191 registered / 191 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -101,6 +101,42 @@ Verified Drawing Generation / Export Hands:
 - `create_custom_table`
 - `move_custom_table`
 - `delete_custom_table`
+- `get_revision_tables`
+- `create_revision_table`
+- `move_revision_table`
+- `delete_revision_table`
+
+Verified RevisionTable lifecycle:
+
+```text
+get_revision_tables
+-> create_revision_table
+-> get_revision_tables
+-> move_revision_table
+-> get_revision_tables
+-> delete_revision_table
+-> get_revision_tables
+```
+
+`create_revision_table` calls native `RevisionTables.Add(Point2d)`. Live
+Inventor validation confirmed requested initial placement, title
+`ЖУРНАЛ ИЗМЕНЕНИЙ`, referenceKey, selectorSnapshot, one row, five columns,
+readable row/cell data, and columns `ЗОНА`, `ИЗМ`, `ОПИСАНИЕ`, `ДАТА`,
+`УТВЕРЖДЕНО`.
+
+Inventor/template behavior generated native revision row content including
+revision value `1` and date `14.08.2026`. Runtime did not generate revision
+numbering or date content.
+
+`move_revision_table` uses `RevisionTable.Position = Point2d` and preserved
+referenceKey, title, structure, revision row/cell content, style/layer, and
+rotation. `delete_revision_table` uses `RevisionTable.Delete()` and final
+`get_revision_tables` count was `0`.
+
+Runtime must not invent revision numbers, dates, or descriptions, decide when a
+revision is required, edit revision rows, apply revision numbering policy,
+create revision clouds automatically, interpret GOST/ESKD revision semantics,
+or mutate style/layer automatically.
 
 Verified CustomTable lifecycle:
 
@@ -549,7 +585,7 @@ Runtime does not:
 Next expected stage:
 
 ```text
-Capability Audit - RevisionTable lifecycle
+Capability Audit - RevisionClouds / revision-related drawing annotations
 ```
 
 Required next check:

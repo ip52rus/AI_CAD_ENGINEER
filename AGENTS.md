@@ -792,8 +792,57 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 51A. Current next correct action: run
-a Capability Audit for RevisionTable lifecycle before writing code.
+Next correct action completed by Package 52A. Current next correct action: run
+a Capability Audit for RevisionClouds / revision-related drawing annotations
+before writing code.
+
+## Current milestone addendum after Package 52A
+
+```text
+Package 52A complete - RevisionTable lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_revision_tables
+create_revision_table
+move_revision_table
+delete_revision_table
+```
+
+Verified lifecycle:
+
+```text
+get_revision_tables
+-> create_revision_table
+-> get_revision_tables
+-> move_revision_table
+-> get_revision_tables
+-> delete_revision_table
+-> get_revision_tables
+```
+
+Live Inventor validation confirmed native `RevisionTables.Add(Point2d)`,
+caller-requested initial placement, title `ЖУРНАЛ ИЗМЕНЕНИЙ`, referenceKey,
+selectorSnapshot, one row, five columns, readable row/cell data, and native
+columns `ЗОНА`, `ИЗМ`, `ОПИСАНИЕ`, `ДАТА`, `УТВЕРЖДЕНО`.
+
+Inventor/template behavior generated revision row content including revision
+value `1` and date `14.08.2026`. Runtime did not generate revision numbering or
+date content.
+
+`move_revision_table` uses `RevisionTable.Position = Point2d` and preserved
+referenceKey, title, structure, revision row/cell content, style/layer, and
+rotation. `delete_revision_table` uses `RevisionTable.Delete()` and final
+`get_revision_tables` returned `count = 0`.
+
+Observed `MaximumRows` E_FAIL remains a property-level diagnostic.
+
+Runtime does not invent revision numbers, dates, or descriptions, decide when a
+revision is required, edit revision rows, apply revision numbering policy,
+create revision clouds automatically, interpret GOST/ESKD revision semantics,
+or mutate style/layer automatically.
 
 ## Current milestone addendum after Package 51A
 

@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.44 complete custom table lifecycle
+v0.45 complete revision table lifecycle
 ```
 
 ## Ground rules
@@ -70,7 +70,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Parts Lists | VERIFIED | `get_parts_lists`, `create_parts_list`, `move_parts_list`, `delete_parts_list`, legacy aggregate coverage through `get_drawing_tables` | Package 49B complete PartsList lifecycle: get/create/get/move/get/delete/get; move preserves referenceKey, rows, columns, cells, and referenced document/view facts | - | export/sort/renumber/cell editing/BOM mutation are not Runtime scope for this checkpoint | P0 maintained |
 | Balloons | VERIFIED | `get_balloons`, `create_balloon`, `move_balloon`, `delete_balloon` | Package 49A complete balloon lifecycle: create/read/move/read/delete/read; `get_balloons` referenceKey support; move preserves referenceKey/value/itemNumber/geometry attachment | - | value override/edit and automatic item-number operations are not Runtime scope | P0 maintained |
 | Parts List + Balloon Pipeline | VERIFIED | `get_parts_lists`, `create_parts_list`, `move_parts_list`, `delete_parts_list`, `create_balloon`, `get_balloons`, `move_balloon`, `delete_balloon` | DrawingView -> PartsList lifecycle; DrawingView geometry -> GeometryIntent -> Balloon lifecycle | - | no BOM modification, automatic numbering, automatic placement, geometry selection, layout optimization, or engineering/GOST decisions in Runtime | P0 maintained |
-| Revision Tables | VERIFIED | `get_revision_tables`, legacy aggregate coverage through `get_drawing_tables` | `get_revision_tables` found one revision table with columns, rows, cells, and metadata | - | create/edit/delete/move/format revision table Hands are not confirmed | P1 maintained |
+| Revision Tables | VERIFIED | `get_revision_tables`, `create_revision_table`, `move_revision_table`, `delete_revision_table`, legacy aggregate coverage through `get_drawing_tables` | Package 52A complete lifecycle: native `RevisionTables.Add(Point2d)`, `RevisionTable.Position`, `RevisionTable.Delete`, referenceKey preservation, rows/columns/cells readable; Inventor/template may generate native revision row content | - | revision row editing/numbering policy/revision property mutation/style-formatting/GOST logic are not Runtime scope | P0 maintained |
 | Drawing Table Collections Diagnostics | VERIFIED | `get_drawing_table_collections` | confirmed counts and metadata for `CustomTables`, `HoleTables`, `PartsLists`, and `RevisionTables` | - | not intended to read full row/cell content | P0 maintained |
 | CustomTables Discovery | VERIFIED | `get_drawing_table_collections` | confirmed GOST table is `Sheet.CustomTables` / `kCustomTableObject` | - | - | P0 maintained |
 | CustomTables | VERIFIED | `get_custom_tables`, `create_custom_table`, `move_custom_table`, `delete_custom_table` | Package 17A detailed CustomTable Eye; Package 51A complete lifecycle with explicit title/placement/row count/column count/column titles, `CustomTable.Position` move, `CustomTable.Delete`, referenceKey preservation, and corrected zero-based Cell.Column -> one-based column metadata lookup | - | caller-supplied Contents/cell editing/sorting/merging/formatting/GOST logic are not Runtime scope | P0 maintained |
@@ -92,6 +92,9 @@ Exact commands explicitly confirmed:
 {"command":"get_active_document"}
 {"command":"get_drawing_sheets"}
 {"command":"get_revision_tables"}
+{"command":"create_revision_table"}
+{"command":"move_revision_table"}
+{"command":"delete_revision_table"}
 {"command":"get_revision_tables","sheetName":"Лист:1"}
 {"command":"get_parts_lists"}
 {"command":"get_parts_lists","sheetName":"Лист:1"}

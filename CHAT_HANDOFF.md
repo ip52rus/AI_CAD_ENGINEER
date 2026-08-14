@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.44 complete custom table lifecycle`.
+- Current checkpoint: `v0.45 complete revision table lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 51A - CustomTable lifecycle.
-- Registry after Package 51A: `188 registered / 188 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 51A checkpoint commit.
+- Latest completed checkpoint: Package 52A - RevisionTable lifecycle.
+- Registry after Package 52A: `191 registered / 191 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 52A checkpoint commit.
 
 ## Architecture Rules
 
@@ -26,6 +26,7 @@
 - Drawing Dimensions.
 - PartsLists API: `get_parts_lists` is verified for `Sheet.PartsLists`.
 - RevisionTables: `get_revision_tables`.
+- RevisionTable lifecycle Hands: `create_revision_table`, `move_revision_table`, `delete_revision_table`.
 - Drawing Table Collections: `get_drawing_table_collections`.
 - CustomTables Discovery: `get_drawing_table_collections`.
 - CustomTables Detailed Reading: `get_custom_tables`.
@@ -105,6 +106,50 @@
 - SketchedSymbol Hand: `create_sketched_symbol`.
 - SketchedSymbol move Hand: `move_sketched_symbol`.
 - SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## RevisionTable Lifecycle
+
+Verified commands:
+
+```text
+get_revision_tables
+create_revision_table
+move_revision_table
+delete_revision_table
+```
+
+Verified lifecycle:
+
+```text
+get_revision_tables
+-> create_revision_table
+-> get_revision_tables
+-> move_revision_table
+-> get_revision_tables
+-> delete_revision_table
+-> get_revision_tables
+```
+
+Live Inventor validation confirmed native `RevisionTables.Add(Point2d)`,
+caller-requested initial placement, title `ЖУРНАЛ ИЗМЕНЕНИЙ`, referenceKey,
+selectorSnapshot, one row, five columns, readable row/cell data, and native
+columns `ЗОНА`, `ИЗМ`, `ОПИСАНИЕ`, `ДАТА`, `УТВЕРЖДЕНО`.
+
+Inventor/template behavior generated revision row content including revision
+value `1` and date `14.08.2026`. Runtime did not generate revision numbering or
+date content.
+
+`move_revision_table` uses `RevisionTable.Position = Point2d` and preserved
+referenceKey, title, structure, revision row/cell content, style/layer, and
+rotation. `delete_revision_table` uses `RevisionTable.Delete()` and final
+`get_revision_tables` returned `count = 0`.
+
+Observed `MaximumRows` E_FAIL remains a property-level diagnostic.
+
+Runtime does not invent revision numbers, dates, or descriptions, decide when a
+revision is required, edit revision rows, apply revision numbering policy,
+create revision clouds automatically, interpret GOST/ESKD revision semantics,
+or mutate style/layer automatically.
 
 ## CustomTable Lifecycle
 
@@ -953,7 +998,7 @@ Verified runtime tests:
 - Welding semantic interpretation is outside Runtime.
 - Drawing symbol semantic interpretation is outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
-- RevisionTable lifecycle Hands are not implemented yet.
+- RevisionCloud lifecycle Hands are not implemented yet.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`
@@ -967,7 +1012,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - RevisionTable lifecycle
+Capability Audit - RevisionClouds / revision-related drawing annotations
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

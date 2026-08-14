@@ -1,6 +1,64 @@
 # PROJECT REVIEW
 
-## Package 51A checkpoint - current state
+## Package 52A checkpoint - current state
+
+Package 52A closes native drawing RevisionTable lifecycle primitives.
+
+Current live command inventory after Package 52A:
+
+```text
+191 registered JSON commands
+191 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified RevisionTable commands:
+
+```text
+get_revision_tables
+create_revision_table
+move_revision_table
+delete_revision_table
+```
+
+Verified lifecycle:
+
+```text
+get_revision_tables
+-> create_revision_table
+-> get_revision_tables
+-> move_revision_table
+-> get_revision_tables
+-> delete_revision_table
+-> get_revision_tables
+```
+
+Live Inventor validation confirmed:
+
+- create uses native `RevisionTables.Add(Point2d)`;
+- created table title was `ЖУРНАЛ ИЗМЕНЕНИЙ`;
+- initial position matched caller-requested placement;
+- referenceKey and selectorSnapshot were present;
+- created table had one row, five columns, and readable row/cell data;
+- columns were `ЗОНА`, `ИЗМ`, `ОПИСАНИЕ`, `ДАТА`, `УТВЕРЖДЕНО`;
+- Inventor/template behavior generated native revision row content including revision value `1` and date `14.08.2026`;
+- Runtime did not generate revision numbering or date content;
+- move uses `RevisionTable.Position = Point2d`; factual resulting position was `(12,18)`;
+- same referenceKey was preserved, with unchanged title, structure, revision row/cell content, style/layer, and rotation;
+- delete uses `RevisionTable.Delete()`, returned deleted snapshot, and final `get_revision_tables` count was `0`.
+
+Observed `MaximumRows` E_FAIL remains a property-level diagnostic and does not
+invalidate the lifecycle.
+
+Runtime does not invent revision numbers, dates, or descriptions, decide when a
+revision is required, edit revision rows, apply revision numbering policy,
+create revision clouds automatically, interpret GOST/ESKD revision semantics,
+or mutate style/layer automatically.
+
+Next capability check: RevisionClouds / revision-related drawing annotations.
+
+## Package 51A checkpoint
 
 Package 51A closes native drawing CustomTable lifecycle primitives.
 

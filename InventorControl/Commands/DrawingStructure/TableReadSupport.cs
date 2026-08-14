@@ -2505,6 +2505,19 @@ internal static class TableReadSupport
         };
     }
 
+    public static object ReadRevisionTableSnapshot(
+        DrawingDocument drawingDocument,
+        Sheet sheet,
+        RevisionTable revisionTable,
+        int index)
+    {
+        return ReadRevisionTable(
+            drawingDocument,
+            sheet,
+            revisionTable,
+            index);
+    }
+
     private static TableColumnRead ReadPartsListColumns(
         PartsList partsList,
         List<object> tableDiagnostics)
