@@ -6,6 +6,19 @@ namespace AI_CAD_ENGINEER.InventorControl.Commands;
 
 internal static class RevisionCloudReadSupport
 {
+    internal static object ReadRevisionCloudSnapshot(
+        DrawingDocument drawingDocument,
+        Sheet sheet,
+        RevisionCloud cloud,
+        int index)
+    {
+        return ReadRevisionCloud(
+            drawingDocument,
+            sheet,
+            cloud,
+            index);
+    }
+
     public static string Execute(
         Inventor.Application inventor,
         JsonElement root)

@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.45 complete revision table lifecycle
+v0.46 complete revision cloud lifecycle
 ```
 
 ## Ground rules
@@ -57,8 +57,8 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Welding Symbols | VERIFIED | `get_welding_symbols`, `create_welding_symbol`, `move_welding_symbol`, `delete_welding_symbol` | `get_welding_symbols`, `get_welding_symbols` with `sheetName`, Package 47 create/move/delete validation | - | content-edit/style/layer Hands are not confirmed | P0 maintained |
 | Welding semantic analysis | MISSING | - | - | - | weld interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Sketched Symbols | VERIFIED | `get_sketched_symbol_definitions`, `get_drawing_text_objects`, `create_sketched_symbol`, `move_sketched_symbol`, `delete_sketched_symbol` | Package 48 definition discovery; free `SketchedSymbols.Add` create/move/delete; leader/attached `SketchedSymbols.AddWithLeader` with optional GeometryIntent LAST | - | prompt result editing and definition copy/import/create are deferred | P0 maintained |
-| Drawing Symbol Layer | VERIFIED | `get_feature_control_frames`, `get_surface_texture_symbols`, `get_welding_symbols`, `get_revision_clouds`, `get_edge_symbols`, `get_transition_symbols` | all six typed symbol Eyes have Inventor PASS recorded through Package 22 | - | semantic interpretation is outside Runtime; create/move/delete/format Hands are not confirmed | P0 maintained |
-| RevisionClouds Eye | VERIFIED | `get_revision_clouds` | `get_revision_clouds`, `get_revision_clouds` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| Drawing Symbol Layer | VERIFIED | `get_feature_control_frames`, `get_surface_texture_symbols`, `get_welding_symbols`, `get_revision_clouds`, `create_revision_cloud`, `move_revision_cloud`, `delete_revision_cloud`, `get_edge_symbols`, `get_transition_symbols` | typed symbol Eyes plus Package 45-47 and Package 53A lifecycle primitives where implemented | - | semantic interpretation is outside Runtime; EdgeSymbol/TransitionSymbol lifecycle Hands are not confirmed | P0 maintained |
+| RevisionClouds | VERIFIED | `get_revision_clouds`, `create_revision_cloud`, `move_revision_cloud`, `delete_revision_cloud` | Package 53A complete lifecycle: native `RevisionClouds.CreateRevisionCloudDefinition(...)`, `RevisionClouds.Add(...)`, `RevisionCloud.Position`, `RevisionCloud.Delete`, referenceKey preservation, and native position move translating cloud/control-point coordinates | - | control-point editing, revision association, layer/style mutation, revision policy/GOST semantics are not Runtime scope | P0 maintained |
 | EdgeSymbols Eye | VERIFIED | `get_edge_symbols` | `get_edge_symbols`, `get_edge_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
 | TransitionSymbols Eye | VERIFIED | `get_transition_symbols` | `get_transition_symbols`, `get_transition_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
 | Drawing symbol semantic interpretation | MISSING | - | - | - | symbol interpretation, GOST/ISO validation, correctness checking, and engineering analysis belong to external LLM, not Runtime | no Runtime priority |
@@ -115,6 +115,9 @@ Exact commands explicitly confirmed:
 {"command":"get_drawing_text_objects","sheetName":"Лист:1"}
 {"command":"get_custom_tables","sheetName":"Лист:1"}
 {"command":"get_revision_clouds"}
+{"command":"create_revision_cloud"}
+{"command":"move_revision_cloud"}
+{"command":"delete_revision_cloud"}
 {"command":"get_revision_clouds","sheetName":"Лист:1"}
 {"command":"get_edge_symbols"}
 {"command":"get_edge_symbols","sheetName":"Лист:1"}
@@ -262,6 +265,22 @@ confirmed. Runtime does not infer prompt semantics from `<Prompt>` or formatted
 text and does not fabricate prompted values.
 
 `get_revision_clouds` is verified for reading `Sheet.RevisionClouds`, RevisionCloud metadata, RevisionCloudDefinition data, control points, reference keys, and diagnostics.
+
+Package 53A verifies native RevisionCloud lifecycle primitives:
+
+```text
+get_revision_clouds -> create_revision_cloud -> get_revision_clouds -> move_revision_cloud -> get_revision_clouds -> delete_revision_cloud -> get_revision_clouds
+RevisionClouds.CreateRevisionCloudDefinition(...) -> RevisionClouds.Add(...)
+RevisionCloud.Position -> get_revision_clouds factual post-move state
+RevisionCloud.Delete()
+```
+
+Live Inventor validation confirmed four caller-supplied control points,
+`inverted = false`, referenceKey, selectorSnapshot, readable definition, native
+layer inheritance, and generated native name such as `Пометочное_облако1`.
+`RevisionCloud.Position` translated the native cloud/control-point coordinates
+as Inventor behavior; Runtime did not edit individual control points.
+Control-point editing and revision association remain deferred.
 
 `get_edge_symbols` is verified for reading `Sheet.EdgeSymbols`, EdgeSymbol metadata, EdgeSymbolDefinition data, reference keys, and diagnostics.
 

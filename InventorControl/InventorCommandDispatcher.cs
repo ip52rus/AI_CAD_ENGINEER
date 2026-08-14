@@ -412,6 +412,15 @@ public class InventorCommandDispatcher
     private readonly GetRevisionCloudsCommand
         _getRevisionCloudsCommand;
 
+    private readonly CreateRevisionCloudCommand
+        _createRevisionCloudCommand;
+
+    private readonly MoveRevisionCloudCommand
+        _moveRevisionCloudCommand;
+
+    private readonly DeleteRevisionCloudCommand
+        _deleteRevisionCloudCommand;
+
     private readonly GetEdgeSymbolsCommand
         _getEdgeSymbolsCommand;
 
@@ -1123,6 +1132,18 @@ public class InventorCommandDispatcher
 
         _getRevisionCloudsCommand =
             new GetRevisionCloudsCommand(
+                inventor);
+
+        _createRevisionCloudCommand =
+            new CreateRevisionCloudCommand(
+                inventor);
+
+        _moveRevisionCloudCommand =
+            new MoveRevisionCloudCommand(
+                inventor);
+
+        _deleteRevisionCloudCommand =
+            new DeleteRevisionCloudCommand(
                 inventor);
 
         _getEdgeSymbolsCommand =
@@ -1924,6 +1945,18 @@ public class InventorCommandDispatcher
 
                 "get_revision_clouds" =>
                     _getRevisionCloudsCommand.Execute(
+                        root),
+
+                "create_revision_cloud" =>
+                    _createRevisionCloudCommand.Execute(
+                        root),
+
+                "move_revision_cloud" =>
+                    _moveRevisionCloudCommand.Execute(
+                        root),
+
+                "delete_revision_cloud" =>
+                    _deleteRevisionCloudCommand.Execute(
                         root),
 
                 "get_edge_symbols" =>

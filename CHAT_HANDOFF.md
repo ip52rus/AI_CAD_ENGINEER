@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.45 complete revision table lifecycle`.
+- Current checkpoint: `v0.46 complete revision cloud lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 52A - RevisionTable lifecycle.
-- Registry after Package 52A: `191 registered / 191 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 52A checkpoint commit.
+- Latest completed checkpoint: Package 53A - RevisionCloud lifecycle.
+- Registry after Package 53A: `194 registered / 194 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 53A checkpoint commit.
 
 ## Architecture Rules
 
@@ -38,7 +38,7 @@
 - Surface Texture Symbols: `get_surface_texture_symbols`, `create_surface_texture_symbol`, `move_surface_texture_symbol`, `delete_surface_texture_symbol`.
 - Welding Symbols: `get_welding_symbols`, `create_welding_symbol`, `move_welding_symbol`, `delete_welding_symbol`.
 - SketchedSymbols: `get_sketched_symbol_definitions`, `create_sketched_symbol`, `move_sketched_symbol`, `delete_sketched_symbol`.
-- RevisionClouds Eye: `get_revision_clouds`.
+- RevisionClouds: `get_revision_clouds`, `create_revision_cloud`, `move_revision_cloud`, `delete_revision_cloud`.
 - EdgeSymbols Eye: `get_edge_symbols`.
 - TransitionSymbols Eye: `get_transition_symbols`.
 - create_drawing_document Hand: `create_drawing_document`.
@@ -150,6 +150,50 @@ Runtime does not invent revision numbers, dates, or descriptions, decide when a
 revision is required, edit revision rows, apply revision numbering policy,
 create revision clouds automatically, interpret GOST/ESKD revision semantics,
 or mutate style/layer automatically.
+
+## RevisionCloud Lifecycle
+
+Verified commands:
+
+```text
+get_revision_clouds
+create_revision_cloud
+move_revision_cloud
+delete_revision_cloud
+```
+
+Verified lifecycle:
+
+```text
+get_revision_clouds
+-> create_revision_cloud
+-> get_revision_clouds
+-> move_revision_cloud
+-> get_revision_clouds
+-> delete_revision_cloud
+-> get_revision_clouds
+```
+
+Live Inventor validation confirmed native
+`RevisionClouds.CreateRevisionCloudDefinition(...)` and
+`RevisionClouds.Add(...)`, exactly four caller-defined control points,
+`controlPointCount = 4`, `inverted = false`, referenceKey, selectorSnapshot,
+readable definition, natively inherited layer, and generated native name such
+as `Пометочное_облако1`.
+
+Runtime did not generate extra points, reorder points, close or repair
+topology, select a layer, or associate the cloud with a revision.
+
+`move_revision_cloud` uses `RevisionCloud.Position = Point2d`. Live validation
+confirmed factual position `(20,18)`, same referenceKey, and
+`controlPointCount = 4`. Inventor translated the native cloud/control-point
+coordinates as part of native `RevisionCloud.Position`; Runtime did not edit
+individual `RevisionCloudControlPoint.Position` values.
+
+`delete_revision_cloud` uses `RevisionCloud.Delete()` and final
+`get_revision_clouds` returned `count = 0`.
+
+Control-point editing and automatic revision association remain deferred.
 
 ## CustomTable Lifecycle
 
@@ -998,7 +1042,7 @@ Verified runtime tests:
 - Welding semantic interpretation is outside Runtime.
 - Drawing symbol semantic interpretation is outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
-- RevisionCloud lifecycle Hands are not implemented yet.
+- RevisionCloud control-point editing and revision association remain deferred.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`
@@ -1012,7 +1056,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - RevisionClouds / revision-related drawing annotations
+Capability Audit - remaining native drawing annotation lifecycle gaps
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

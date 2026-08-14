@@ -792,9 +792,60 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 52A. Current next correct action: run
-a Capability Audit for RevisionClouds / revision-related drawing annotations
-before writing code.
+Next correct action completed by Package 53A. Current next correct action: run
+a Capability Audit for remaining native drawing annotation lifecycle gaps before
+writing code.
+
+## Current milestone addendum after Package 53A
+
+```text
+Package 53A complete - RevisionCloud lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_revision_clouds
+create_revision_cloud
+move_revision_cloud
+delete_revision_cloud
+```
+
+Verified lifecycle:
+
+```text
+get_revision_clouds
+-> create_revision_cloud
+-> get_revision_clouds
+-> move_revision_cloud
+-> get_revision_clouds
+-> delete_revision_cloud
+-> get_revision_clouds
+```
+
+Live Inventor validation confirmed native
+`RevisionClouds.CreateRevisionCloudDefinition(...)` and
+`RevisionClouds.Add(...)`, exactly four caller-defined control points,
+`controlPointCount = 4`, `inverted = false`, referenceKey, selectorSnapshot,
+readable definition, natively inherited layer, and generated native name such
+as `Пометочное_облако1`.
+
+Runtime did not generate extra points, reorder points, close or repair
+topology, select a layer, or associate the cloud with a revision.
+
+`move_revision_cloud` uses `RevisionCloud.Position = Point2d`. Inventor
+translated the native cloud/control-point coordinates as part of the native
+position mutation. Runtime did not mutate individual
+`RevisionCloudControlPoint.Position` values. `delete_revision_cloud` uses
+`RevisionCloud.Delete()` and final `get_revision_clouds` returned `count = 0`.
+
+Control-point editing and automatic revision association remain deferred.
+
+Runtime does not decide whether a revision cloud is required, associate clouds
+with revision rows automatically, create revision numbers, interpret revision
+semantics, generate cloud geometry automatically, edit control points
+automatically, choose layers, apply GOST/ESKD revision policy, or modify
+RevisionTables.
 
 ## Current milestone addendum after Package 52A
 

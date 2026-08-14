@@ -1,6 +1,63 @@
 # PROJECT REVIEW
 
-## Package 52A checkpoint - current state
+## Package 53A checkpoint - current state
+
+Package 53A closes native drawing RevisionCloud lifecycle primitives.
+
+Current live command inventory after Package 53A:
+
+```text
+194 registered JSON commands
+194 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified RevisionCloud commands:
+
+```text
+get_revision_clouds
+create_revision_cloud
+move_revision_cloud
+delete_revision_cloud
+```
+
+Verified lifecycle:
+
+```text
+get_revision_clouds
+-> create_revision_cloud
+-> get_revision_clouds
+-> move_revision_cloud
+-> get_revision_clouds
+-> delete_revision_cloud
+-> get_revision_clouds
+```
+
+Live Inventor validation confirmed:
+
+- create uses native `RevisionClouds.CreateRevisionCloudDefinition(...)` and `RevisionClouds.Add(...)`;
+- Runtime supplied exactly four caller-defined control points;
+- native cloud readback had `controlPointCount = 4`, `inverted = false`, referenceKey, selectorSnapshot, readable definition, and natively inherited layer;
+- Inventor generated a native name such as `Пометочное_облако1`;
+- Runtime did not generate extra points, reorder points, close or repair topology, choose a layer, or associate the cloud with a revision;
+- move uses `RevisionCloud.Position = Point2d`; factual resulting position was `(20,18)`;
+- same referenceKey was preserved and `controlPointCount` remained `4`;
+- Inventor translated native cloud/control-point coordinates as part of the `RevisionCloud.Position` mutation;
+- Runtime did not mutate individual `RevisionCloudControlPoint.Position` values;
+- delete uses `RevisionCloud.Delete()`, returned deleted snapshot, and final `get_revision_clouds` count was `0`.
+
+Control-point editing remains deferred.
+
+Runtime does not decide whether a revision cloud is required, associate clouds
+with revision rows automatically, create revision numbers, interpret revision
+semantics, generate cloud geometry automatically, edit control points
+automatically, choose layers, apply GOST/ESKD revision policy, or modify
+RevisionTables.
+
+Next capability check: remaining native drawing annotation lifecycle gaps.
+
+## Package 52A checkpoint
 
 Package 52A closes native drawing RevisionTable lifecycle primitives.
 

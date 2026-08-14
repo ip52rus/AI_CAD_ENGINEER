@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 52A documentation sync:
+Current checkpoint after the Package 53A documentation sync:
 
 ```text
-v0.45 complete revision table lifecycle
+v0.46 complete revision cloud lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 52A checkpoint:
+Live command audit after Package 53A checkpoint:
 
 ```text
-191 registered JSON commands
-191 unique registered JSON commands
+194 registered JSON commands
+194 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -422,7 +422,7 @@ Major verified read areas include:
 
 ## Known gaps
 
-- RevisionCloud lifecycle Hands are not implemented yet.
+- RevisionCloud control-point editing and revision association are not implemented.
 - Drawing Generation Hands are still partial outside the verified view/export pipeline; print workflow is not implemented yet.
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
@@ -608,6 +608,55 @@ Runtime does not invent revision numbers, dates, or descriptions, decide when a
 revision is required, edit revision rows, apply revision numbering policy,
 create revision clouds automatically, interpret GOST/ESKD revision semantics,
 or mutate style/layer automatically.
+
+## Package 53A checkpoint
+
+Package 53A complete: native RevisionCloud lifecycle primitives are VERIFIED.
+
+Verified commands:
+
+```text
+get_revision_clouds
+create_revision_cloud
+move_revision_cloud
+delete_revision_cloud
+```
+
+Verified lifecycle:
+
+```text
+get_revision_clouds
+-> create_revision_cloud
+-> get_revision_clouds
+-> move_revision_cloud
+-> get_revision_clouds
+-> delete_revision_cloud
+-> get_revision_clouds
+```
+
+Live Inventor validation confirmed:
+
+- `create_revision_cloud` uses native `RevisionClouds.CreateRevisionCloudDefinition(...)` and `RevisionClouds.Add(...)`;
+- Runtime supplied exactly four caller-defined control points;
+- native cloud readback returned `controlPointCount = 4`, `inverted = false`, referenceKey, selectorSnapshot, readable definition, and natively inherited layer;
+- Inventor generated a native name such as `Пометочное_облако1`;
+- Runtime did not generate extra points, reorder points, close or repair topology, choose a layer, or associate the cloud with a revision;
+- `move_revision_cloud` uses native `RevisionCloud.Position = Point2d`;
+- factual position after move was `(20,18)`;
+- same referenceKey was preserved;
+- `controlPointCount` remained `4`, with control-point topology/order intact;
+- Inventor translated the native cloud/control-point coordinates as part of the `RevisionCloud.Position` mutation;
+- Runtime did not mutate individual `RevisionCloudControlPoint.Position` values;
+- `delete_revision_cloud` uses native `RevisionCloud.Delete()`;
+- deleted cloud snapshot was returned, `remainingRevisionCloudCount = 0`, and final `get_revision_clouds` returned `count = 0`.
+
+Control-point editing remains deferred.
+
+Runtime does not decide whether a revision cloud is required, associate clouds
+with revision rows automatically, create revision numbers, interpret revision
+semantics, generate cloud geometry automatically, edit control points
+automatically, choose layers, apply GOST/ESKD revision policy, or modify
+RevisionTables.
 
 ## Package 42 checkpoint
 
