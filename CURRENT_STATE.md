@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 50B documentation sync:
+Current checkpoint after the Package 51A documentation sync:
 
 ```text
-v0.43 complete hole table lifecycle
+v0.44 complete custom table lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 50B checkpoint:
+Live command audit after Package 51A checkpoint:
 
 ```text
-185 registered JSON commands
-185 unique registered JSON commands
+188 registered JSON commands
+188 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -422,7 +422,7 @@ Major verified read areas include:
 
 ## Known gaps
 
-- CustomTable lifecycle Hands are not implemented yet.
+- RevisionTable lifecycle Hands are not implemented yet.
 - Drawing Generation Hands are still partial outside the verified view/export pipeline; print workflow is not implemented yet.
 - Drawing Text semantic analysis is not implemented in Runtime and must remain outside the C# layer.
 - GD&T semantic analysis is not implemented in Runtime and must remain outside the C# layer.
@@ -509,6 +509,58 @@ E_FAIL, `SecondaryTagModifierOnRollup` E_FAIL, and limited generic
 Runtime still does not decide whether a HoleTable is needed, choose view or
 placement, interpret engineering meaning, apply GOST/ESKD decisions, choose
 numbering/tag strategy, sort, format, edit cells, or mutate model holes.
+
+## Package 51A checkpoint
+
+Package 51A complete: native CustomTable lifecycle primitives are VERIFIED.
+
+Verified commands:
+
+```text
+get_custom_tables
+create_custom_table
+move_custom_table
+delete_custom_table
+```
+
+Verified lifecycle:
+
+```text
+get_custom_tables
+-> create_custom_table
+-> get_custom_tables
+-> move_custom_table
+-> get_custom_tables
+-> delete_custom_table
+-> get_custom_tables
+```
+
+Live Inventor validation confirmed:
+
+- `create_custom_table` creates a native `CustomTable` with explicit title, placement, row count, column count, and column titles;
+- tested table `TEST TABLE` was created at `(10,20)` with `numberOfColumns = 2`, `numberOfRows = 2`, and `columnTitles = ["A", "B"]`;
+- factual readback returned title `TEST TABLE`, position `(10,20)`, `rowCount = 2`, `columnCount = 2`, column 1 `A`, column 2 `B`, referenceKey, and selectorSnapshot;
+- `move_custom_table` uses native `CustomTable.Position = Point2d` and factual readback confirmed requested movement while preserving identity/referenceKey;
+- `delete_custom_table` uses native `CustomTable.Delete()`, returned a deleted snapshot, and final `get_custom_tables` returned `count = 0`.
+
+Current Package 51A creation scope:
+
+- caller-supplied `Contents` are not supported;
+- Runtime passes `Type.Missing` for `Contents`, `ColumnWidths`, `RowHeights`, and `MoreInfo`;
+- no post-create cell population occurs.
+
+CustomTable cell metadata correction:
+
+- live Inventor data confirmed `Cell.Row` and `Cell.Column` are zero-based for CustomTable cells;
+- `CustomTable.Columns` metadata is one-based;
+- Runtime preserves raw/native `rowIndex` and `columnIndex` values;
+- CustomTable cell column metadata lookup now uses `metadataColumnIndex = native Cell.Column + 1`;
+- this correction is scoped only to CustomTable cell metadata lookup and is not applied to PartsList or HoleTable serializers.
+
+Runtime does not decide whether a CustomTable is needed, invent content or
+column titles, choose row/column counts or placement, populate cells
+automatically, sort, merge, resize automatically, apply GOST/ESKD semantics,
+perform engineering calculations, or interpret arbitrary table content.
 
 ## Package 42 checkpoint
 

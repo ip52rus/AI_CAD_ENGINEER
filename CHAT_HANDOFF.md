@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.43 complete hole table lifecycle`.
+- Current checkpoint: `v0.44 complete custom table lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 50B - HoleTable lifecycle.
-- Registry after Package 50B: `185 registered / 185 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 50B checkpoint commit.
+- Latest completed checkpoint: Package 51A - CustomTable lifecycle.
+- Registry after Package 51A: `188 registered / 188 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 51A checkpoint commit.
 
 ## Architecture Rules
 
@@ -29,6 +29,7 @@
 - Drawing Table Collections: `get_drawing_table_collections`.
 - CustomTables Discovery: `get_drawing_table_collections`.
 - CustomTables Detailed Reading: `get_custom_tables`.
+- CustomTable lifecycle Hands: `create_custom_table`, `move_custom_table`, `delete_custom_table`.
 - HoleTables Detailed Reading: `get_hole_tables`.
 - HoleTable lifecycle Hands: `create_hole_table`, `move_hole_table`, `delete_hole_table`.
 - Drawing Text Objects: `get_drawing_text_objects`.
@@ -104,6 +105,51 @@
 - SketchedSymbol Hand: `create_sketched_symbol`.
 - SketchedSymbol move Hand: `move_sketched_symbol`.
 - SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## CustomTable Lifecycle
+
+Verified commands:
+
+```text
+get_custom_tables
+create_custom_table
+move_custom_table
+delete_custom_table
+```
+
+Verified lifecycle:
+
+```text
+get_custom_tables
+-> create_custom_table
+-> get_custom_tables
+-> move_custom_table
+-> get_custom_tables
+-> delete_custom_table
+-> get_custom_tables
+```
+
+Live Inventor validation confirmed explicit native CustomTable creation with
+title `TEST TABLE`, position `(10,20)`, two rows, two columns, column 1 `A`,
+column 2 `B`, referenceKey, and selectorSnapshot. `move_custom_table` uses
+`CustomTable.Position = Point2d` and preserved identity/referenceKey.
+`delete_custom_table` uses `CustomTable.Delete()` and final
+`get_custom_tables` returned `count = 0`.
+
+Package 51A intentionally does not support caller-supplied `Contents`.
+Runtime passes `Type.Missing` for `Contents`, `ColumnWidths`, `RowHeights`, and
+`MoreInfo`, and performs no post-create cell population.
+
+CustomTable cell metadata correction is verified: `Cell.Row` and `Cell.Column`
+are zero-based for live CustomTable cells, while `CustomTable.Columns` metadata
+is one-based. Runtime preserves raw `rowIndex` and `columnIndex`, but resolves
+cell metadata with `metadataColumnIndex = native Cell.Column + 1` only for
+CustomTable cells.
+
+Runtime does not decide whether a CustomTable is needed, invent content or
+column titles, choose row/column counts or placement, populate cells
+automatically, sort, merge, resize automatically, apply GOST/ESKD semantics, or
+interpret arbitrary table content.
 
 ## HoleTable Detailed Eye
 
@@ -907,7 +953,7 @@ Verified runtime tests:
 - Welding semantic interpretation is outside Runtime.
 - Drawing symbol semantic interpretation is outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
-- CustomTable lifecycle Hands are not implemented yet.
+- RevisionTable lifecycle Hands are not implemented yet.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`
@@ -921,7 +967,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - CustomTable lifecycle
+Capability Audit - RevisionTable lifecycle
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

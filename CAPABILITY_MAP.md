@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.43 complete hole table lifecycle
+v0.44 complete custom table lifecycle
 ```
 
 ## Ground rules
@@ -73,7 +73,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Revision Tables | VERIFIED | `get_revision_tables`, legacy aggregate coverage through `get_drawing_tables` | `get_revision_tables` found one revision table with columns, rows, cells, and metadata | - | create/edit/delete/move/format revision table Hands are not confirmed | P1 maintained |
 | Drawing Table Collections Diagnostics | VERIFIED | `get_drawing_table_collections` | confirmed counts and metadata for `CustomTables`, `HoleTables`, `PartsLists`, and `RevisionTables` | - | not intended to read full row/cell content | P0 maintained |
 | CustomTables Discovery | VERIFIED | `get_drawing_table_collections` | confirmed GOST table is `Sheet.CustomTables` / `kCustomTableObject` | - | - | P0 maintained |
-| CustomTables Detailed Reading | VERIFIED | `get_custom_tables` | reads CustomTable metadata, Columns, Rows, Cells, MergedCells, and reference keys | - | write Hands are not confirmed | P0 maintained |
+| CustomTables | VERIFIED | `get_custom_tables`, `create_custom_table`, `move_custom_table`, `delete_custom_table` | Package 17A detailed CustomTable Eye; Package 51A complete lifecycle with explicit title/placement/row count/column count/column titles, `CustomTable.Position` move, `CustomTable.Delete`, referenceKey preservation, and corrected zero-based Cell.Column -> one-based column metadata lookup | - | caller-supplied Contents/cell editing/sorting/merging/formatting/GOST logic are not Runtime scope | P0 maintained |
 | Hole Tables | VERIFIED | `get_hole_tables`, `create_hole_table`, `move_hole_table`, `delete_hole_table` | Package 50A detailed HoleTable Eye; Package 50B complete lifecycle with explicit view/placement create, `HoleTable.Position` move, `HoleTable.Delete`, stable referenceKey after move, and no tag/content mutation by Runtime | - | sorting/row merging/tag renumbering/cell editing/formatting/GOST logic are not Runtime scope | P0 maintained |
 | Legacy drawing table aggregate | PARTIAL | `get_drawing_tables` | legacy parts/revision table aggregate exists; does not cover `CustomTables` or `HoleTables` | - | not a complete all-table reader | compatibility |
 | Document properties | PARTIAL | `get_document_properties`, `get_document_property`, `get_document_property_by_id`, `get_document_property_sets`, `set_document_property`, `set_document_property_by_id` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P2 |
@@ -98,6 +98,9 @@ Exact commands explicitly confirmed:
 {"command":"get_drawing_table_collections"}
 {"command":"get_drawing_table_collections","sheetName":"Лист:1"}
 {"command":"get_custom_tables"}
+{"command":"create_custom_table"}
+{"command":"move_custom_table"}
+{"command":"delete_custom_table"}
 {"command":"get_hole_tables"}
 {"command":"get_surface_texture_symbols"}
 {"command":"get_welding_symbols"}

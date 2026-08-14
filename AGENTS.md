@@ -792,8 +792,57 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 50B. Current next correct action: run
-a Capability Audit for CustomTable lifecycle before writing code.
+Next correct action completed by Package 51A. Current next correct action: run
+a Capability Audit for RevisionTable lifecycle before writing code.
+
+## Current milestone addendum after Package 51A
+
+```text
+Package 51A complete - CustomTable lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_custom_tables
+create_custom_table
+move_custom_table
+delete_custom_table
+```
+
+Verified lifecycle:
+
+```text
+get_custom_tables
+-> create_custom_table
+-> get_custom_tables
+-> move_custom_table
+-> get_custom_tables
+-> delete_custom_table
+-> get_custom_tables
+```
+
+Live Inventor validation confirmed explicit native CustomTable creation with
+title `TEST TABLE`, position `(10,20)`, two rows, two columns, column 1 `A`,
+column 2 `B`, referenceKey, and selectorSnapshot. `move_custom_table` uses
+`CustomTable.Position = Point2d` and preserved identity/referenceKey.
+`delete_custom_table` uses `CustomTable.Delete()` and final
+`get_custom_tables` returned `count = 0`.
+
+Package 51A intentionally does not support caller-supplied `Contents`.
+Runtime passes `Type.Missing` for `Contents`, `ColumnWidths`, `RowHeights`, and
+`MoreInfo`, and performs no post-create cell population.
+
+CustomTable cell metadata correction is verified: `Cell.Row` and `Cell.Column`
+are zero-based for live CustomTable cells, while `CustomTable.Columns` metadata
+is one-based. Runtime preserves raw `rowIndex` and `columnIndex`, but resolves
+cell metadata with `metadataColumnIndex = native Cell.Column + 1` only for
+CustomTable cells.
+
+Runtime does not decide whether a CustomTable is needed, invent content or
+column titles, choose row/column counts or placement, populate cells
+automatically, sort, merge, resize automatically, apply GOST/ESKD semantics,
+perform engineering calculations, or interpret arbitrary table content.
 
 ## Current milestone addendum after Package 50B
 

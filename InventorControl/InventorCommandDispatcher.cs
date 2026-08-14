@@ -544,6 +544,15 @@ public class InventorCommandDispatcher
     private readonly GetCustomTablesCommand
         _getCustomTablesCommand;
 
+    private readonly CreateCustomTableCommand
+        _createCustomTableCommand;
+
+    private readonly MoveCustomTableCommand
+        _moveCustomTableCommand;
+
+    private readonly DeleteCustomTableCommand
+        _deleteCustomTableCommand;
+
     private readonly GetPartsListsCommand
         _getPartsListsCommand;
 
@@ -1281,6 +1290,18 @@ public class InventorCommandDispatcher
 
         _getCustomTablesCommand =
             new GetCustomTablesCommand(
+                inventor);
+
+        _createCustomTableCommand =
+            new CreateCustomTableCommand(
+                inventor);
+
+        _moveCustomTableCommand =
+            new MoveCustomTableCommand(
+                inventor);
+
+        _deleteCustomTableCommand =
+            new DeleteCustomTableCommand(
                 inventor);
 
         _getPartsListsCommand =
@@ -2058,6 +2079,18 @@ public class InventorCommandDispatcher
 
                 "get_custom_tables" =>
                     _getCustomTablesCommand.Execute(
+                        root),
+
+                "create_custom_table" =>
+                    _createCustomTableCommand.Execute(
+                        root),
+
+                "move_custom_table" =>
+                    _moveCustomTableCommand.Execute(
+                        root),
+
+                "delete_custom_table" =>
+                    _deleteCustomTableCommand.Execute(
                         root),
 
                 "get_parts_lists" =>

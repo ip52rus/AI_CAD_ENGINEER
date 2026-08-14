@@ -1,6 +1,66 @@
 # PROJECT REVIEW
 
-## Package 50B checkpoint - current state
+## Package 51A checkpoint - current state
+
+Package 51A closes native drawing CustomTable lifecycle primitives.
+
+Current live command inventory after Package 51A:
+
+```text
+188 registered JSON commands
+188 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified CustomTable commands:
+
+```text
+get_custom_tables
+create_custom_table
+move_custom_table
+delete_custom_table
+```
+
+Verified lifecycle:
+
+```text
+get_custom_tables
+-> create_custom_table
+-> get_custom_tables
+-> move_custom_table
+-> get_custom_tables
+-> delete_custom_table
+-> get_custom_tables
+```
+
+Live Inventor validation confirmed:
+
+- create uses explicit caller title, placement, row count, column count, and column titles;
+- tested table `TEST TABLE` was created at `(10,20)` with two rows and two columns, column 1 `A`, column 2 `B`;
+- created table returned referenceKey and selectorSnapshot;
+- move uses `CustomTable.Position = Point2d` and factual readback confirmed requested movement with same identity/referenceKey;
+- delete uses `CustomTable.Delete()`, returned deleted snapshot, and final `get_custom_tables` count was `0`.
+
+Package 51A intentionally does not support caller-supplied `Contents`.
+Runtime passes `Type.Missing` for `Contents`, `ColumnWidths`, `RowHeights`, and
+`MoreInfo`, and performs no post-create cell population.
+
+CustomTable cell metadata correction is verified: live Inventor data showed
+`Cell.Row` and `Cell.Column` are zero-based for CustomTable cells, while
+`CustomTable.Columns` metadata is one-based. Runtime preserves raw indexes but
+uses `metadataColumnIndex = native Cell.Column + 1` only for CustomTable cell
+metadata lookup. This correction is not applied to PartsList or HoleTable
+serializers.
+
+Runtime does not decide whether a CustomTable is needed, invent content or
+column titles, choose row/column counts or placement, populate cells
+automatically, sort, merge, resize automatically, apply GOST/ESKD semantics,
+perform engineering calculations, or interpret arbitrary table content.
+
+Next capability check: RevisionTable lifecycle.
+
+## Package 50B checkpoint
 
 Package 50B closes native drawing HoleTable lifecycle primitives.
 

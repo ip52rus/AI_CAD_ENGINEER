@@ -1057,6 +1057,17 @@ internal static class TableReadSupport
             diagnostics);
     }
 
+    public static object ReadCustomTable(
+        DrawingDocument drawingDocument,
+        CustomTable customTable,
+        int index)
+    {
+        return ReadCustomTableDetailed(
+            drawingDocument,
+            customTable,
+            index);
+    }
+
     private static object ReadCustomTableDetailed(
         DrawingDocument drawingDocument,
         CustomTable customTable,
@@ -1445,9 +1456,9 @@ internal static class TableReadSupport
                 () => cell.Column);
 
         GenericTableColumnInfo? column =
-            FindGenericTableColumn(
+            FindCustomTableColumnForCell(
                 columns,
-                columnIndex ??
+                columnIndex,
                 fallbackColumnIndex);
 
         return new
@@ -4865,6 +4876,25 @@ internal static class TableReadSupport
                 column =>
                     column.Index ==
                     index);
+    }
+
+    private static GenericTableColumnInfo? FindCustomTableColumnForCell(
+        IReadOnlyList<GenericTableColumnInfo> columns,
+        int? nativeCellColumnIndex,
+        int fallbackColumnIndex)
+    {
+        // Inventor CustomTable Cell.Column is observed in live Inventor 2027
+        // validation as zero-based, while CustomTable.Columns enumeration and
+        // Columns.Item(...) are one-based. Preserve the raw Cell.Column value in
+        // the response, but use the one-based column number for metadata lookup.
+        int metadataColumnIndex =
+            nativeCellColumnIndex.HasValue
+                ? nativeCellColumnIndex.Value + 1
+                : fallbackColumnIndex;
+
+        return FindGenericTableColumn(
+            columns,
+            metadataColumnIndex);
     }
 
     private static List<object> MergeDiagnostics(
