@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 54A documentation sync:
+Current checkpoint after the Package 55A documentation sync:
 
 ```text
-v0.47 complete edge symbol lifecycle
+v0.48 complete transition symbol lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 54A checkpoint:
+Live command audit after Package 55A checkpoint:
 
 ```text
-197 registered JSON commands
-197 unique registered JSON commands
+200 registered JSON commands
+200 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -699,6 +699,50 @@ Live Inventor validation confirmed:
 Package 54A does not implement GeometryIntent attachment, automatic geometry
 selection, definition editing after creation, leader editing, layer/style
 mutation, automatic placement, or GOST/ESKD interpretation.
+
+## Package 55A checkpoint
+
+Package 55A complete: native TransitionSymbol lifecycle primitives are VERIFIED.
+
+Verified commands:
+
+```text
+get_transition_symbols
+create_transition_symbol
+move_transition_symbol
+delete_transition_symbol
+```
+
+Verified lifecycle:
+
+```text
+get_transition_symbols
+-> create_transition_symbol
+-> get_transition_symbols
+-> move_transition_symbol
+-> get_transition_symbols
+-> delete_transition_symbol
+-> get_transition_symbols
+```
+
+Live Inventor validation confirmed:
+
+- `create_transition_symbol` uses native `TransitionSymbols.CreateDefinition(...)`, `TransitionSymbols.Add(...)`, then `createdTransitionSymbol.Position = Point2d(x,y)` as the explicit free-symbol placement step;
+- free `kNoAttachmentType` creation requires caller-supplied `x/y` placement;
+- caller `leaderPoints` are passed to `TransitionSymbols.Add(...)` but are not treated as factual placement coordinates;
+- creation readback returned `position = (20,18)`, `attachmentType = kNoAttachmentType`, `indicationType = kForAllTransitionsSymbolIndication`, referenceKey, selectorSnapshot, readable definition, and natively inherited layer/style;
+- Package 55A does not create `GeometryIntent`, drawing-view attachment, or automatic geometry selection;
+- valid free `kNoAttachmentType` TransitionSymbols may have `Leader`, `Leader.HasRootNode = false`, and unavailable/null `Leader.AllNodes`;
+- leader node count is nullable/unknown when unavailable, no zero is fabricated, and missing leader-node facts are diagnostic only;
+- `move_transition_symbol` uses native `TransitionSymbol.Position = Point2d`;
+- factual position after move matched the requested coordinates, visible/native symbol movement was confirmed, and referenceKey, attachmentType, definition, and indicationType were preserved;
+- `delete_transition_symbol` uses native `TransitionSymbol.Delete()`;
+- deleted symbol snapshot was returned, `remainingTransitionSymbolCount = 0`, and final `get_transition_symbols` returned `count = 0`.
+
+Package 55A does not implement GeometryIntent attachment, drawing-view
+attachment, edge/face attachment, automatic geometry selection, leader editing,
+definition editing after creation, layer/style mutation, or GOST/ESKD
+interpretation.
 
 ## Package 42 checkpoint
 

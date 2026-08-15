@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.47 complete edge symbol lifecycle
+v0.48 complete transition symbol lifecycle
 ```
 
 ## Ground rules
@@ -57,10 +57,10 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Welding Symbols | VERIFIED | `get_welding_symbols`, `create_welding_symbol`, `move_welding_symbol`, `delete_welding_symbol` | `get_welding_symbols`, `get_welding_symbols` with `sheetName`, Package 47 create/move/delete validation | - | content-edit/style/layer Hands are not confirmed | P0 maintained |
 | Welding semantic analysis | MISSING | - | - | - | weld interpretation, GOST validation, engineering analysis; belongs to external LLM, not Runtime | no Runtime priority |
 | Sketched Symbols | VERIFIED | `get_sketched_symbol_definitions`, `get_drawing_text_objects`, `create_sketched_symbol`, `move_sketched_symbol`, `delete_sketched_symbol` | Package 48 definition discovery; free `SketchedSymbols.Add` create/move/delete; leader/attached `SketchedSymbols.AddWithLeader` with optional GeometryIntent LAST | - | prompt result editing and definition copy/import/create are deferred | P0 maintained |
-| Drawing Symbol Layer | VERIFIED | `get_feature_control_frames`, `get_surface_texture_symbols`, `get_welding_symbols`, `get_revision_clouds`, `create_revision_cloud`, `move_revision_cloud`, `delete_revision_cloud`, `get_edge_symbols`, `create_edge_symbol`, `move_edge_symbol`, `delete_edge_symbol`, `get_transition_symbols` | typed symbol Eyes plus Package 45-47, Package 53A, and Package 54A lifecycle primitives where implemented | - | semantic interpretation is outside Runtime; TransitionSymbol lifecycle Hands are not confirmed | P0 maintained |
+| Drawing Symbol Layer | VERIFIED | `get_feature_control_frames`, `get_surface_texture_symbols`, `get_welding_symbols`, `get_revision_clouds`, `create_revision_cloud`, `move_revision_cloud`, `delete_revision_cloud`, `get_edge_symbols`, `create_edge_symbol`, `move_edge_symbol`, `delete_edge_symbol`, `get_transition_symbols`, `create_transition_symbol`, `move_transition_symbol`, `delete_transition_symbol` | typed symbol Eyes plus Package 45-47 and Package 53A-55A lifecycle primitives where implemented | - | semantic interpretation is outside Runtime; geometry attachment for TransitionSymbols is not implemented | P0 maintained |
 | RevisionClouds | VERIFIED | `get_revision_clouds`, `create_revision_cloud`, `move_revision_cloud`, `delete_revision_cloud` | Package 53A complete lifecycle: native `RevisionClouds.CreateRevisionCloudDefinition(...)`, `RevisionClouds.Add(...)`, `RevisionCloud.Position`, `RevisionCloud.Delete`, referenceKey preservation, and native position move translating cloud/control-point coordinates | - | control-point editing, revision association, layer/style mutation, revision policy/GOST semantics are not Runtime scope | P0 maintained |
 | EdgeSymbols | VERIFIED | `get_edge_symbols`, `create_edge_symbol`, `move_edge_symbol`, `delete_edge_symbol` | Package 54A complete lifecycle: native `EdgeSymbols.CreateDefinition(...)`, `EdgeSymbols.Add(...)`, `EdgeSymbol.Position`, `EdgeSymbol.Delete`, referenceKey preservation, and unchanged definition through move | - | GeometryIntent attachment, definition editing, leader editing, layer/style mutation, automatic placement, geometry selection, and GOST/ESKD semantics are not Runtime scope | P0 maintained |
-| TransitionSymbols Eye | VERIFIED | `get_transition_symbols` | `get_transition_symbols`, `get_transition_symbols` with `sheetName` | - | atomic create/move/delete/format Hands are not confirmed | P1 maintained |
+| TransitionSymbols | VERIFIED | `get_transition_symbols`, `create_transition_symbol`, `move_transition_symbol`, `delete_transition_symbol` | Package 55A complete lifecycle: native `TransitionSymbols.CreateDefinition(...)`, `TransitionSymbols.Add(...)`, explicit created-object `TransitionSymbol.Position` placement, `TransitionSymbol.Position` move, `TransitionSymbol.Delete`, referenceKey preservation, and null-safe leader-node diagnostics | - | GeometryIntent/drawing-view/edge/face attachment, definition editing, leader editing, layer/style mutation, automatic placement, geometry selection, and GOST/ESKD semantics are not Runtime scope | P0 maintained |
 | Drawing symbol semantic interpretation | MISSING | - | - | - | symbol interpretation, GOST/ISO validation, correctness checking, and engineering analysis belong to external LLM, not Runtime | no Runtime priority |
 | Datum identifiers | MISSING | placeholder count only; no confirmed API coverage | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
 | Datum target symbols | MISSING | - | - | - | typed Eye; atomic create/move/delete/format Hands | P2 |
@@ -126,6 +126,9 @@ Exact commands explicitly confirmed:
 {"command":"get_edge_symbols","sheetName":"Лист:1"}
 {"command":"get_transition_symbols"}
 {"command":"get_transition_symbols","sheetName":"Лист:1"}
+{"command":"create_transition_symbol"}
+{"command":"move_transition_symbol"}
+{"command":"delete_transition_symbol"}
 {"command":"create_drawing_document"}
 {"command":"export_pdf"}
 {"command":"export_dwg"}
@@ -304,6 +307,29 @@ caller `Point2d` leader points only; it does not implement GeometryIntent
 attachment or automatic geometry selection.
 
 `get_transition_symbols` is verified for reading `Sheet.TransitionSymbols`, TransitionSymbol metadata, TransitionSymbolDefinition data, leader/attachment metadata, reference keys, and diagnostics.
+
+Package 55A verifies native TransitionSymbol lifecycle primitives:
+
+```text
+get_transition_symbols -> create_transition_symbol -> get_transition_symbols -> move_transition_symbol -> get_transition_symbols -> delete_transition_symbol -> get_transition_symbols
+TransitionSymbols.CreateDefinition(...) -> TransitionSymbols.Add(...) -> created TransitionSymbol.Position
+TransitionSymbol.Position -> get_transition_symbols factual post-move state
+TransitionSymbol.Delete()
+```
+
+Live Inventor validation confirmed that caller `leaderPoints` supplied to
+`TransitionSymbols.Add(...)` do not factually determine free
+`kNoAttachmentType` symbol placement. Package 55A therefore requires explicit
+caller `x/y` for creation and sets the created object's
+`TransitionSymbol.Position = Point2d(x,y)` as part of the native construction
+sequence. Runtime does not infer placement from `leaderPoints`.
+
+Valid free `kNoAttachmentType` TransitionSymbols may have `Leader`,
+`Leader.HasRootNode = false`, and null/unavailable `Leader.AllNodes`. Runtime
+records unavailable leader-node count as nullable diagnostic data and does not
+fabricate zero or fail movement solely because leader node count is unavailable.
+GeometryIntent/drawing-view attachment and automatic geometry selection remain
+deferred.
 
 `create_drawing_document` is verified for creating a new Autodesk Inventor `DrawingDocument` through `Application.Documents.Add` with an explicit `templatePath`.
 

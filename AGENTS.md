@@ -449,6 +449,9 @@ get_welding_symbols
 get_revision_clouds
 get_edge_symbols
 get_transition_symbols
+create_transition_symbol
+move_transition_symbol
+delete_transition_symbol
 ```
 
 Current Package 22 status:
@@ -457,6 +460,7 @@ Current Package 22 status:
 - `get_revision_clouds` reads `Sheet.RevisionClouds`, RevisionCloud metadata, RevisionCloudDefinition, control points, reference keys, and diagnostics.
 - `get_edge_symbols` reads `Sheet.EdgeSymbols`, EdgeSymbol metadata, EdgeSymbolDefinition, reference keys, and diagnostics.
 - `get_transition_symbols` reads `Sheet.TransitionSymbols`, TransitionSymbol metadata, leader/attachment metadata, TransitionSymbolDefinition, reference keys, and diagnostics.
+- Package 55A verifies `create_transition_symbol`, `move_transition_symbol`, and `delete_transition_symbol` for free/sheet TransitionSymbol lifecycle using explicit caller placement.
 - the runtime still does not perform symbol interpretation, GOST/ISO validation, correctness checking, semantic analysis, or engineering interpretation.
 
 Next correct action:
@@ -792,8 +796,62 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 54A. Current next correct action: run
-a Capability Audit for TransitionSymbol lifecycle before writing code.
+Next correct action completed by Package 55A. Current next correct action: run
+a Capability Audit for remaining drawing annotation lifecycle gaps before
+writing code.
+
+## Current milestone addendum after Package 55A
+
+```text
+Package 55A complete - TransitionSymbol lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_transition_symbols
+create_transition_symbol
+move_transition_symbol
+delete_transition_symbol
+```
+
+Verified lifecycle:
+
+```text
+get_transition_symbols
+-> create_transition_symbol
+-> get_transition_symbols
+-> move_transition_symbol
+-> get_transition_symbols
+-> delete_transition_symbol
+-> get_transition_symbols
+```
+
+Live Inventor validation confirmed native
+`TransitionSymbols.CreateDefinition(...)`, `TransitionSymbols.Add(...)`, and
+created-object `TransitionSymbol.Position = Point2d(x,y)` for explicit free
+symbol placement.
+
+Important factual behavior: caller `leaderPoints` supplied to
+`TransitionSymbols.Add(...)` do not factually determine free
+`kNoAttachmentType` TransitionSymbol placement. Runtime requires explicit
+caller `x/y` and does not infer placement from leader points.
+
+Valid free `kNoAttachmentType` TransitionSymbols may have `Leader`,
+`Leader.HasRootNode = false`, and unavailable/null `Leader.AllNodes`. Missing
+leader-node count is nullable/diagnostic only; Runtime does not fabricate zero
+and does not fail movement solely because node count is unavailable.
+
+`move_transition_symbol` uses `TransitionSymbol.Position = Point2d`; live
+validation confirmed factual position change, visible/native symbol movement,
+same referenceKey, unchanged attachmentType, unchanged definition, and unchanged
+indicationType. `delete_transition_symbol` uses `TransitionSymbol.Delete()` and
+final `get_transition_symbols` returned `count = 0`.
+
+GeometryIntent attachment, drawing-view attachment, edge/face attachment,
+automatic geometry selection, definition editing after creation, leader editing,
+layer/style mutation, automatic placement, and GOST/ESKD interpretation remain
+deferred.
 
 ## Current milestone addendum after Package 54A
 

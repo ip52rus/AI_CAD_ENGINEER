@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.47 complete edge symbol lifecycle`.
+- Current checkpoint: `v0.48 complete transition symbol lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 54A - EdgeSymbol lifecycle.
-- Registry after Package 54A: `197 registered / 197 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 54A checkpoint commit.
+- Latest completed checkpoint: Package 55A - TransitionSymbol lifecycle.
+- Registry after Package 55A: `200 registered / 200 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 55A checkpoint commit.
 
 ## Architecture Rules
 
@@ -40,7 +40,7 @@
 - SketchedSymbols: `get_sketched_symbol_definitions`, `create_sketched_symbol`, `move_sketched_symbol`, `delete_sketched_symbol`.
 - RevisionClouds: `get_revision_clouds`, `create_revision_cloud`, `move_revision_cloud`, `delete_revision_cloud`.
 - EdgeSymbols: `get_edge_symbols`, `create_edge_symbol`, `move_edge_symbol`, `delete_edge_symbol`.
-- TransitionSymbols Eye: `get_transition_symbols`.
+- TransitionSymbols: `get_transition_symbols`, `create_transition_symbol`, `move_transition_symbol`, `delete_transition_symbol`.
 - create_drawing_document Hand: `create_drawing_document`.
 - Drawing View Break Hand: `add_drawing_view_break`.
 - PDF Export Hand: `export_pdf`.
@@ -194,6 +194,56 @@ individual `RevisionCloudControlPoint.Position` values.
 `get_revision_clouds` returned `count = 0`.
 
 Control-point editing and automatic revision association remain deferred.
+
+## TransitionSymbol Lifecycle
+
+Verified commands:
+
+```text
+get_transition_symbols
+create_transition_symbol
+move_transition_symbol
+delete_transition_symbol
+```
+
+Verified lifecycle:
+
+```text
+get_transition_symbols
+-> create_transition_symbol
+-> get_transition_symbols
+-> move_transition_symbol
+-> get_transition_symbols
+-> delete_transition_symbol
+-> get_transition_symbols
+```
+
+Live Inventor validation confirmed native
+`TransitionSymbols.CreateDefinition(...)`, `TransitionSymbols.Add(...)`, and
+created-object `TransitionSymbol.Position = Point2d(x,y)` for explicit free
+symbol placement.
+
+Caller `leaderPoints` supplied to `TransitionSymbols.Add(...)` do not factually
+determine free `kNoAttachmentType` TransitionSymbol placement. Runtime requires
+explicit caller `x/y` and does not infer placement from leader points.
+
+Valid free `kNoAttachmentType` TransitionSymbols may have `Leader`,
+`Leader.HasRootNode = false`, and unavailable/null `Leader.AllNodes`. Missing
+leader-node count is nullable/diagnostic only; Runtime does not fabricate zero
+and does not fail movement solely because node count is unavailable.
+
+`move_transition_symbol` uses `TransitionSymbol.Position = Point2d`; live
+validation confirmed factual position change, visible/native symbol movement,
+same referenceKey, unchanged attachmentType, unchanged definition, and unchanged
+indicationType.
+
+`delete_transition_symbol` uses `TransitionSymbol.Delete()` and final
+`get_transition_symbols` returned `count = 0`.
+
+GeometryIntent attachment, drawing-view attachment, edge/face attachment,
+automatic geometry selection, definition editing after creation, leader editing,
+layer/style mutation, automatic placement, and GOST/ESKD interpretation remain
+deferred.
 
 ## EdgeSymbol Lifecycle
 
@@ -1085,6 +1135,9 @@ Verified runtime tests:
 - Drawing symbol semantic interpretation is outside Runtime.
 - Engineering interpretation remains the responsibility of the external LLM.
 - RevisionCloud control-point editing and revision association remain deferred.
+- TransitionSymbol GeometryIntent/drawing-view attachment, edge/face
+  attachment, definition editing, leader editing, layer/style mutation,
+  automatic placement, and GOST/ESKD interpretation remain deferred.
 - Some older annotation commands remain implemented but not separately Inventor-verified.
 - Experimental commands remain compatibility-only and must not be expanded as Runtime architecture examples:
   - `analyze_dimension_layout`
@@ -1098,12 +1151,13 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - TransitionSymbol lifecycle
+Capability Audit - remaining drawing annotation lifecycle gaps
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,
 `CAPABILITY_MAP.md`, and this `CHAT_HANDOFF.md`. Then audit the live
-repository before proposing or writing code.
+registry/capability map and remaining native drawing annotation collections
+before proposing or writing code.
 
 Do not implement the next capability until the audit proves the gap and the
 user authorizes implementation.

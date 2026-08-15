@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 54A is complete.
-- Current checkpoint: `v0.47 complete edge symbol lifecycle`.
-- Live registry after Package 54A: `197 registered / 197 unique`, no duplicate command names.
+- Package 55A is complete.
+- Current checkpoint: `v0.48 complete transition symbol lifecycle`.
+- Live registry after Package 55A: `200 registered / 200 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -113,6 +113,10 @@ Verified Drawing Generation / Export Hands:
 - `create_edge_symbol`
 - `move_edge_symbol`
 - `delete_edge_symbol`
+- `get_transition_symbols`
+- `create_transition_symbol`
+- `move_transition_symbol`
+- `delete_transition_symbol`
 
 Verified RevisionTable lifecycle:
 
@@ -205,6 +209,45 @@ and final `get_edge_symbols` returned `count = 0`.
 GeometryIntent attachment, automatic geometry selection, definition editing,
 leader editing, layer/style mutation, automatic placement, and GOST/ESKD
 interpretation remain deferred.
+
+Verified TransitionSymbol lifecycle:
+
+```text
+get_transition_symbols
+-> create_transition_symbol
+-> get_transition_symbols
+-> move_transition_symbol
+-> get_transition_symbols
+-> delete_transition_symbol
+-> get_transition_symbols
+```
+
+`create_transition_symbol` calls native `TransitionSymbols.CreateDefinition(...)`
+and `TransitionSymbols.Add(...)`, then sets
+`createdTransitionSymbol.Position = Point2d(x,y)` as part of explicit free
+symbol construction. Live Inventor validation confirmed
+`position = (20,18)`, `attachmentType = kNoAttachmentType`,
+`indicationType = kForAllTransitionsSymbolIndication`, referenceKey,
+selectorSnapshot, readable definition, and natively inherited layer/style.
+
+Caller `leaderPoints` are passed to `TransitionSymbols.Add(...)` but do not
+factually determine free `kNoAttachmentType` placement. Runtime requires
+explicit caller `x/y` and does not infer placement from leader points.
+
+Valid free `kNoAttachmentType` TransitionSymbols may have `Leader`,
+`Leader.HasRootNode = false`, and unavailable/null `Leader.AllNodes`. Missing
+leader-node count is nullable/diagnostic only and not fabricated as zero.
+
+`move_transition_symbol` uses `TransitionSymbol.Position = Point2d`; live
+validation confirmed factual position change, visible/native movement, same
+referenceKey, unchanged attachmentType, unchanged definition, and unchanged
+indicationType. `delete_transition_symbol` uses `TransitionSymbol.Delete()` and
+final `get_transition_symbols` returned `count = 0`.
+
+GeometryIntent attachment, drawing-view attachment, edge/face attachment,
+automatic geometry selection, definition editing after creation, leader editing,
+layer/style mutation, automatic placement, and GOST/ESKD interpretation remain
+deferred.
 
 Verified CustomTable lifecycle:
 
@@ -653,19 +696,19 @@ Runtime does not:
 Next expected stage:
 
 ```text
-Capability Audit - TransitionSymbol lifecycle
+Capability Audit - remaining drawing annotation lifecycle gaps
 ```
 
 Required next check:
 
 1. Run `git status --short --branch`.
 2. Confirm the active branch and HEAD.
-3. Read `InventorCommandDispatcher.cs`.
-4. Identify the next capability boundary from current user instructions.
+3. Inspect the current capability map and Runtime registry.
+4. Identify remaining native drawing annotation collections with read-only coverage or partial lifecycle coverage.
 5. Search for existing equivalent commands and support code.
 6. Inspect actual Inventor 2027 interop signatures before proposing code.
-7. If sufficient capability exists, do not write code.
-8. If a gap exists, report the exact missing atomic Eye/Hand and wait for implementation approval unless the user explicitly authorizes implementation in the same request.
+7. If sufficient capability exists, do not write code and continue auditing.
+8. If a real atomic gap exists, recommend the smallest next package only.
 
 Do not implement code during documentation-only tasks.
 

@@ -6,6 +6,19 @@ namespace AI_CAD_ENGINEER.InventorControl.Commands;
 
 internal static class TransitionSymbolReadSupport
 {
+    internal static object ReadTransitionSymbolSnapshot(
+        DrawingDocument drawingDocument,
+        Sheet sheet,
+        TransitionSymbol symbol,
+        int index)
+    {
+        return ReadTransitionSymbol(
+            drawingDocument,
+            sheet,
+            symbol,
+            index);
+    }
+
     public static string Execute(
         Inventor.Application inventor,
         JsonElement root)

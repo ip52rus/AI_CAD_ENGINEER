@@ -436,6 +436,15 @@ public class InventorCommandDispatcher
     private readonly GetTransitionSymbolsCommand
         _getTransitionSymbolsCommand;
 
+    private readonly CreateTransitionSymbolCommand
+        _createTransitionSymbolCommand;
+
+    private readonly MoveTransitionSymbolCommand
+        _moveTransitionSymbolCommand;
+
+    private readonly DeleteTransitionSymbolCommand
+        _deleteTransitionSymbolCommand;
+
     private readonly GetBalloonsCommand
         _getBalloonsCommand;
 
@@ -1173,6 +1182,18 @@ public class InventorCommandDispatcher
 
         _getTransitionSymbolsCommand =
             new GetTransitionSymbolsCommand(
+                inventor);
+
+        _createTransitionSymbolCommand =
+            new CreateTransitionSymbolCommand(
+                inventor);
+
+        _moveTransitionSymbolCommand =
+            new MoveTransitionSymbolCommand(
+                inventor);
+
+        _deleteTransitionSymbolCommand =
+            new DeleteTransitionSymbolCommand(
                 inventor);
 
         _getBalloonsCommand =
@@ -1998,6 +2019,18 @@ public class InventorCommandDispatcher
 
                 "get_transition_symbols" =>
                     _getTransitionSymbolsCommand.Execute(
+                        root),
+
+                "create_transition_symbol" =>
+                    _createTransitionSymbolCommand.Execute(
+                        root),
+
+                "move_transition_symbol" =>
+                    _moveTransitionSymbolCommand.Execute(
+                        root),
+
+                "delete_transition_symbol" =>
+                    _deleteTransitionSymbolCommand.Execute(
                         root),
 
                 "get_balloons" =>

@@ -1,6 +1,58 @@
 # PROJECT REVIEW
 
-## Package 54A checkpoint - current state
+## Package 55A checkpoint - current state
+
+Package 55A closes native drawing TransitionSymbol lifecycle primitives.
+
+Current live command inventory after Package 55A:
+
+```text
+200 registered commands
+200 unique command names
+0 duplicate registrations
+0 duplicate command Name properties
+```
+
+Verified TransitionSymbol commands:
+
+```text
+get_transition_symbols
+create_transition_symbol
+move_transition_symbol
+delete_transition_symbol
+```
+
+Verified lifecycle:
+
+```text
+get_transition_symbols
+-> create_transition_symbol
+-> get_transition_symbols
+-> move_transition_symbol
+-> get_transition_symbols
+-> delete_transition_symbol
+-> get_transition_symbols
+```
+
+Live Inventor validation confirmed:
+
+- create uses native `TransitionSymbols.CreateDefinition(...)`, `TransitionSymbols.Add(...)`, then `createdTransitionSymbol.Position = Point2d(x,y)`;
+- free `kNoAttachmentType` TransitionSymbol creation requires explicit caller `x/y` placement;
+- caller `leaderPoints` are passed to `TransitionSymbols.Add(...)` but are not factual free-symbol placement coordinates;
+- created symbol returned `position = (20,18)`, `attachmentType = kNoAttachmentType`, `indicationType = kForAllTransitionsSymbolIndication`, referenceKey, selectorSnapshot, readable definition, and natively inherited layer/style;
+- valid free `kNoAttachmentType` symbols may expose `Leader.HasRootNode = false` and unavailable/null `Leader.AllNodes`;
+- unavailable leader-node count is nullable/diagnostic only; Runtime does not fabricate zero and move does not fail solely because node count is unavailable;
+- move uses native `TransitionSymbol.Position = Point2d`; factual resulting position matched the request, the visible/native symbol moved, and referenceKey, attachmentType, definition, and indicationType were preserved;
+- delete uses `TransitionSymbol.Delete()`, returned deleted snapshot, and final `get_transition_symbols` count was `0`.
+
+Package 55A does not implement GeometryIntent attachment, drawing-view
+attachment, edge/face attachment, automatic geometry selection, definition
+editing after creation, leader editing, layer/style mutation, automatic
+placement, or GOST/ESKD interpretation.
+
+Next capability check: remaining drawing annotation lifecycle gaps.
+
+## Package 54A checkpoint
 
 Package 54A closes native drawing EdgeSymbol lifecycle primitives.
 
