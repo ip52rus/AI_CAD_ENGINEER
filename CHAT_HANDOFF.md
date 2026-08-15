@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.46 complete revision cloud lifecycle`.
+- Current checkpoint: `v0.47 complete edge symbol lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 53A - RevisionCloud lifecycle.
-- Registry after Package 53A: `194 registered / 194 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 53A checkpoint commit.
+- Latest completed checkpoint: Package 54A - EdgeSymbol lifecycle.
+- Registry after Package 54A: `197 registered / 197 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 54A checkpoint commit.
 
 ## Architecture Rules
 
@@ -39,7 +39,7 @@
 - Welding Symbols: `get_welding_symbols`, `create_welding_symbol`, `move_welding_symbol`, `delete_welding_symbol`.
 - SketchedSymbols: `get_sketched_symbol_definitions`, `create_sketched_symbol`, `move_sketched_symbol`, `delete_sketched_symbol`.
 - RevisionClouds: `get_revision_clouds`, `create_revision_cloud`, `move_revision_cloud`, `delete_revision_cloud`.
-- EdgeSymbols Eye: `get_edge_symbols`.
+- EdgeSymbols: `get_edge_symbols`, `create_edge_symbol`, `move_edge_symbol`, `delete_edge_symbol`.
 - TransitionSymbols Eye: `get_transition_symbols`.
 - create_drawing_document Hand: `create_drawing_document`.
 - Drawing View Break Hand: `add_drawing_view_break`.
@@ -194,6 +194,48 @@ individual `RevisionCloudControlPoint.Position` values.
 `get_revision_clouds` returned `count = 0`.
 
 Control-point editing and automatic revision association remain deferred.
+
+## EdgeSymbol Lifecycle
+
+Verified commands:
+
+```text
+get_edge_symbols
+create_edge_symbol
+move_edge_symbol
+delete_edge_symbol
+```
+
+Verified lifecycle:
+
+```text
+get_edge_symbols
+-> create_edge_symbol
+-> get_edge_symbols
+-> move_edge_symbol
+-> get_edge_symbols
+-> delete_edge_symbol
+-> get_edge_symbols
+```
+
+Live Inventor validation confirmed native `EdgeSymbols.CreateDefinition(...)`
+and `EdgeSymbols.Add(...)`, factual definition values
+`valuePositionType = kEdgeSymbolValueNoValues` and
+`indicationType = kAllEdgesIndicationType`, referenceKey, selectorSnapshot,
+readable native definition, and natively inherited layer/style.
+
+Package 54A creation uses explicit caller-supplied `Point2d` leader points only.
+Runtime did not select drawing geometry, create a `GeometryIntent`, or apply
+standards semantics.
+
+`move_edge_symbol` uses `EdgeSymbol.Position = Point2d`; live validation
+confirmed factual position `(20,18)`, same referenceKey, and unchanged
+definition. `delete_edge_symbol` uses `EdgeSymbol.Delete()` and final
+`get_edge_symbols` returned `count = 0`.
+
+GeometryIntent attachment, automatic geometry selection, definition editing
+after creation, leader editing, layer/style mutation, automatic placement, and
+GOST/ESKD interpretation remain deferred.
 
 ## CustomTable Lifecycle
 
@@ -1056,7 +1098,7 @@ Verified runtime tests:
 Next Capability Check:
 
 ```text
-Capability Audit - remaining native drawing annotation lifecycle gaps
+Capability Audit - TransitionSymbol lifecycle
 ```
 
 Start the next chat by reading `AGENTS.md`, `CURRENT_STATE.md`,

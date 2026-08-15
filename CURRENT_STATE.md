@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 53A documentation sync:
+Current checkpoint after the Package 54A documentation sync:
 
 ```text
-v0.46 complete revision cloud lifecycle
+v0.47 complete edge symbol lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 53A checkpoint:
+Live command audit after Package 54A checkpoint:
 
 ```text
-194 registered JSON commands
-194 unique registered JSON commands
+197 registered JSON commands
+197 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -657,6 +657,48 @@ with revision rows automatically, create revision numbers, interpret revision
 semantics, generate cloud geometry automatically, edit control points
 automatically, choose layers, apply GOST/ESKD revision policy, or modify
 RevisionTables.
+
+## Package 54A checkpoint
+
+Package 54A complete: native EdgeSymbol lifecycle primitives are VERIFIED.
+
+Verified commands:
+
+```text
+get_edge_symbols
+create_edge_symbol
+move_edge_symbol
+delete_edge_symbol
+```
+
+Verified lifecycle:
+
+```text
+get_edge_symbols
+-> create_edge_symbol
+-> get_edge_symbols
+-> move_edge_symbol
+-> get_edge_symbols
+-> delete_edge_symbol
+-> get_edge_symbols
+```
+
+Live Inventor validation confirmed:
+
+- `create_edge_symbol` uses native `EdgeSymbols.CreateDefinition(...)` and `EdgeSymbols.Add(...)`;
+- verified factual definition values were `valuePositionType = kEdgeSymbolValueNoValues` and `indicationType = kAllEdgesIndicationType`;
+- created symbol returned referenceKey, selectorSnapshot, readable native definition, and natively inherited layer/style;
+- Runtime did not select drawing geometry, create a `GeometryIntent`, or apply standards semantics;
+- Package 54A creation uses explicit caller-supplied `Point2d` leader points only;
+- `move_edge_symbol` uses native `EdgeSymbol.Position = Point2d`;
+- factual position after move was `(20,18)`;
+- same referenceKey was preserved and the definition remained unchanged;
+- `delete_edge_symbol` uses native `EdgeSymbol.Delete()`;
+- deleted symbol snapshot was returned, `remainingEdgeSymbolCount = 0`, and final `get_edge_symbols` returned `count = 0`.
+
+Package 54A does not implement GeometryIntent attachment, automatic geometry
+selection, definition editing after creation, leader editing, layer/style
+mutation, automatic placement, or GOST/ESKD interpretation.
 
 ## Package 42 checkpoint
 

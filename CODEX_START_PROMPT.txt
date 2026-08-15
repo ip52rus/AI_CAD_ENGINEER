@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 53A is complete.
-- Current checkpoint: `v0.46 complete revision cloud lifecycle`.
-- Live registry after Package 53A: `194 registered / 194 unique`, no duplicate command names.
+- Package 54A is complete.
+- Current checkpoint: `v0.47 complete edge symbol lifecycle`.
+- Live registry after Package 54A: `197 registered / 197 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -109,6 +109,10 @@ Verified Drawing Generation / Export Hands:
 - `create_revision_cloud`
 - `move_revision_cloud`
 - `delete_revision_cloud`
+- `get_edge_symbols`
+- `create_edge_symbol`
+- `move_edge_symbol`
+- `delete_edge_symbol`
 
 Verified RevisionTable lifecycle:
 
@@ -171,6 +175,36 @@ values. `delete_revision_cloud` uses `RevisionCloud.Delete()` and final
 `get_revision_clouds` returned `count = 0`.
 
 Control-point editing and automatic revision association remain deferred.
+
+Verified EdgeSymbol lifecycle:
+
+```text
+get_edge_symbols
+-> create_edge_symbol
+-> get_edge_symbols
+-> move_edge_symbol
+-> get_edge_symbols
+-> delete_edge_symbol
+-> get_edge_symbols
+```
+
+`create_edge_symbol` calls native `EdgeSymbols.CreateDefinition(...)` and
+`EdgeSymbols.Add(...)`. Live Inventor validation confirmed
+`valuePositionType = kEdgeSymbolValueNoValues`, `indicationType =
+kAllEdgesIndicationType`, referenceKey, selectorSnapshot, readable native
+definition, and natively inherited layer/style.
+
+Package 54A creation uses explicit caller-supplied `Point2d` leader points
+only. Runtime did not select drawing geometry, create a `GeometryIntent`, or
+apply standards semantics.
+
+`move_edge_symbol` uses `EdgeSymbol.Position = Point2d` and preserved
+referenceKey and definition. `delete_edge_symbol` uses `EdgeSymbol.Delete()`
+and final `get_edge_symbols` returned `count = 0`.
+
+GeometryIntent attachment, automatic geometry selection, definition editing,
+leader editing, layer/style mutation, automatic placement, and GOST/ESKD
+interpretation remain deferred.
 
 Verified CustomTable lifecycle:
 
@@ -619,7 +653,7 @@ Runtime does not:
 Next expected stage:
 
 ```text
-Capability Audit - remaining native drawing annotation lifecycle gaps
+Capability Audit - TransitionSymbol lifecycle
 ```
 
 Required next check:

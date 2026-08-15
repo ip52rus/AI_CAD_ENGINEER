@@ -792,9 +792,54 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 53A. Current next correct action: run
-a Capability Audit for remaining native drawing annotation lifecycle gaps before
-writing code.
+Next correct action completed by Package 54A. Current next correct action: run
+a Capability Audit for TransitionSymbol lifecycle before writing code.
+
+## Current milestone addendum after Package 54A
+
+```text
+Package 54A complete - EdgeSymbol lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_edge_symbols
+create_edge_symbol
+move_edge_symbol
+delete_edge_symbol
+```
+
+Verified lifecycle:
+
+```text
+get_edge_symbols
+-> create_edge_symbol
+-> get_edge_symbols
+-> move_edge_symbol
+-> get_edge_symbols
+-> delete_edge_symbol
+-> get_edge_symbols
+```
+
+Live Inventor validation confirmed native `EdgeSymbols.CreateDefinition(...)`
+and `EdgeSymbols.Add(...)`, factual definition values `valuePositionType =
+kEdgeSymbolValueNoValues` and `indicationType = kAllEdgesIndicationType`,
+referenceKey, selectorSnapshot, readable native definition, and natively
+inherited layer/style.
+
+Package 54A creation uses explicit caller-supplied `Point2d` leader points
+only. Runtime did not select drawing geometry, create a `GeometryIntent`, or
+apply standards semantics.
+
+`move_edge_symbol` uses `EdgeSymbol.Position = Point2d`; live validation
+confirmed factual position `(20,18)`, same referenceKey, and unchanged
+definition. `delete_edge_symbol` uses `EdgeSymbol.Delete()` and final
+`get_edge_symbols` returned `count = 0`.
+
+GeometryIntent attachment, automatic geometry selection, definition editing
+after creation, leader editing, layer/style mutation, automatic placement, and
+GOST/ESKD interpretation remain deferred.
 
 ## Current milestone addendum after Package 53A
 

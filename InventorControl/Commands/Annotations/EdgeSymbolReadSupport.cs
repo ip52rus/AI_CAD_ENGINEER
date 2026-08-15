@@ -6,6 +6,19 @@ namespace AI_CAD_ENGINEER.InventorControl.Commands;
 
 internal static class EdgeSymbolReadSupport
 {
+    internal static object ReadEdgeSymbolSnapshot(
+        DrawingDocument drawingDocument,
+        Sheet sheet,
+        EdgeSymbol symbol,
+        int index)
+    {
+        return ReadEdgeSymbol(
+            drawingDocument,
+            sheet,
+            symbol,
+            index);
+    }
+
     public static string Execute(
         Inventor.Application inventor,
         JsonElement root)

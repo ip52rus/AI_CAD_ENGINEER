@@ -1,6 +1,57 @@
 # PROJECT REVIEW
 
-## Package 53A checkpoint - current state
+## Package 54A checkpoint - current state
+
+Package 54A closes native drawing EdgeSymbol lifecycle primitives.
+
+Current live command inventory after Package 54A:
+
+```text
+197 registered JSON commands
+197 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+Verified EdgeSymbol commands:
+
+```text
+get_edge_symbols
+create_edge_symbol
+move_edge_symbol
+delete_edge_symbol
+```
+
+Verified lifecycle:
+
+```text
+get_edge_symbols
+-> create_edge_symbol
+-> get_edge_symbols
+-> move_edge_symbol
+-> get_edge_symbols
+-> delete_edge_symbol
+-> get_edge_symbols
+```
+
+Live Inventor validation confirmed:
+
+- create uses native `EdgeSymbols.CreateDefinition(...)` and `EdgeSymbols.Add(...)`;
+- factual definition values were `valuePositionType = kEdgeSymbolValueNoValues` and `indicationType = kAllEdgesIndicationType`;
+- created symbol returned referenceKey, selectorSnapshot, readable native definition, and natively inherited layer/style;
+- Runtime did not select drawing geometry, create a `GeometryIntent`, or apply standards semantics;
+- Package 54A creation uses explicit caller-supplied `Point2d` leader points only;
+- move uses native `EdgeSymbol.Position = Point2d`; factual resulting position was `(20,18)`;
+- same referenceKey was preserved and the definition remained unchanged;
+- delete uses `EdgeSymbol.Delete()`, returned deleted snapshot, and final `get_edge_symbols` count was `0`.
+
+Package 54A does not implement GeometryIntent attachment, automatic geometry
+selection, definition editing after creation, leader editing, layer/style
+mutation, automatic placement, or GOST/ESKD interpretation.
+
+Next capability check: TransitionSymbol lifecycle.
+
+## Package 53A checkpoint
 
 Package 53A closes native drawing RevisionCloud lifecycle primitives.
 

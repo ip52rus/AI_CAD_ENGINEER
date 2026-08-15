@@ -424,6 +424,15 @@ public class InventorCommandDispatcher
     private readonly GetEdgeSymbolsCommand
         _getEdgeSymbolsCommand;
 
+    private readonly CreateEdgeSymbolCommand
+        _createEdgeSymbolCommand;
+
+    private readonly MoveEdgeSymbolCommand
+        _moveEdgeSymbolCommand;
+
+    private readonly DeleteEdgeSymbolCommand
+        _deleteEdgeSymbolCommand;
+
     private readonly GetTransitionSymbolsCommand
         _getTransitionSymbolsCommand;
 
@@ -1148,6 +1157,18 @@ public class InventorCommandDispatcher
 
         _getEdgeSymbolsCommand =
             new GetEdgeSymbolsCommand(
+                inventor);
+
+        _createEdgeSymbolCommand =
+            new CreateEdgeSymbolCommand(
+                inventor);
+
+        _moveEdgeSymbolCommand =
+            new MoveEdgeSymbolCommand(
+                inventor);
+
+        _deleteEdgeSymbolCommand =
+            new DeleteEdgeSymbolCommand(
                 inventor);
 
         _getTransitionSymbolsCommand =
@@ -1961,6 +1982,18 @@ public class InventorCommandDispatcher
 
                 "get_edge_symbols" =>
                     _getEdgeSymbolsCommand.Execute(
+                        root),
+
+                "create_edge_symbol" =>
+                    _createEdgeSymbolCommand.Execute(
+                        root),
+
+                "move_edge_symbol" =>
+                    _moveEdgeSymbolCommand.Execute(
+                        root),
+
+                "delete_edge_symbol" =>
+                    _deleteEdgeSymbolCommand.Execute(
                         root),
 
                 "get_transition_symbols" =>
