@@ -445,6 +445,15 @@ public class InventorCommandDispatcher
     private readonly DeleteTransitionSymbolCommand
         _deleteTransitionSymbolCommand;
 
+    private readonly CreateBendNoteCommand
+        _createBendNoteCommand;
+
+    private readonly MoveBendNoteCommand
+        _moveBendNoteCommand;
+
+    private readonly DeleteBendNoteCommand
+        _deleteBendNoteCommand;
+
     private readonly GetBalloonsCommand
         _getBalloonsCommand;
 
@@ -1194,6 +1203,18 @@ public class InventorCommandDispatcher
 
         _deleteTransitionSymbolCommand =
             new DeleteTransitionSymbolCommand(
+                inventor);
+
+        _createBendNoteCommand =
+            new CreateBendNoteCommand(
+                inventor);
+
+        _moveBendNoteCommand =
+            new MoveBendNoteCommand(
+                inventor);
+
+        _deleteBendNoteCommand =
+            new DeleteBendNoteCommand(
                 inventor);
 
         _getBalloonsCommand =
@@ -2031,6 +2052,18 @@ public class InventorCommandDispatcher
 
                 "delete_transition_symbol" =>
                     _deleteTransitionSymbolCommand.Execute(
+                        root),
+
+                "create_bend_note" =>
+                    _createBendNoteCommand.Execute(
+                        root),
+
+                "move_bend_note" =>
+                    _moveBendNoteCommand.Execute(
+                        root),
+
+                "delete_bend_note" =>
+                    _deleteBendNoteCommand.Execute(
                         root),
 
                 "get_balloons" =>

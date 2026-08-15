@@ -1,6 +1,63 @@
 # PROJECT REVIEW
 
-## Package 55A checkpoint - current state
+## Package 56A checkpoint - current state
+
+Package 56A closes native drawing BendNote lifecycle primitives using existing
+`get_drawing_text_objects` BendNote read coverage plus factual
+`DrawingCurve.EdgeType` exposure in `get_drawing_curves`.
+
+Current live command inventory after Package 56A:
+
+```text
+203 registered commands
+203 unique command names
+0 duplicate registrations
+0 duplicate command Name properties
+```
+
+Verified BendNote commands:
+
+```text
+get_drawing_text_objects
+get_drawing_curves
+create_bend_note
+move_bend_note
+delete_bend_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> deterministic bend-edge selection
+-> create_bend_note
+-> move_bend_note
+-> delete_bend_note
+```
+
+Live Inventor validation confirmed:
+
+- `get_drawing_curves` exposes factual `DrawingCurve.EdgeType` as `edgeTypeRaw` / `edgeType`;
+- valid BendNote creation requires a caller-selected bend edge such as `kBendUpEdge` or `kBendDownEdge`;
+- arbitrary non-bend curve indexes produced native `E_FAIL`; Runtime does not auto-select or retry geometry;
+- create uses native `BendNotes.Add(DrawingCurve, Type.Missing)`;
+- validation used `viewName = "ВИД1"`, `curveIndex = 98`, `edgeType = kBendDownEdge`;
+- created BendNote text was native Inventor/template output: `"ВНИЗ 90° R1,5"` with `formattedText = "<BendNote/>"`;
+- attached entity was a `GeometryIntent`, attachment point remained on the bend edge, referenceKey was present, and native GOST dimension style was inherited;
+- move uses native `BendNote.Position = Point2d(x,y)`;
+- Inventor may natively create/reroute a leader during move;
+- when `Leader.RootNode.Position` is readable, move verification uses it as the effective requested placement;
+- `BendNote.Position` may differ from requested coordinates after native layout;
+- Runtime does not reroute or edit the leader;
+- delete uses native `BendNote.Delete()` and returned remaining BendNote count `0`.
+
+Package 56A does not implement automatic bend-edge selection, bend geometry
+inference, bend angle/radius interpretation, text editing, leader editing,
+style/layer mutation, automatic placement, or GOST/ESKD interpretation.
+
+Next capability check: ChamferNote lifecycle.
+
+## Package 55A checkpoint
 
 Package 55A closes native drawing TransitionSymbol lifecycle primitives.
 

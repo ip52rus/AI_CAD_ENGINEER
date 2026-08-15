@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.48 complete transition symbol lifecycle
+v0.49 complete bend note lifecycle
 ```
 
 ## Ground rules
@@ -38,7 +38,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Document operations | PARTIAL | `get_open_documents`, `open_document`, `activate_document`, `update_active_document`, `save_document`, `save_document_as`, `close_document`, `create_drawing_document`, `export_pdf`, `export_dwg`, `export_dxf` | `create_drawing_document`, `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow | P1 |
 | Drawing sheets | VERIFIED | `get_drawing_sheets`, `get_sheets`, `get_sheet`, `activate_sheet`, `rename_sheet`, `create_sheet`, `delete_sheet`, `set_sheet_size`, `set_sheet_orientation` | `get_drawing_sheets` | - | no additional missing items confirmed by Package audits | P0 maintained |
 | Borders and title blocks | PARTIAL | `get_border_definitions`, `get_sheet_border`, `set_sheet_border`, `remove_sheet_border`, `get_title_block_definitions`, `get_sheet_title_block`, `set_sheet_title_block`, `remove_sheet_title_block`, `get_title_block_fields`, `set_title_block_field`, `set_title_block_field_by_name`, `fill_title_block`, `get_title_block_definition_text`, `set_title_block_definition_text`, `get_title_block_binding`, `get_title_block_bindings`, `get_title_block_field_map` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P1 |
-| Drawing views | PARTIAL | `get_drawing_views`, `get_drawing_view`, `get_drawing_views_detailed`, `get_drawing_view_relationships`, `get_drawing_curves`, `get_view_model_references`, `get_curve_model_reference`, `create_base_view`, `create_projected_view`, `create_auxiliary_view`, `add_drawing_view_break`, `move_drawing_view`, `delete_drawing_view`, `rename_drawing_view`, `rotate_drawing_view`, `set_drawing_view_scale`, `set_drawing_view_style`, `set_drawing_view_label_visibility`, `set_drawing_view_scale_inheritance`, `set_drawing_view_alignment`, `set_drawing_view_suppressed` | drawing views / relationships / curve geometry, `create_auxiliary_view`, and `add_drawing_view_break` are verified areas | - | detail/crop view improvements not covered by confirmed commands | P1 |
+| Drawing views | PARTIAL | `get_drawing_views`, `get_drawing_view`, `get_drawing_views_detailed`, `get_drawing_view_relationships`, `get_drawing_curves`, `get_view_model_references`, `get_curve_model_reference`, `create_base_view`, `create_projected_view`, `create_auxiliary_view`, `add_drawing_view_break`, `move_drawing_view`, `delete_drawing_view`, `rename_drawing_view`, `rotate_drawing_view`, `set_drawing_view_scale`, `set_drawing_view_style`, `set_drawing_view_label_visibility`, `set_drawing_view_scale_inheritance`, `set_drawing_view_alignment`, `set_drawing_view_suppressed` | drawing views / relationships / curve geometry, `get_drawing_curves` with factual `DrawingCurve.EdgeType`, `create_auxiliary_view`, and `add_drawing_view_break` are verified areas | - | detail/crop view improvements not covered by confirmed commands | P1 |
 | Drawing Generation Hands | PARTIAL | `create_drawing_document`, `create_sheet`, `create_base_view`, `create_projected_view`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | `create_drawing_document`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow and other drawing-generation Hands not yet audited | P1 |
 | Drawing Export Hands | VERIFIED | `export_pdf`, `export_dwg`, `export_dxf` | `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow is not implemented | P0 maintained |
 | Drawing dimensions | VERIFIED | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `create_angular_dimension`, `create_ordinate_dimension`, `get_drawing_view_origin_indicator`, `create_drawing_view_origin_indicator`, `create_baseline_dimension`, `create_chain_dimension`, `set_general_dimension_formatted_text`, `set_general_dimension_hide_value`, `set_general_dimension_precision`, `set_general_dimension_model_value_override`, `clear_general_dimension_model_value_override`, `set_general_dimension_style`, `set_general_dimension_layer`, `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | linear/diameter/radius plus Package 31-39 commands listed in explicit PASS section | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | symmetric/chamfer dimensions are not confirmed | P0 maintained |
@@ -49,6 +49,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Drawing Text Objects | VERIFIED | `get_drawing_text_objects` | `get_drawing_text_objects`, `get_drawing_text_objects` with `sheetName` | - | - | P0 maintained |
 | General Notes / Technical Requirements primitives | VERIFIED | `get_general_notes`, `get_drawing_text_objects`, `create_general_note_fitted`, `set_general_note_formatted_text`, `move_general_note`, `delete_general_note` | Package 43 full create/read/edit/read/move/read/delete/read lifecycle; final `get_general_notes` count = 0 | - | rectangular GeneralNotes, text style/layer setters, automatic technical requirement generation are not Runtime scope for this checkpoint | P0 maintained |
 | Leader Notes primitives | VERIFIED | `get_leader_notes`, `get_drawing_text_objects`, `create_leader_note`, `set_leader_note_formatted_text`, `move_leader_note`, `delete_leader_note` | Package 44 free and attached LeaderNote lifecycle; attached `GeometryIntent` with `curveIndex=14`, `intent=mid`; referenceKey and non-blocking diagnostics verified | - | leader path editing, style/layer setters, automatic leader routing are deferred | P0 maintained |
+| BendNotes | VERIFIED | `get_drawing_text_objects`, `get_drawing_curves`, `create_bend_note`, `move_bend_note`, `delete_bend_note` | Package 56A complete lifecycle: `get_drawing_curves` exposes factual `DrawingCurve.EdgeType`; `BendNotes.Add(DrawingCurve, Type.Missing)` create using explicit bend edge; `BendNote.Position` move with effective verification via `Leader.RootNode.Position` when Inventor creates a root node; `BendNote.Delete` | - | automatic bend-edge selection, bend geometry inference, bend angle/radius interpretation, text editing, leader editing, style/layer mutation, automatic placement, and GOST/ESKD interpretation are not Runtime scope | P0 maintained |
 | Drawing Text semantic analysis | MISSING | - | - | - | semantic text understanding, GOST interpretation, TT/TU recognition; belongs to external LLM, not Runtime | no Runtime priority |
 | Annotation summary and bounds | PARTIAL | `get_drawing_annotation_summary`, `get_annotation_bounds` | annotation summary recorded as verified area; exact PASS command not separately recorded | - | typed bounds for all annotation classes; current bounds coverage is incomplete | P1 |
 | Annotation collision/layout logic | EXPERIMENTAL | - | not applicable | `check_annotation_collisions`, `auto_resolve_annotation_collisions` | should not be expanded as Runtime coverage | no priority |
@@ -129,6 +130,10 @@ Exact commands explicitly confirmed:
 {"command":"create_transition_symbol"}
 {"command":"move_transition_symbol"}
 {"command":"delete_transition_symbol"}
+{"command":"get_drawing_curves"}
+{"command":"create_bend_note"}
+{"command":"move_bend_note"}
+{"command":"delete_bend_note"}
 {"command":"create_drawing_document"}
 {"command":"export_pdf"}
 {"command":"export_dwg"}
@@ -330,6 +335,34 @@ records unavailable leader-node count as nullable diagnostic data and does not
 fabricate zero or fail movement solely because leader node count is unavailable.
 GeometryIntent/drawing-view attachment and automatic geometry selection remain
 deferred.
+
+Package 56A verifies native BendNote lifecycle primitives through the existing
+`get_drawing_text_objects` aggregate Eye:
+
+```text
+get_drawing_curves -> deterministic bend-edge selection -> create_bend_note -> move_bend_note -> delete_bend_note
+BendNotes.Add(DrawingCurve, Type.Missing)
+BendNote.Position -> effective placement verification
+BendNote.Delete()
+```
+
+Package 56A also verifies the prerequisite factual `DrawingCurve.EdgeType`
+readback in `get_drawing_curves`, including bend-edge values such as
+`kBendUpEdge` and `kBendDownEdge`. Native `BendNotes.Add(...)` requires a bend
+edge; arbitrary non-bend curves can return `E_FAIL`. Runtime exposes the
+factual edge type and does not auto-select or retry geometry.
+
+Verified BendNote move semantics: Runtime mutates only
+`BendNote.Position = Point2d(x,y)`. Inventor may natively create/reroute a
+leader. When `Leader.HasRootNode == true` and `Leader.RootNode.Position` is
+readable, the requested effective placement is verified against
+`Leader.RootNode.Position`; otherwise verification uses `BendNote.Position`.
+`BendNote.Position` may differ from requested coordinates after native layout.
+Runtime does not reroute or edit the leader.
+
+Live validation confirmed native text `"ВНИЗ 90° R1,5"`,
+`formattedText = "<BendNote/>"`, preserved referenceKey, preserved attached
+bend entity / attachment point, and successful `BendNote.Delete()`.
 
 `create_drawing_document` is verified for creating a new Autodesk Inventor `DrawingDocument` through `Application.Documents.Add` with an explicit `templatePath`.
 

@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 55A is complete.
-- Current checkpoint: `v0.48 complete transition symbol lifecycle`.
-- Live registry after Package 55A: `200 registered / 200 unique`, no duplicate command names.
+- Package 56A is complete.
+- Current checkpoint: `v0.49 complete bend note lifecycle`.
+- Live registry after Package 56A: `203 registered / 203 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -117,6 +117,10 @@ Verified Drawing Generation / Export Hands:
 - `create_transition_symbol`
 - `move_transition_symbol`
 - `delete_transition_symbol`
+- `get_drawing_curves` with factual `DrawingCurve.EdgeType`
+- `create_bend_note`
+- `move_bend_note`
+- `delete_bend_note`
 
 Verified RevisionTable lifecycle:
 
@@ -248,6 +252,42 @@ GeometryIntent attachment, drawing-view attachment, edge/face attachment,
 automatic geometry selection, definition editing after creation, leader editing,
 layer/style mutation, automatic placement, and GOST/ESKD interpretation remain
 deferred.
+
+Verified BendNote lifecycle:
+
+```text
+get_drawing_curves
+-> deterministic bend-edge selection
+-> create_bend_note
+-> move_bend_note
+-> delete_bend_note
+```
+
+`get_drawing_curves` exposes factual `DrawingCurve.EdgeType` as `edgeTypeRaw`
+and `edgeType`. Valid BendNote creation requires a caller-selected bend edge,
+such as `kBendUpEdge` or `kBendDownEdge`; arbitrary non-bend DrawingCurves can
+return native `E_FAIL`. Runtime does not auto-select or retry geometry.
+
+`create_bend_note` calls native `BendNotes.Add(DrawingCurve, Type.Missing)`.
+Live validation used `viewName = "ВИД1"`, `curveIndex = 98`,
+`edgeType = kBendDownEdge`, and returned native text `"ВНИЗ 90° R1,5"` with
+`formattedText = "<BendNote/>"`, `GeometryIntent` attached entity, preserved
+attachment point, referenceKey, and natively inherited GOST dimension style.
+Runtime generated no bend semantics.
+
+`move_bend_note` mutates only `BendNote.Position = Point2d(x,y)`. Inventor may
+natively create/reroute a leader. If `Leader.HasRootNode == true` and
+`Leader.RootNode.Position` is readable, Runtime verifies effective placement
+against `Leader.RootNode.Position`; otherwise it uses `BendNote.Position`.
+`BendNote.Position` may differ from requested coordinates after native layout.
+Runtime does not reroute or edit the leader.
+
+`delete_bend_note` uses `BendNote.Delete()` and final readback returned
+remaining BendNote count `0`.
+
+Automatic bend-edge selection, bend geometry inference, bend angle/radius
+interpretation, text editing, leader editing, style/layer mutation, automatic
+placement, and GOST/ESKD interpretation remain deferred.
 
 Verified CustomTable lifecycle:
 

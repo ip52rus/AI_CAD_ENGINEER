@@ -6,6 +6,19 @@ namespace AI_CAD_ENGINEER.InventorControl.Commands;
 
 internal static class DrawingTextReadSupport
 {
+    internal static object ReadBendNoteSnapshot(
+        DrawingDocument drawingDocument,
+        Sheet sheet,
+        BendNote note,
+        int index)
+    {
+        return ReadBendNote(
+            drawingDocument,
+            sheet,
+            note,
+            index);
+    }
+
     public static string Execute(
         Inventor.Application inventor,
         JsonElement root)

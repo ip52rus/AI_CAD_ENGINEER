@@ -461,6 +461,8 @@ Current Package 22 status:
 - `get_edge_symbols` reads `Sheet.EdgeSymbols`, EdgeSymbol metadata, EdgeSymbolDefinition, reference keys, and diagnostics.
 - `get_transition_symbols` reads `Sheet.TransitionSymbols`, TransitionSymbol metadata, leader/attachment metadata, TransitionSymbolDefinition, reference keys, and diagnostics.
 - Package 55A verifies `create_transition_symbol`, `move_transition_symbol`, and `delete_transition_symbol` for free/sheet TransitionSymbol lifecycle using explicit caller placement.
+- Package 56A verifies `create_bend_note`, `move_bend_note`, and `delete_bend_note` through existing `get_drawing_text_objects` BendNote read coverage.
+- `get_drawing_curves` now exposes factual `DrawingCurve.EdgeType` as `edgeTypeRaw` / `edgeType` so external callers can deterministically select native bend edges for `BendNotes.Add(...)`.
 - the runtime still does not perform symbol interpretation, GOST/ISO validation, correctness checking, semantic analysis, or engineering interpretation.
 
 Next correct action:
@@ -796,9 +798,59 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 55A. Current next correct action: run
-a Capability Audit for remaining drawing annotation lifecycle gaps before
-writing code.
+Next correct action completed by Package 56A. Current next correct action: run
+a Capability Audit for ChamferNote lifecycle before writing code.
+
+## Current milestone addendum after Package 56A
+
+```text
+Package 56A complete - BendNote lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_drawing_text_objects
+get_drawing_curves
+create_bend_note
+move_bend_note
+delete_bend_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> deterministic bend-edge selection
+-> create_bend_note
+-> move_bend_note
+-> delete_bend_note
+```
+
+Package 56A uses native `BendNotes.Add(DrawingCurve, Type.Missing)`.
+Validation used an explicit caller-selected DrawingCurve with
+`edgeType = kBendDownEdge`. Native `BendNotes.Add(...)` requires a bend edge;
+arbitrary non-bend curve indexes returned `E_FAIL`. Runtime exposes
+`DrawingCurve.EdgeType` and does not auto-select or retry geometry.
+
+Live creation returned native text `"ВНИЗ 90° R1,5"`,
+`formattedText = "<BendNote/>"`, `GeometryIntent` attached entity, preserved
+attachment point on the bend edge, referenceKey, and natively inherited GOST
+dimension style. Runtime generated no bend semantics.
+
+`move_bend_note` mutates only `BendNote.Position = Point2d(x,y)`. Inventor may
+natively create/reroute a leader. If `Leader.HasRootNode == true` and
+`Leader.RootNode.Position` is readable, Runtime verifies the requested effective
+placement against `Leader.RootNode.Position`; otherwise it uses
+`BendNote.Position`. `BendNote.Position` may differ from requested coordinates
+after native layout. Runtime does not reroute or edit the leader.
+
+`delete_bend_note` uses `BendNote.Delete()` and final readback returned
+remaining BendNote count `0`.
+
+Automatic bend-edge selection, bend geometry inference, bend angle/radius
+interpretation, text editing, leader editing, style/layer mutation, automatic
+placement, and GOST/ESKD interpretation remain outside Runtime scope.
 
 ## Current milestone addendum after Package 55A
 

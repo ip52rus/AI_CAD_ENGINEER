@@ -100,6 +100,8 @@ public class GetDrawingCurvesCommand : IInventorCommand
             Point2d? endPoint = null;
             Point2d? midPoint = null;
             Point2d? centerPoint = null;
+            DrawingEdgeTypeEnum? edgeType = null;
+            List<object> propertyDiagnostics = new();
 
             try
             {
@@ -134,6 +136,15 @@ public class GetDrawingCurvesCommand : IInventorCommand
             {
             }
 
+            try
+            {
+                edgeType = curve.EdgeType;
+            }
+            catch (Exception exception)
+            {
+                propertyDiagnostics.Add(new { scope = "DrawingCurve.EdgeType", message = exception.Message, exceptionType = exception.GetType().FullName });
+            }
+
             string modelGeometryType = string.Empty;
 
             try
@@ -159,6 +170,14 @@ public class GetDrawingCurvesCommand : IInventorCommand
                     curveType =
                         curve.CurveType.ToString(),
 
+                    edgeTypeRaw =
+                        edgeType.HasValue
+                            ? (int?)edgeType.Value
+                            : null,
+
+                    edgeType =
+                        edgeType?.ToString(),
+
                     startPoint =
                         DimensionCommandSupport.PointToObject(
                             startPoint),
@@ -175,7 +194,9 @@ public class GetDrawingCurvesCommand : IInventorCommand
                         DimensionCommandSupport.PointToObject(
                             centerPoint),
 
-                    modelGeometryType
+                    modelGeometryType,
+
+                    propertyDiagnostics
                 });
         }
 

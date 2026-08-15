@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.48 complete transition symbol lifecycle`.
+- Current checkpoint: `v0.49 complete bend note lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 55A - TransitionSymbol lifecycle.
-- Registry after Package 55A: `200 registered / 200 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 55A checkpoint commit.
+- Latest completed checkpoint: Package 56A - BendNote lifecycle.
+- Registry after Package 56A: `203 registered / 203 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 56A checkpoint commit.
 
 ## Architecture Rules
 
@@ -41,6 +41,7 @@
 - RevisionClouds: `get_revision_clouds`, `create_revision_cloud`, `move_revision_cloud`, `delete_revision_cloud`.
 - EdgeSymbols: `get_edge_symbols`, `create_edge_symbol`, `move_edge_symbol`, `delete_edge_symbol`.
 - TransitionSymbols: `get_transition_symbols`, `create_transition_symbol`, `move_transition_symbol`, `delete_transition_symbol`.
+- BendNotes: `get_drawing_text_objects`, `get_drawing_curves` with `DrawingCurve.EdgeType`, `create_bend_note`, `move_bend_note`, `delete_bend_note`.
 - create_drawing_document Hand: `create_drawing_document`.
 - Drawing View Break Hand: `add_drawing_view_break`.
 - PDF Export Hand: `export_pdf`.
@@ -106,6 +107,55 @@
 - SketchedSymbol Hand: `create_sketched_symbol`.
 - SketchedSymbol move Hand: `move_sketched_symbol`.
 - SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## BendNote Lifecycle
+
+Verified commands:
+
+```text
+get_drawing_text_objects
+get_drawing_curves
+create_bend_note
+move_bend_note
+delete_bend_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> deterministic bend-edge selection
+-> create_bend_note
+-> move_bend_note
+-> delete_bend_note
+```
+
+`get_drawing_curves` now exposes factual `DrawingCurve.EdgeType` as
+`edgeTypeRaw` and `edgeType`, including bend-edge values such as
+`kBendUpEdge` and `kBendDownEdge`. Native `BendNotes.Add(...)` requires a bend
+edge; arbitrary non-bend curves can return `E_FAIL`. Runtime exposes the fact
+and does not auto-select or retry geometry.
+
+`create_bend_note` uses native `BendNotes.Add(DrawingCurve, Type.Missing)`.
+Live validation used `viewName = "ВИД1"`, `curveIndex = 98`,
+`edgeType = kBendDownEdge`, and returned native text `"ВНИЗ 90° R1,5"` with
+`formattedText = "<BendNote/>"`, `GeometryIntent` attached entity, preserved
+attachment point, referenceKey, and natively inherited GOST dimension style.
+Runtime generated no bend semantics.
+
+`move_bend_note` mutates only `BendNote.Position = Point2d(x,y)`. Inventor may
+natively create/reroute a leader. If `Leader.HasRootNode == true` and
+`Leader.RootNode.Position` is readable, Runtime verifies effective placement
+against `Leader.RootNode.Position`; otherwise it verifies against
+`BendNote.Position`. `BendNote.Position` may differ from requested coordinates
+after native layout. Runtime does not reroute or edit the leader.
+
+`delete_bend_note` uses native `BendNote.Delete()` and final readback returned
+remaining BendNote count `0`.
+
+Automatic bend-edge selection, bend geometry inference, bend angle/radius
+interpretation, text editing, leader editing, style/layer mutation, automatic
+placement, and GOST/ESKD interpretation remain deferred.
 
 ## RevisionTable Lifecycle
 

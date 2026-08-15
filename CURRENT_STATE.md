@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 55A documentation sync:
+Current checkpoint after the Package 56A documentation sync:
 
 ```text
-v0.48 complete transition symbol lifecycle
+v0.49 complete bend note lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 55A checkpoint:
+Live command audit after Package 56A checkpoint:
 
 ```text
-200 registered JSON commands
-200 unique registered JSON commands
+203 registered JSON commands
+203 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -743,6 +743,75 @@ Package 55A does not implement GeometryIntent attachment, drawing-view
 attachment, edge/face attachment, automatic geometry selection, leader editing,
 definition editing after creation, layer/style mutation, or GOST/ESKD
 interpretation.
+
+## Package 56A checkpoint
+
+Package 56A complete: native BendNote lifecycle primitives are VERIFIED.
+
+Verified existing Eye and prerequisite Eye enhancement:
+
+```text
+get_drawing_text_objects
+get_drawing_curves
+```
+
+`get_drawing_text_objects` BendNote read coverage is sufficient for lifecycle
+verification. `get_drawing_curves` now exposes factual
+`DrawingCurve.EdgeType` as `edgeTypeRaw` and `edgeType`, enabling deterministic
+caller selection of bend edges such as `kBendUpEdge` / `kBendDownEdge`.
+
+Verified commands:
+
+```text
+create_bend_note
+move_bend_note
+delete_bend_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> deterministic bend-edge selection
+-> create_bend_note
+-> move_bend_note
+-> delete_bend_note
+```
+
+Live Inventor validation confirmed:
+
+- `create_bend_note` uses native `BendNotes.Add(DrawingCurve, Type.Missing)`;
+- validation used `viewName = "ВИД1"`, `curveIndex = 98`, `edgeType = kBendDownEdge`;
+- arbitrary non-bend `DrawingCurve` indexes produced native `E_FAIL`, matching Autodesk's bend-edge requirement;
+- created BendNote text was native Inventor/template output: `"ВНИЗ 90° R1,5"` with `formattedText = "<BendNote/>"`;
+- attached entity was a `GeometryIntent`, attachment point remained on the bend edge, referenceKey was present, and native GOST dimension style was inherited;
+- Runtime generated no bend semantics and selected no geometry automatically.
+
+Move semantics:
+
+- mutation uses native `BendNote.Position = Point2d(x,y)`;
+- Inventor may natively create/reroute a leader when `BendNote.Position` is set;
+- when `Leader.HasRootNode == true` and `Leader.RootNode.Position` is readable, move verification uses `Leader.RootNode.Position` as the effective requested placement;
+- otherwise move verification uses factual `BendNote.Position`;
+- `BendNote.Position` itself may differ from requested coordinates after native layout;
+- Runtime does not reroute or edit the leader.
+
+Live move verified requested `(22,19)` with:
+
+```text
+effectivePosition = (22,19)
+verificationSource = Leader.RootNode.Position
+BendNote.Position after layout = (22.25,19)
+```
+
+ReferenceKey, text, and attached bend entity / attachment point were preserved.
+
+`delete_bend_note` uses native `BendNote.Delete()`, returned a deleted BendNote
+snapshot, and final remaining BendNote count was `0`.
+
+Package 56A does not implement automatic bend-edge selection, bend geometry
+inference, bend angle/radius interpretation, text editing, leader editing,
+style/layer mutation, automatic placement, or GOST/ESKD interpretation.
 
 ## Package 42 checkpoint
 
