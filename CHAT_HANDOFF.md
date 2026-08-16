@@ -3,18 +3,19 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.56 add autonomous single-command runtime mode`.
+- Current checkpoint: `v0.57 add drawing sheet preview eye`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 60A - autonomous single-command Runtime mode.
-- Registry after Package 60A: `211 registered / 211 unique`, `0` duplicate command names.
+- Latest completed checkpoint: Package 61A - drawing sheet visual preview Eye.
+- Registry after Package 61A: `212 registered / 212 unique`, `0` duplicate command names.
 - Single-command automation is available via `AI_CAD_ENGINEER.exe --json-file "<command.json>"`; `--json-file` is recommended for PowerShell/automation.
 - Single-command mode writes exactly one complete JSON response to stdout, uses deterministic exit codes, reuses `InventorCommandDispatcher`, and is attach-only.
 - Single-command Inventor attach uses `CLSIDFromProgIDEx("Inventor.Application")`, fallback `CLSIDFromProgID`, then `oleaut32!GetActiveObject`; the program entrypoint is `[STAThread]`.
 - Single-command mode does not call `Activator.CreateInstance` and does not launch Inventor. Autonomous agents must invoke it from a process context with access to the same user/session COM ROT as Inventor; the managed Codex sandbox may not expose that ROT.
+- `capture_drawing_sheet_preview` is live-verified for full-sheet PNG visual QA. It uses `Application.ActiveView.Fit(true)` and `View.SaveAsBitmap(...)`, preserves sheet aspect ratio, performs no image interpretation or document-content mutation, and works through attach-only `--json-file`. Known limitation: active view zoom/pan camera state is touched and not restored.
 - `get_model_feature_tree` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
 - Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported.
-- Working tree is expected to be clean after the v0.56 checkpoint commit.
+- Working tree is expected to be clean after the v0.57 checkpoint commit.
 
 ## Architecture Rules
 
@@ -56,6 +57,7 @@
 - PDF Export Hand: `export_pdf`.
 - DWG Export Hand: `export_dwg`.
 - DXF Export Hand: `export_dxf`.
+- Drawing sheet preview Eye: `capture_drawing_sheet_preview`.
 - PartsList Eye: `get_parts_lists`.
 - PartsList creation Hand: `create_parts_list`.
 - PartsList move Hand: `move_parts_list`.

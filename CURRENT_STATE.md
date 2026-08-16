@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after Package 60A:
+Current checkpoint after Package 61A:
 
 ```text
-v0.56 add autonomous single-command runtime mode
+v0.57 add drawing sheet preview eye
 ```
 
 ## Runtime architecture
@@ -48,17 +48,56 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 60A checkpoint:
+Live command audit after Package 61A checkpoint:
 
 ```text
-211 registered JSON commands
-211 unique registered JSON commands
+212 registered JSON commands
+212 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
 ```
 
 Always recalculate from the live repository before relying on these numbers.
+
+## Package 61A checkpoint
+
+Package 61A adds one read-only visual Eye:
+
+```json
+{"command":"capture_drawing_sheet_preview"}
+```
+
+Purpose: let the external multimodal LLM perform visual drawing QA from a
+raster image. Runtime only captures the sheet image; it performs no image
+interpretation, layout analysis, or engineering judgment.
+
+Live-proven Inventor path:
+
+```text
+DrawingDocument
+-> selected Sheet
+-> Sheet.Activate() if needed
+-> Application.ActiveView.Fit(true)
+-> View.SaveAsBitmap(...)
+```
+
+Verified behavior:
+
+- complete A3 sheet captured;
+- border/frame, title block, drawing views, dimensions, and annotations visible;
+- PNG output;
+- pixel dimensions adjusted to preserve `Sheet.Width / Sheet.Height`;
+- no document geometry/content mutation;
+- no modal dialogs observed;
+- works through attach-only `--json-file`;
+- repeated `overwrite=true` succeeds;
+- `overwrite=false` returns structured failure for an existing output path.
+
+Known limitation: this live-proven path uses `Application.ActiveView`.
+`activeViewStateTouched = true` and `activeViewStateRestored = false`.
+The command normalizes the viewport with `ActiveView.Fit(true)`, so previous
+user zoom/pan camera state is not preserved.
 
 ## Package 60A checkpoint
 

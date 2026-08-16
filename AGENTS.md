@@ -800,9 +800,9 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 59A. Current next correct action: run
-a Capability Audit for the next remaining native drawing annotation lifecycle
-gap before writing code.
+Next correct action completed by Package 61A. Current next correct action must
+be driven by the next factual end-to-end workflow blocker, not by arbitrary
+sequential API-family auditing.
 
 ## Current milestone addendum after Package 59A
 
@@ -847,6 +847,58 @@ testing proved the semantics are `CenterlineType`-dependent:
 
 - `kCenteredPatternCenterlineType` normalized caller values;
 - `kBisectorCenterlineType` constrained/transformed caller values.
+
+## Current milestone addendum after Package 61A
+
+```text
+v0.57 add drawing sheet preview eye
+```
+
+Package 61A adds one read-only visual Eye:
+
+```text
+capture_drawing_sheet_preview
+```
+
+Purpose: external multimodal visual QA of the current drawing sheet. Runtime
+captures a raster preview only; it performs no visual interpretation, layout
+analysis, GOST/ESKD judgment, or automatic correction.
+
+Live-proven Inventor path:
+
+```text
+DrawingDocument
+-> selected Sheet
+-> Sheet.Activate() if needed
+-> Application.ActiveView.Fit(true)
+-> View.SaveAsBitmap(...)
+```
+
+Verified facts:
+
+- complete A3 sheet captured;
+- border/frame, title block, drawing views, dimensions, and annotations visible;
+- PNG output;
+- pixel dimensions adjusted to preserve sheet aspect ratio;
+- no drawing content mutation;
+- no modal dialogs observed;
+- compatible with attach-only `--json-file`;
+- `overwrite=true` can update the same output path repeatedly;
+- `overwrite=false` returns structured failure when the target exists.
+
+Known limitation: the verified path uses `Application.ActiveView`; it touches
+the viewport with `ActiveView.Fit(true)` and does not restore previous user
+zoom/pan camera state. Responses factually report
+`activeViewStateTouched = true` and `activeViewStateRestored = false`.
+
+Current registry after Package 61A:
+
+```text
+212 registered JSON commands
+212 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
 
 ## Current milestone addendum after Package 60A
 

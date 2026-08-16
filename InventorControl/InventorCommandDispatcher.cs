@@ -142,6 +142,9 @@ public class InventorCommandDispatcher
     private readonly ExportDxfCommand
         _exportDxfCommand;
 
+    private readonly CaptureDrawingSheetPreviewCommand
+        _captureDrawingSheetPreviewCommand;
+
     private readonly CloseDocumentCommand
         _closeDocumentCommand;
 
@@ -823,6 +826,10 @@ public class InventorCommandDispatcher
 
         _exportDxfCommand =
             new ExportDxfCommand(
+                inventor);
+
+        _captureDrawingSheetPreviewCommand =
+            new CaptureDrawingSheetPreviewCommand(
                 inventor);
 
         _closeDocumentCommand =
@@ -1704,6 +1711,10 @@ public class InventorCommandDispatcher
 
                 "export_dxf" =>
                     _exportDxfCommand.Execute(
+                        root),
+
+                "capture_drawing_sheet_preview" =>
+                    _captureDrawingSheetPreviewCommand.Execute(
                         root),
 
                 "close_document" =>

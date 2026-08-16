@@ -1,5 +1,37 @@
 # PROJECT REVIEW
 
+## Package 61A checkpoint - current state
+
+Package 61A adds one read-only drawing visual Eye:
+
+```json
+{"command":"capture_drawing_sheet_preview"}
+```
+
+The command is intended for external multimodal visual QA. Runtime captures a
+raster preview and performs no image interpretation or layout judgment.
+
+Live-proven Inventor path:
+
+```text
+DrawingDocument
+-> selected Sheet
+-> Sheet.Activate() if needed
+-> Application.ActiveView.Fit(true)
+-> View.SaveAsBitmap(...)
+```
+
+Live validation captured a complete A3 sheet as PNG with border/frame, title
+block, drawing views, dimensions, and annotations visible. Repeated
+`overwrite=true` worked, `overwrite=false` returned structured failure, no
+modal dialogs were observed, and attach-only `--json-file` execution did not
+start another Inventor process.
+
+Known limitation: the verified path uses `Application.ActiveView`, touches the
+viewport with `ActiveView.Fit(true)`, and does not restore previous user
+zoom/pan camera state. Response fields record this factually with
+`activeViewStateTouched = true` and `activeViewStateRestored = false`.
+
 ## Package 60A checkpoint - current state
 
 Package 60A adds a deterministic single-command machine interface for
