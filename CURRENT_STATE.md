@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 59A documentation sync:
+Current checkpoint after End-to-End Blocker 01:
 
 ```text
-v0.52 complete center mark and centerline delete lifecycle
+v0.53 support active part feature tree
 ```
 
 ## Runtime architecture
@@ -59,6 +59,32 @@ Live command audit after Package 59A checkpoint:
 ```
 
 Always recalculate from the live repository before relying on these numbers.
+
+## End-to-End Blocker 01 checkpoint
+
+During the first ESKD end-to-end test, `get_model_feature_tree` was fixed and
+live-verified for an active `PartDocument`.
+
+Verified command:
+
+```json
+{"command":"get_model_feature_tree"}
+```
+
+Live validation on active `вал тестовый.ipt` returned `success = true`,
+`documentType = kPartDocumentObject`, `source = activePartDocument`,
+`featureCount = 9`, and factual feature-tree data.
+
+The active part path is:
+
+```text
+Application.ActiveDocument
+-> kPartDocumentObject
+-> ModelFeatureReadSupport.ReadFeatureTree(...)
+-> PartDocument.ComponentDefinition.Features
+```
+
+Existing DrawingDocument referenced-model behavior is preserved.
 
 ## Confirmed baseline commands
 

@@ -1,5 +1,28 @@
 # PROJECT REVIEW
 
+## End-to-End Blocker 01 checkpoint - current state
+
+`get_model_feature_tree` now supports active `PartDocument` directly while
+preserving the existing DrawingDocument referenced-model path.
+
+Live validation during the first ESKD end-to-end test used active
+`вал тестовый.ipt` and returned:
+
+- `success = true`;
+- `documentType = kPartDocumentObject`;
+- `source = activePartDocument`;
+- `featureCount = 9`;
+- factual feature tree returned.
+
+The active part path is:
+
+```text
+Application.ActiveDocument
+-> kPartDocumentObject
+-> ModelFeatureReadSupport.ReadFeatureTree(...)
+-> PartDocument.ComponentDefinition.Features
+```
+
 ## Package 59A checkpoint - current state
 
 Package 59A closes native CenterMark and Centerline delete lifecycle

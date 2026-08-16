@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.52 complete center mark and centerline delete lifecycle
+v0.53 support active part feature tree
 ```
 
 ## Ground rules
@@ -80,7 +80,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Hole Tables | VERIFIED | `get_hole_tables`, `create_hole_table`, `move_hole_table`, `delete_hole_table` | Package 50A detailed HoleTable Eye; Package 50B complete lifecycle with explicit view/placement create, `HoleTable.Position` move, `HoleTable.Delete`, stable referenceKey after move, and no tag/content mutation by Runtime | - | sorting/row merging/tag renumbering/cell editing/formatting/GOST logic are not Runtime scope | P0 maintained |
 | Legacy drawing table aggregate | PARTIAL | `get_drawing_tables` | legacy parts/revision table aggregate exists; does not cover `CustomTables` or `HoleTables` | - | not a complete all-table reader | compatibility |
 | Document properties | PARTIAL | `get_document_properties`, `get_document_property`, `get_document_property_by_id`, `get_document_property_sets`, `set_document_property`, `set_document_property_by_id` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P2 |
-| Model feature Eyes | VERIFIED | `get_model_feature_tree`, `get_hole_features`, `get_thread_features`, `get_feature_details`, `get_model_parameters` | `get_hole_features` hardened and verified; `get_thread_features` verified for standalone external ThreadFeature; feature tree, feature details, parameters recorded as verified areas | - | write commands for model features are not part of confirmed Runtime scope | P0 maintained |
+| Model feature Eyes | VERIFIED | `get_model_feature_tree`, `get_hole_features`, `get_thread_features`, `get_feature_details`, `get_model_parameters` | `get_model_feature_tree` live-verified for active `PartDocument` during first ESKD end-to-end test; `get_hole_features` hardened and verified; `get_thread_features` verified for standalone external ThreadFeature; feature tree, feature details, parameters recorded as verified areas | - | write commands for model features are not part of confirmed Runtime scope | P0 maintained |
 | Model geometry Eyes | VERIFIED | `get_surface_bodies`, `get_body_faces`, `get_face_edges` | surface bodies, faces, edges recorded as verified areas; exact PASS command list not recorded | - | no missing items confirmed by Package 13-17 audits | P0 maintained |
 | Sketch / constraint / work feature Eyes | VERIFIED | `get_sketches`, `get_sketch_geometry`, `get_sketch_constraints`, `get_sketch_dimensions`, `get_work_features` | sketches, sketch geometry, constraints, dimensions, work features recorded as verified areas; exact PASS command list not recorded | - | model/sketch constraint writes are outside Package 15 audit scope | P0 maintained |
 | Assembly Eyes | VERIFIED | `get_assembly_summary`, `get_assembly_occurrences`, `get_assembly_constraints`, `get_assembly_bom`, `get_assembly_referenced_documents` | assembly summary, occurrences, constraints, BOM, referenced documents recorded as verified areas; exact PASS command list not recorded | - | assembly Hands are not confirmed | P1 |

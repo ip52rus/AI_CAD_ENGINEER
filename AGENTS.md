@@ -848,6 +848,27 @@ testing proved the semantics are `CenterlineType`-dependent:
 - `kCenteredPatternCenterlineType` normalized caller values;
 - `kBisectorCenterlineType` constrained/transformed caller values.
 
+## Current milestone addendum after End-to-End Blocker 01
+
+```text
+v0.53 support active part feature tree
+```
+
+During the first ESKD end-to-end test, `get_model_feature_tree` was fixed and
+live-verified for active `PartDocument`. The command now supports:
+
+```text
+Application.ActiveDocument
+-> kPartDocumentObject
+-> ModelFeatureReadSupport.ReadFeatureTree(...)
+-> PartDocument.ComponentDefinition.Features
+```
+
+Live validation on active `вал тестовый.ipt` returned `success = true`,
+`documentType = kPartDocumentObject`, `source = activePartDocument`,
+`featureCount = 9`, and factual feature-tree data. The existing DrawingDocument
+referenced-model behavior is preserved.
+
 Do not expose these setters as a generic absolute sheet-coordinate endpoint
 Hand without a future type-specific API contract.
 

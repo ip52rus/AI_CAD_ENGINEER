@@ -3,11 +3,12 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.52 complete center mark and centerline delete lifecycle`.
+- Current checkpoint: `v0.53 support active part feature tree`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 59A - CenterMark and Centerline delete lifecycle.
+- Latest completed checkpoint: End-to-End Blocker 01 - active PartDocument feature tree support.
 - Registry after Package 59A: `211 registered / 211 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 59A checkpoint commit.
+- `get_model_feature_tree` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
+- Working tree is expected to be clean after the v0.53 checkpoint commit.
 
 ## Architecture Rules
 
