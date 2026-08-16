@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.50 complete chamfer note lifecycle`.
+- Current checkpoint: `v0.51 complete punch note lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 57A - ChamferNote lifecycle.
-- Registry after Package 57A: `206 registered / 206 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 57A checkpoint commit.
+- Latest completed checkpoint: Package 58A - PunchNote lifecycle.
+- Registry after Package 58A: `209 registered / 209 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 58A checkpoint commit.
 
 ## Architecture Rules
 
@@ -43,6 +43,7 @@
 - TransitionSymbols: `get_transition_symbols`, `create_transition_symbol`, `move_transition_symbol`, `delete_transition_symbol`.
 - BendNotes: `get_drawing_text_objects`, `get_drawing_curves` with `DrawingCurve.EdgeType`, `create_bend_note`, `move_bend_note`, `delete_bend_note`.
 - ChamferNotes: `get_drawing_text_objects`, `get_drawing_curves`, `create_chamfer_note`, `move_chamfer_note`, `delete_chamfer_note`.
+- PunchNotes: `get_drawing_text_objects`, `get_drawing_curves`, `create_punch_note`, `move_punch_note`, `delete_punch_note`.
 - create_drawing_document Hand: `create_drawing_document`.
 - Drawing View Break Hand: `add_drawing_view_break`.
 - PDF Export Hand: `export_pdf`.
@@ -108,6 +109,59 @@
 - SketchedSymbol Hand: `create_sketched_symbol`.
 - SketchedSymbol move Hand: `move_sketched_symbol`.
 - SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## PunchNote Lifecycle
+
+Verified commands:
+
+```text
+get_drawing_curves
+get_drawing_text_objects
+create_punch_note
+move_punch_note
+delete_punch_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> explicit kPunchUpEdge/kPunchDownEdge DrawingCurve selection
+-> create_punch_note
+-> move_punch_note
+-> delete_punch_note
+```
+
+`create_punch_note` uses native `Sheet.CreateGeometryIntent(drawingCurve)`
+followed by `PunchNotes.Add(position, geometryIntent, Type.Missing)`. Live
+validation used document `500х85х120-1`, sheet `Лист:1`, view `ВИД1`, and
+`curveIndex = 20` with factual `DrawingCurve.EdgeType = kPunchUpEdge` raw
+`82696`. Created note facts included native text `"ВВЕРХ 270° "`, readable
+`PunchEdge`, readable attachment facts, referenceKey, and natively inherited
+dimension style.
+
+`create_punch_note` accepts only explicit caller-selected DrawingCurves whose
+factual `EdgeType` is `kPunchUpEdge` or `kPunchDownEdge`. Known non-punch
+curves are rejected before `PunchNotes.Add`. Runtime performs no punch
+geometry detection, curve search, punch-feature inference, text generation,
+style selection, or standards interpretation.
+
+`move_punch_note` mutates only `PunchNote.Position = Point2d(x,y)`. Caller
+`x/y` are requested native placement input, not a guaranteed final exact
+readback. Inventor may normalize/reflow PunchNote text placement while
+preserving identity, `PunchEdge`, attachment, and text. `Leader.RootNode.Position`
+is not a requested-placement proxy for PunchNote.
+
+Runtime returns `requestedPosition`, factual `actualPosition`, and
+`positionNormalizedByInventor`. Normalization is not failure; Runtime does not
+compensate coordinates or mutate leader nodes.
+
+`delete_punch_note` uses native `PunchNote.Delete()` and final readback
+returned remaining PunchNote count `0`.
+
+Automatic punch detection, geometry inference, punch feature search, arbitrary
+`kUnknownEdge` fallback, punch text editing, leader editing, style/layer
+mutation, automatic placement, and GOST/ESKD interpretation remain deferred.
 
 ## ChamferNote Lifecycle
 

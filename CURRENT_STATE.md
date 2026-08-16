@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 57A documentation sync:
+Current checkpoint after the Package 58A documentation sync:
 
 ```text
-v0.50 complete chamfer note lifecycle
+v0.51 complete punch note lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 57A checkpoint:
+Live command audit after Package 58A checkpoint:
 
 ```text
-206 registered JSON commands
-206 unique registered JSON commands
+209 registered JSON commands
+209 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -879,6 +879,77 @@ Package 57A does not implement SketchLine-based ChamferNote creation,
 automatic chamfer detection, edge-pair search, pair swapping/retry, chamfer
 angle calculation, chamfer distance calculation, note text editing, leader
 editing, style/layer mutation, automatic placement, or GOST/ESKD interpretation.
+
+## Package 58A checkpoint
+
+Package 58A complete: native PunchNote lifecycle primitives are VERIFIED.
+
+Verified existing Eyes:
+
+```text
+get_drawing_curves
+get_drawing_text_objects
+```
+
+Verified commands:
+
+```text
+create_punch_note
+move_punch_note
+delete_punch_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> explicit kPunchUpEdge/kPunchDownEdge DrawingCurve selection
+-> create_punch_note
+-> move_punch_note
+-> delete_punch_note
+```
+
+Live Inventor validation confirmed:
+
+- validation used document `500х85х120-1`, sheet `Лист:1`, view `ВИД1`, and `curveIndex = 20`;
+- the selected `DrawingCurve.EdgeType` was `kPunchUpEdge` with raw value `82696`;
+- `create_punch_note` uses native `Sheet.CreateGeometryIntent(drawingCurve)` followed by `PunchNotes.Add(position, geometryIntent, Type.Missing)`;
+- `PunchNotes.Count` changed from `0` to `1`, `createdPunchNoteIndex = 1`, `PunchEdge` was readable, referenceKey was present, and native text was `"ВВЕРХ 270° "`;
+- native dimension style was inherited and attachment facts were readable;
+- Runtime performed no punch geometry detection, curve search, punch-feature inference, text generation, style selection, or standards interpretation.
+
+Punch curve contract:
+
+- creation accepts only an explicit caller-selected `DrawingCurve` whose factual `EdgeType` is `kPunchUpEdge` or `kPunchDownEdge`;
+- known non-punch curves are rejected before `PunchNotes.Add`;
+- prerequisite live fixture investigation confirmed the flat-pattern `DrawingView` contained punch curves at indexes `20..41`;
+- no weakening of `EdgeType` validation is required.
+
+Move semantics:
+
+- mutation uses native `PunchNote.Position = Point2d(x,y)`;
+- `x/y` are requested native placement input, not a guaranteed final exact `PunchNote.Position` readback contract;
+- Inventor may normalize/reflow final PunchNote text placement through native annotation layout;
+- `Leader.RootNode.Position` is not a requested-placement proxy for PunchNote;
+- `move_punch_note` returns `requestedPosition`, factual `actualPosition`, and `positionNormalizedByInventor`;
+- `positionNormalizedByInventor = true` when factual `actualPosition` differs from requested position by more than `0.0001`;
+- normalization is reported factually and is not a failure;
+- Runtime does not compensate coordinates and does not mutate leader nodes.
+
+Live move verified requested `(24,20)` with factual resulting
+`PunchNote.Position = (24.47213595499958,18)`,
+unchanged `Leader.RootNode.Position = (20,18)`, unchanged
+`AttachedEntity.PointOnSheet = (20.869186813661702,15.177104129571754)`,
+unchanged `PunchEdge`, unchanged text `"ВВЕРХ 270° "`, and unchanged referenceKey.
+
+`delete_punch_note` uses native `PunchNote.Delete()`, returned a deleted
+snapshot with referenceKey and readable PunchEdge/attachedEntity facts, and
+final remaining PunchNote count was `0`.
+
+Package 58A does not implement automatic punch detection, geometry inference,
+punch feature search, arbitrary `kUnknownEdge` fallback, punch text editing,
+leader editing, style/layer mutation, automatic placement, or GOST/ESKD
+interpretation.
 
 ## Package 42 checkpoint
 

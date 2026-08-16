@@ -1,6 +1,65 @@
 # PROJECT REVIEW
 
-## Package 57A checkpoint - current state
+## Package 58A checkpoint - current state
+
+Package 58A closes native drawing PunchNote lifecycle primitives using
+existing `get_drawing_curves` and `get_drawing_text_objects` coverage.
+
+Current live command inventory after Package 58A:
+
+```text
+209 registered commands
+209 unique command names
+0 duplicate registrations
+0 duplicate command Name properties
+```
+
+Verified PunchNote commands:
+
+```text
+get_drawing_curves
+get_drawing_text_objects
+create_punch_note
+move_punch_note
+delete_punch_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> explicit kPunchUpEdge/kPunchDownEdge DrawingCurve selection
+-> create_punch_note
+-> move_punch_note
+-> delete_punch_note
+```
+
+Live Inventor validation confirmed:
+
+- validation used document `500х85х120-1`, sheet `Лист:1`, view `ВИД1`, and `curveIndex = 20`;
+- the selected `DrawingCurve.EdgeType` was `kPunchUpEdge` with raw value `82696`;
+- create uses native `Sheet.CreateGeometryIntent(drawingCurve)` followed by `PunchNotes.Add(position, geometryIntent, Type.Missing)`;
+- `PunchNotes.Count` changed from `0` to `1`, `createdPunchNoteIndex = 1`, `PunchEdge` was readable, referenceKey was present, and native text was `"ВВЕРХ 270° "`;
+- native dimension style was inherited and attachment facts were readable;
+- Runtime performed no punch geometry detection, curve search, punch-feature inference, punch text generation, style selection, or standards interpretation;
+- creation accepts only explicit caller-selected `DrawingCurve` objects whose factual `EdgeType` is `kPunchUpEdge` or `kPunchDownEdge`;
+- known non-punch curves are rejected before `PunchNotes.Add`;
+- prerequisite live fixture investigation confirmed the flat-pattern `DrawingView` contained punch curves at indexes `20..41`;
+- move uses native `PunchNote.Position = Point2d(x,y)`;
+- requested `x/y` are native placement input, not guaranteed final exact `PunchNote.Position`;
+- Inventor may normalize/reflow PunchNote text placement while preserving identity, `PunchEdge`, attachment, and text;
+- `Leader.RootNode.Position` is not a requested-placement proxy for PunchNote;
+- Runtime reports `requestedPosition`, factual `actualPosition`, and `positionNormalizedByInventor`;
+- delete uses native `PunchNote.Delete()` and returned remaining PunchNote count `0`.
+
+Package 58A does not implement automatic punch detection, geometry inference,
+punch feature search, arbitrary `kUnknownEdge` fallback, punch text editing,
+leader editing, style/layer mutation, automatic placement, or GOST/ESKD
+interpretation.
+
+Next capability check: CenterMark / Centerline lifecycle hardening.
+
+## Package 57A checkpoint
 
 Package 57A closes native drawing ChamferNote lifecycle primitives using
 existing `get_drawing_text_objects` ChamferNote read coverage and

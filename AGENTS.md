@@ -800,8 +800,64 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 57A. Current next correct action: run
-a Capability Audit for PunchNote lifecycle before writing code.
+Next correct action completed by Package 58A. Current next correct action: run
+a Capability Audit for CenterMark / Centerline lifecycle hardening before
+writing code.
+
+## Current milestone addendum after Package 58A
+
+```text
+Package 58A complete - PunchNote lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_drawing_curves
+get_drawing_text_objects
+create_punch_note
+move_punch_note
+delete_punch_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> explicit kPunchUpEdge/kPunchDownEdge DrawingCurve selection
+-> create_punch_note
+-> move_punch_note
+-> delete_punch_note
+```
+
+Package 58A uses native `Sheet.CreateGeometryIntent(drawingCurve)` followed by
+`PunchNotes.Add(position, geometryIntent, Type.Missing)`. Validation used
+document `500х85х120-1`, sheet `Лист:1`, view `ВИД1`, and `curveIndex = 20`
+with factual `DrawingCurve.EdgeType = kPunchUpEdge` raw `82696`.
+
+`create_punch_note` accepts only explicit caller-selected `DrawingCurve`
+objects whose factual `EdgeType` is `kPunchUpEdge` or `kPunchDownEdge`. Known
+non-punch curves are rejected before `PunchNotes.Add`. Runtime performs no
+punch geometry detection, curve search, punch-feature inference, punch text
+generation, style selection, or standards interpretation.
+
+`move_punch_note` mutates only `PunchNote.Position = Point2d(x,y)`. Caller
+`x/y` are requested native placement input, not a guaranteed final exact
+readback. Inventor may normalize/reflow PunchNote text placement while
+preserving note identity, `PunchEdge`, attachment, and text.
+`Leader.RootNode.Position` is not a requested-placement proxy for PunchNote.
+
+Runtime reports `requestedPosition`, factual `actualPosition`, and
+`positionNormalizedByInventor`. Normalization is not a failure; Runtime does
+not compensate coordinates and does not mutate leader nodes.
+
+`delete_punch_note` uses `PunchNote.Delete()` and final readback returned
+remaining PunchNote count `0`.
+
+Automatic punch detection, geometry inference, punch feature search, arbitrary
+`kUnknownEdge` fallback, punch text editing, leader editing, style/layer
+mutation, automatic placement, and GOST/ESKD interpretation remain outside
+Runtime scope.
 
 ## Current milestone addendum after Package 57A
 

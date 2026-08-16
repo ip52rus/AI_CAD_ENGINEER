@@ -463,6 +463,15 @@ public class InventorCommandDispatcher
     private readonly DeleteChamferNoteCommand
         _deleteChamferNoteCommand;
 
+    private readonly CreatePunchNoteCommand
+        _createPunchNoteCommand;
+
+    private readonly MovePunchNoteCommand
+        _movePunchNoteCommand;
+
+    private readonly DeletePunchNoteCommand
+        _deletePunchNoteCommand;
+
     private readonly GetBalloonsCommand
         _getBalloonsCommand;
 
@@ -1236,6 +1245,18 @@ public class InventorCommandDispatcher
 
         _deleteChamferNoteCommand =
             new DeleteChamferNoteCommand(
+                inventor);
+
+        _createPunchNoteCommand =
+            new CreatePunchNoteCommand(
+                inventor);
+
+        _movePunchNoteCommand =
+            new MovePunchNoteCommand(
+                inventor);
+
+        _deletePunchNoteCommand =
+            new DeletePunchNoteCommand(
                 inventor);
 
         _getBalloonsCommand =
@@ -2097,6 +2118,18 @@ public class InventorCommandDispatcher
 
                 "delete_chamfer_note" =>
                     _deleteChamferNoteCommand.Execute(
+                        root),
+
+                "create_punch_note" =>
+                    _createPunchNoteCommand.Execute(
+                        root),
+
+                "move_punch_note" =>
+                    _movePunchNoteCommand.Execute(
+                        root),
+
+                "delete_punch_note" =>
+                    _deletePunchNoteCommand.Execute(
                         root),
 
                 "get_balloons" =>

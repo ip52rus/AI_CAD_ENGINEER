@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.50 complete chamfer note lifecycle
+v0.51 complete punch note lifecycle
 ```
 
 ## Ground rules
@@ -51,6 +51,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Leader Notes primitives | VERIFIED | `get_leader_notes`, `get_drawing_text_objects`, `create_leader_note`, `set_leader_note_formatted_text`, `move_leader_note`, `delete_leader_note` | Package 44 free and attached LeaderNote lifecycle; attached `GeometryIntent` with `curveIndex=14`, `intent=mid`; referenceKey and non-blocking diagnostics verified | - | leader path editing, style/layer setters, automatic leader routing are deferred | P0 maintained |
 | BendNotes | VERIFIED | `get_drawing_text_objects`, `get_drawing_curves`, `create_bend_note`, `move_bend_note`, `delete_bend_note` | Package 56A complete lifecycle: `get_drawing_curves` exposes factual `DrawingCurve.EdgeType`; `BendNotes.Add(DrawingCurve, Type.Missing)` create using explicit bend edge; `BendNote.Position` move with effective verification via `Leader.RootNode.Position` when Inventor creates a root node; `BendNote.Delete` | - | automatic bend-edge selection, bend geometry inference, bend angle/radius interpretation, text editing, leader editing, style/layer mutation, automatic placement, and GOST/ESKD interpretation are not Runtime scope | P0 maintained |
 | ChamferNotes | VERIFIED | `get_drawing_text_objects`, `get_drawing_curves`, `create_chamfer_note`, `move_chamfer_note`, `delete_chamfer_note` | Package 57A complete lifecycle: `ChamferNotes.Add(Point2d, ChamferEdgeOne, ChamferEdgeTwo, Type.Missing)` create using two explicit caller-selected DrawingCurves from the same DrawingView; `ChamferNote.Position` move with requestedPosition/actualPosition normalization reporting; `ChamferNote.Delete` | - | SketchLine creation, automatic chamfer detection, edge-pair search, pair swapping/retry, angle/distance calculation, text editing, leader editing, style/layer mutation, automatic placement, and GOST/ESKD interpretation are not Runtime scope | P0 maintained |
+| PunchNotes | VERIFIED | `get_drawing_text_objects`, `get_drawing_curves`, `create_punch_note`, `move_punch_note`, `delete_punch_note` | Package 58A complete lifecycle: `DrawingCurve.EdgeType` validated as `kPunchUpEdge`/`kPunchDownEdge`; `Sheet.CreateGeometryIntent(drawingCurve)` -> `PunchNotes.Add(Point2d, GeometryIntent, Type.Missing)` create; `PunchNote.Position` move with requestedPosition/actualPosition normalization reporting; `PunchNote.Delete` | - | automatic punch detection, geometry inference/search, arbitrary `kUnknownEdge` fallback, text editing, leader editing, style/layer mutation, automatic placement, and GOST/ESKD interpretation are not Runtime scope | P0 maintained |
 | Drawing Text semantic analysis | MISSING | - | - | - | semantic text understanding, GOST interpretation, TT/TU recognition; belongs to external LLM, not Runtime | no Runtime priority |
 | Annotation summary and bounds | PARTIAL | `get_drawing_annotation_summary`, `get_annotation_bounds` | annotation summary recorded as verified area; exact PASS command not separately recorded | - | typed bounds for all annotation classes; current bounds coverage is incomplete | P1 |
 | Annotation collision/layout logic | EXPERIMENTAL | - | not applicable | `check_annotation_collisions`, `auto_resolve_annotation_collisions` | should not be expanded as Runtime coverage | no priority |
@@ -138,6 +139,9 @@ Exact commands explicitly confirmed:
 {"command":"create_chamfer_note"}
 {"command":"move_chamfer_note"}
 {"command":"delete_chamfer_note"}
+{"command":"create_punch_note"}
+{"command":"move_punch_note"}
+{"command":"delete_punch_note"}
 {"command":"create_drawing_document"}
 {"command":"export_pdf"}
 {"command":"export_dwg"}
@@ -394,6 +398,32 @@ text position. Neither `ChamferNote.Position` readback nor
 native layout. Runtime reports `requestedPosition`, factual `actualPosition`,
 and `positionNormalizedByInventor`; normalization is not a failure and Runtime
 does not compensate coordinates or mutate leader nodes.
+
+Package 58A verifies native PunchNote lifecycle primitives through existing
+Eyes:
+
+```text
+get_drawing_curves -> explicit kPunchUpEdge/kPunchDownEdge DrawingCurve selection -> create_punch_note -> move_punch_note -> delete_punch_note
+Sheet.CreateGeometryIntent(drawingCurve) -> PunchNotes.Add(Point2d, GeometryIntent, Type.Missing)
+PunchNote.Position -> factual actualPosition with normalization reporting
+PunchNote.Delete()
+```
+
+Live Inventor validation used document `500х85х120-1`, sheet `Лист:1`, view
+`ВИД1`, and `curveIndex = 20` with `DrawingCurve.EdgeType = kPunchUpEdge`
+raw `82696`. Created note facts included native text `"ВВЕРХ 270° "`,
+readable `PunchEdge`, readable attachment facts, referenceKey, and natively
+inherited dimension style. Runtime performs no punch geometry detection,
+curve search, punch-feature inference, text generation, style selection, or
+standards interpretation.
+
+Verified PunchNote move semantics: Runtime mutates only
+`PunchNote.Position = Point2d(x,y)`. `x/y` are requested native placement
+input, not an exact final readback contract. Inventor may normalize/reflow the
+final note position. `Leader.RootNode.Position` is not a requested-position
+proxy for PunchNote. Runtime reports `requestedPosition`, factual
+`actualPosition`, and `positionNormalizedByInventor`; normalization is not a
+failure and Runtime does not compensate coordinates or mutate leader nodes.
 
 `create_drawing_document` is verified for creating a new Autodesk Inventor `DrawingDocument` through `Application.Documents.Add` with an explicit `templatePath`.
 

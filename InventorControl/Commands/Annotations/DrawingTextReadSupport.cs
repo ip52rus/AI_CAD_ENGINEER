@@ -32,6 +32,19 @@ internal static class DrawingTextReadSupport
             index);
     }
 
+    internal static object ReadPunchNoteSnapshot(
+        DrawingDocument drawingDocument,
+        Sheet sheet,
+        PunchNote note,
+        int index)
+    {
+        return ReadPunchNote(
+            drawingDocument,
+            sheet,
+            note,
+            index);
+    }
+
     public static string Execute(
         Inventor.Application inventor,
         JsonElement root)

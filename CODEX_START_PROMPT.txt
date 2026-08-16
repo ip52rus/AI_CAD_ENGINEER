@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 57A is complete.
-- Current checkpoint: `v0.50 complete chamfer note lifecycle`.
-- Live registry after Package 57A: `206 registered / 206 unique`, no duplicate command names.
+- Package 58A is complete.
+- Current checkpoint: `v0.51 complete punch note lifecycle`.
+- Live registry after Package 58A: `209 registered / 209 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -124,6 +124,9 @@ Verified Drawing Generation / Export Hands:
 - `create_chamfer_note`
 - `move_chamfer_note`
 - `delete_chamfer_note`
+- `create_punch_note`
+- `move_punch_note`
+- `delete_punch_note`
 
 Verified RevisionTable lifecycle:
 
@@ -328,6 +331,45 @@ SketchLine-based creation, automatic chamfer detection, edge-pair search,
 pair swapping/retry, chamfer angle/distance calculation, text editing, leader
 editing, style/layer mutation, automatic placement, and GOST/ESKD
 interpretation remain deferred.
+
+Verified PunchNote lifecycle:
+
+```text
+get_drawing_curves
+-> explicit kPunchUpEdge/kPunchDownEdge DrawingCurve selection
+-> create_punch_note
+-> move_punch_note
+-> delete_punch_note
+```
+
+`create_punch_note` calls native `Sheet.CreateGeometryIntent(drawingCurve)`
+followed by `PunchNotes.Add(position, geometryIntent, Type.Missing)`. Live
+validation used document `500х85х120-1`, sheet `Лист:1`, view `ВИД1`, and
+`curveIndex = 20` with `DrawingCurve.EdgeType = kPunchUpEdge` raw `82696`.
+The created PunchNote returned native text `"ВВЕРХ 270° "`, readable
+`PunchEdge`, readable attachment facts, referenceKey, and natively inherited
+dimension style.
+
+`create_punch_note` accepts only explicit caller-selected `DrawingCurve`
+objects whose factual `EdgeType` is `kPunchUpEdge` or `kPunchDownEdge`. Known
+non-punch curves are rejected before `PunchNotes.Add`; Runtime performs no
+punch geometry detection, curve search, punch-feature inference, text
+generation, style selection, or standards interpretation.
+
+`move_punch_note` mutates only `PunchNote.Position = Point2d(x,y)`. Caller
+`x/y` are requested native placement input, not a guaranteed final exact
+readback. Inventor may normalize/reflow PunchNote text placement. `Leader.RootNode.Position`
+is not a requested-placement proxy for PunchNote. Runtime reports
+`requestedPosition`, factual `actualPosition`, and
+`positionNormalizedByInventor`; normalization is not failure. Runtime does not
+compensate coordinates or mutate leader nodes.
+
+`delete_punch_note` uses `PunchNote.Delete()` and final readback returned
+remaining PunchNote count `0`.
+
+Automatic punch detection, geometry inference, punch feature search, arbitrary
+`kUnknownEdge` fallback, punch text editing, leader editing, style/layer
+mutation, automatic placement, and GOST/ESKD interpretation remain deferred.
 
 Verified CustomTable lifecycle:
 
