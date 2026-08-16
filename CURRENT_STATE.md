@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 56A documentation sync:
+Current checkpoint after the Package 57A documentation sync:
 
 ```text
-v0.49 complete bend note lifecycle
+v0.50 complete chamfer note lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 56A checkpoint:
+Live command audit after Package 57A checkpoint:
 
 ```text
-203 registered JSON commands
-203 unique registered JSON commands
+206 registered JSON commands
+206 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -812,6 +812,73 @@ snapshot, and final remaining BendNote count was `0`.
 Package 56A does not implement automatic bend-edge selection, bend geometry
 inference, bend angle/radius interpretation, text editing, leader editing,
 style/layer mutation, automatic placement, or GOST/ESKD interpretation.
+
+## Package 57A checkpoint
+
+Package 57A complete: native ChamferNote lifecycle primitives are VERIFIED.
+
+Verified existing Eyes:
+
+```text
+get_drawing_text_objects
+get_drawing_curves
+```
+
+`get_drawing_text_objects` ChamferNote read coverage is sufficient for lifecycle
+verification. `get_drawing_curves` supplies the caller-visible DrawingCurve facts
+used for explicit edge selection.
+
+Verified commands:
+
+```text
+create_chamfer_note
+move_chamfer_note
+delete_chamfer_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> explicit two-DrawingCurve selection
+-> create_chamfer_note
+-> move_chamfer_note
+-> delete_chamfer_note
+```
+
+Live Inventor validation confirmed:
+
+- `create_chamfer_note` uses native `ChamferNotes.Add(Point2d, ChamferEdgeOne, ChamferEdgeTwo, Type.Missing)`;
+- validation used `viewName = "ВИД1"`, `chamferEdgeOneCurveIndex = 9`, and `chamferEdgeTwoCurveIndex = 10`;
+- both supplied edges were explicit caller-selected linear `DrawingCurve` objects from the same `DrawingView`;
+- created ChamferNote text was native Inventor/template output: `"10 x 45°"` with `formattedText = "<ChamferNote/>"`;
+- referenceKey and attachedEntity were present, and native GOST dimension style was inherited;
+- Runtime generated no chamfer semantics, performed no chamfer detection, performed no edge-pair search, did not swap order, and did not retry pairs.
+
+Move semantics:
+
+- mutation uses native `ChamferNote.Position = Point2d(x,y)`;
+- `x/y` are treated as requested native placement input, not a guaranteed final `ChamferNote.Position` readback contract;
+- Inventor may normalize/reflow ChamferNote text placement through native leader/text layout;
+- neither `ChamferNote.Position` readback nor `Leader.RootNode.Position` is guaranteed to equal caller-requested coordinates after native layout;
+- `move_chamfer_note` returns `requestedPosition`, factual `actualPosition`, and `positionNormalizedByInventor`;
+- `positionNormalizedByInventor = true` when factual `actualPosition` differs from requested position by more than `0.0001`;
+- normalization is reported factually and is not a failure;
+- Runtime does not compensate coordinates and does not mutate leader nodes.
+
+Live move verified requested `(24,20)` with factual resulting
+`ChamferNote.Position = (24.381451470168425,18.175)`,
+unchanged `Leader.RootNode.Position = (19.825,18.175)`, unchanged
+`AttachedEntity.PointOnSheet = (18.75,17.1)`, unchanged text
+`"10 x 45°"`, and unchanged referenceKey.
+
+`delete_chamfer_note` uses native `ChamferNote.Delete()`, returned a deleted
+snapshot, and final remaining ChamferNote count was `0`.
+
+Package 57A does not implement SketchLine-based ChamferNote creation,
+automatic chamfer detection, edge-pair search, pair swapping/retry, chamfer
+angle calculation, chamfer distance calculation, note text editing, leader
+editing, style/layer mutation, automatic placement, or GOST/ESKD interpretation.
 
 ## Package 42 checkpoint
 

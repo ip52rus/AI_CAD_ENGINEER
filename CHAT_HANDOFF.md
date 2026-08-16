@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.49 complete bend note lifecycle`.
+- Current checkpoint: `v0.50 complete chamfer note lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 56A - BendNote lifecycle.
-- Registry after Package 56A: `203 registered / 203 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 56A checkpoint commit.
+- Latest completed checkpoint: Package 57A - ChamferNote lifecycle.
+- Registry after Package 57A: `206 registered / 206 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 57A checkpoint commit.
 
 ## Architecture Rules
 
@@ -42,6 +42,7 @@
 - EdgeSymbols: `get_edge_symbols`, `create_edge_symbol`, `move_edge_symbol`, `delete_edge_symbol`.
 - TransitionSymbols: `get_transition_symbols`, `create_transition_symbol`, `move_transition_symbol`, `delete_transition_symbol`.
 - BendNotes: `get_drawing_text_objects`, `get_drawing_curves` with `DrawingCurve.EdgeType`, `create_bend_note`, `move_bend_note`, `delete_bend_note`.
+- ChamferNotes: `get_drawing_text_objects`, `get_drawing_curves`, `create_chamfer_note`, `move_chamfer_note`, `delete_chamfer_note`.
 - create_drawing_document Hand: `create_drawing_document`.
 - Drawing View Break Hand: `add_drawing_view_break`.
 - PDF Export Hand: `export_pdf`.
@@ -107,6 +108,59 @@
 - SketchedSymbol Hand: `create_sketched_symbol`.
 - SketchedSymbol move Hand: `move_sketched_symbol`.
 - SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## ChamferNote Lifecycle
+
+Verified commands:
+
+```text
+get_drawing_text_objects
+get_drawing_curves
+create_chamfer_note
+move_chamfer_note
+delete_chamfer_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> explicit two-DrawingCurve selection
+-> create_chamfer_note
+-> move_chamfer_note
+-> delete_chamfer_note
+```
+
+`create_chamfer_note` uses native
+`ChamferNotes.Add(Point2d, ChamferEdgeOne, ChamferEdgeTwo, Type.Missing)`.
+Live validation used two explicit caller-selected linear DrawingCurves from
+the same DrawingView: `chamferEdgeOneCurveIndex = 9` and
+`chamferEdgeTwoCurveIndex = 10`. Created note facts included native text
+`"10 x 45°"`, `formattedText = "<ChamferNote/>"`, referenceKey,
+attachedEntity, and natively inherited GOST dimension style.
+
+Runtime does not auto-detect chamfers, search connected curves, swap edge
+order, retry pairs, calculate chamfer angle, calculate chamfer distance, or
+interpret GOST/ESKD semantics.
+
+`move_chamfer_note` mutates only `ChamferNote.Position = Point2d(x,y)`.
+Caller `x/y` are requested native placement input, not a guaranteed final
+exact readback. Inventor may normalize/reflow ChamferNote text placement while
+preserving identity, attachment, and text. Neither `ChamferNote.Position`
+readback nor `Leader.RootNode.Position` is guaranteed to equal the requested
+point after native layout.
+
+Runtime returns `requestedPosition`, factual `actualPosition`, and
+`positionNormalizedByInventor`. Normalization is not failure; Runtime does not
+compensate coordinates or mutate leader nodes.
+
+`delete_chamfer_note` uses native `ChamferNote.Delete()` and final readback
+returned remaining ChamferNote count `0`.
+
+SketchLine-based ChamferNote creation, automatic chamfer detection, edge-pair
+search, pair swapping/retry, angle/distance calculation, text editing, leader
+editing, style/layer mutation, automatic placement, and GOST/ESKD
+interpretation remain deferred.
 
 ## BendNote Lifecycle
 

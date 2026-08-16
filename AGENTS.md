@@ -463,6 +463,8 @@ Current Package 22 status:
 - Package 55A verifies `create_transition_symbol`, `move_transition_symbol`, and `delete_transition_symbol` for free/sheet TransitionSymbol lifecycle using explicit caller placement.
 - Package 56A verifies `create_bend_note`, `move_bend_note`, and `delete_bend_note` through existing `get_drawing_text_objects` BendNote read coverage.
 - `get_drawing_curves` now exposes factual `DrawingCurve.EdgeType` as `edgeTypeRaw` / `edgeType` so external callers can deterministically select native bend edges for `BendNotes.Add(...)`.
+- Package 57A verifies `create_chamfer_note`, `move_chamfer_note`, and `delete_chamfer_note` through existing `get_drawing_text_objects` ChamferNote read coverage.
+- ChamferNote creation uses two explicit caller-selected linear DrawingCurves from the same DrawingView; Runtime performs no chamfer detection, edge-pair search, edge-order swapping, retry, angle/distance calculation, or standards interpretation.
 - the runtime still does not perform symbol interpretation, GOST/ISO validation, correctness checking, semantic analysis, or engineering interpretation.
 
 Next correct action:
@@ -798,8 +800,62 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 56A. Current next correct action: run
-a Capability Audit for ChamferNote lifecycle before writing code.
+Next correct action completed by Package 57A. Current next correct action: run
+a Capability Audit for PunchNote lifecycle before writing code.
+
+## Current milestone addendum after Package 57A
+
+```text
+Package 57A complete - ChamferNote lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_drawing_text_objects
+get_drawing_curves
+create_chamfer_note
+move_chamfer_note
+delete_chamfer_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> explicit two-DrawingCurve selection
+-> create_chamfer_note
+-> move_chamfer_note
+-> delete_chamfer_note
+```
+
+Package 57A uses native
+`ChamferNotes.Add(Point2d, ChamferEdgeOne, ChamferEdgeTwo, Type.Missing)`.
+Validation used explicit caller-selected linear DrawingCurves from the same
+DrawingView: `chamferEdgeOneCurveIndex = 9` and
+`chamferEdgeTwoCurveIndex = 10`. Created note facts included native text
+`"10 x 45°"`, `formattedText = "<ChamferNote/>"`, referenceKey,
+attachedEntity, and natively inherited GOST dimension style. Runtime performed
+no chamfer semantics or geometry search.
+
+`move_chamfer_note` mutates only `ChamferNote.Position = Point2d(x,y)`.
+Caller `x/y` are requested native placement input, not a guaranteed final
+exact readback. Inventor may normalize/reflow ChamferNote text placement while
+preserving note identity, attachment, and text. Neither `ChamferNote.Position`
+readback nor `Leader.RootNode.Position` is guaranteed to equal the requested
+point after native layout.
+
+Runtime reports `requestedPosition`, factual `actualPosition`, and
+`positionNormalizedByInventor`. Normalization is not a failure; Runtime does
+not compensate coordinates and does not mutate leader nodes.
+
+`delete_chamfer_note` uses `ChamferNote.Delete()` and final readback returned
+remaining ChamferNote count `0`.
+
+SketchLine-based creation, automatic chamfer detection, edge-pair search,
+pair swapping/retry, chamfer angle/distance calculation, text editing, leader
+editing, style/layer mutation, automatic placement, and GOST/ESKD
+interpretation remain outside Runtime scope.
 
 ## Current milestone addendum after Package 56A
 

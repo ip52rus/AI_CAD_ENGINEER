@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.49 complete bend note lifecycle
+v0.50 complete chamfer note lifecycle
 ```
 
 ## Ground rules
@@ -50,6 +50,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | General Notes / Technical Requirements primitives | VERIFIED | `get_general_notes`, `get_drawing_text_objects`, `create_general_note_fitted`, `set_general_note_formatted_text`, `move_general_note`, `delete_general_note` | Package 43 full create/read/edit/read/move/read/delete/read lifecycle; final `get_general_notes` count = 0 | - | rectangular GeneralNotes, text style/layer setters, automatic technical requirement generation are not Runtime scope for this checkpoint | P0 maintained |
 | Leader Notes primitives | VERIFIED | `get_leader_notes`, `get_drawing_text_objects`, `create_leader_note`, `set_leader_note_formatted_text`, `move_leader_note`, `delete_leader_note` | Package 44 free and attached LeaderNote lifecycle; attached `GeometryIntent` with `curveIndex=14`, `intent=mid`; referenceKey and non-blocking diagnostics verified | - | leader path editing, style/layer setters, automatic leader routing are deferred | P0 maintained |
 | BendNotes | VERIFIED | `get_drawing_text_objects`, `get_drawing_curves`, `create_bend_note`, `move_bend_note`, `delete_bend_note` | Package 56A complete lifecycle: `get_drawing_curves` exposes factual `DrawingCurve.EdgeType`; `BendNotes.Add(DrawingCurve, Type.Missing)` create using explicit bend edge; `BendNote.Position` move with effective verification via `Leader.RootNode.Position` when Inventor creates a root node; `BendNote.Delete` | - | automatic bend-edge selection, bend geometry inference, bend angle/radius interpretation, text editing, leader editing, style/layer mutation, automatic placement, and GOST/ESKD interpretation are not Runtime scope | P0 maintained |
+| ChamferNotes | VERIFIED | `get_drawing_text_objects`, `get_drawing_curves`, `create_chamfer_note`, `move_chamfer_note`, `delete_chamfer_note` | Package 57A complete lifecycle: `ChamferNotes.Add(Point2d, ChamferEdgeOne, ChamferEdgeTwo, Type.Missing)` create using two explicit caller-selected DrawingCurves from the same DrawingView; `ChamferNote.Position` move with requestedPosition/actualPosition normalization reporting; `ChamferNote.Delete` | - | SketchLine creation, automatic chamfer detection, edge-pair search, pair swapping/retry, angle/distance calculation, text editing, leader editing, style/layer mutation, automatic placement, and GOST/ESKD interpretation are not Runtime scope | P0 maintained |
 | Drawing Text semantic analysis | MISSING | - | - | - | semantic text understanding, GOST interpretation, TT/TU recognition; belongs to external LLM, not Runtime | no Runtime priority |
 | Annotation summary and bounds | PARTIAL | `get_drawing_annotation_summary`, `get_annotation_bounds` | annotation summary recorded as verified area; exact PASS command not separately recorded | - | typed bounds for all annotation classes; current bounds coverage is incomplete | P1 |
 | Annotation collision/layout logic | EXPERIMENTAL | - | not applicable | `check_annotation_collisions`, `auto_resolve_annotation_collisions` | should not be expanded as Runtime coverage | no priority |
@@ -134,6 +135,9 @@ Exact commands explicitly confirmed:
 {"command":"create_bend_note"}
 {"command":"move_bend_note"}
 {"command":"delete_bend_note"}
+{"command":"create_chamfer_note"}
+{"command":"move_chamfer_note"}
+{"command":"delete_chamfer_note"}
 {"command":"create_drawing_document"}
 {"command":"export_pdf"}
 {"command":"export_dwg"}
@@ -363,6 +367,33 @@ Runtime does not reroute or edit the leader.
 Live validation confirmed native text `"ВНИЗ 90° R1,5"`,
 `formattedText = "<BendNote/>"`, preserved referenceKey, preserved attached
 bend entity / attachment point, and successful `BendNote.Delete()`.
+
+Package 57A verifies native ChamferNote lifecycle primitives through the
+existing `get_drawing_text_objects` aggregate Eye:
+
+```text
+get_drawing_curves -> explicit two-DrawingCurve selection -> create_chamfer_note -> move_chamfer_note -> delete_chamfer_note
+ChamferNotes.Add(Point2d, ChamferEdgeOne, ChamferEdgeTwo, Type.Missing)
+ChamferNote.Position -> factual actualPosition with normalization reporting
+ChamferNote.Delete()
+```
+
+Live Inventor validation used explicit caller-selected linear DrawingCurves
+from the same DrawingView: `chamferEdgeOneCurveIndex = 9` and
+`chamferEdgeTwoCurveIndex = 10`. Created note facts included native text
+`"10 x 45°"`, `formattedText = "<ChamferNote/>"`, referenceKey,
+attachedEntity, and natively inherited GOST dimension style. Runtime performed
+no chamfer detection, edge-pair search, edge-order swapping, retry, angle
+calculation, or distance calculation.
+
+Verified ChamferNote move semantics: Runtime mutates only
+`ChamferNote.Position = Point2d(x,y)`. `x/y` are requested native placement
+input, not an exact final readback contract. Inventor may normalize/reflow the
+text position. Neither `ChamferNote.Position` readback nor
+`Leader.RootNode.Position` is guaranteed to equal the requested point after
+native layout. Runtime reports `requestedPosition`, factual `actualPosition`,
+and `positionNormalizedByInventor`; normalization is not a failure and Runtime
+does not compensate coordinates or mutate leader nodes.
 
 `create_drawing_document` is verified for creating a new Autodesk Inventor `DrawingDocument` through `Application.Documents.Add` with an explicit `templatePath`.
 

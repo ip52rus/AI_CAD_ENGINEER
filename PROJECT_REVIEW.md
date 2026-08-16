@@ -1,6 +1,63 @@
 # PROJECT REVIEW
 
-## Package 56A checkpoint - current state
+## Package 57A checkpoint - current state
+
+Package 57A closes native drawing ChamferNote lifecycle primitives using
+existing `get_drawing_text_objects` ChamferNote read coverage and
+`get_drawing_curves` for caller-side geometry selection.
+
+Current live command inventory after Package 57A:
+
+```text
+206 registered commands
+206 unique command names
+0 duplicate registrations
+0 duplicate command Name properties
+```
+
+Verified ChamferNote commands:
+
+```text
+get_drawing_text_objects
+get_drawing_curves
+create_chamfer_note
+move_chamfer_note
+delete_chamfer_note
+```
+
+Verified lifecycle:
+
+```text
+get_drawing_curves
+-> explicit two-DrawingCurve selection
+-> create_chamfer_note
+-> move_chamfer_note
+-> delete_chamfer_note
+```
+
+Live Inventor validation confirmed:
+
+- create uses native `ChamferNotes.Add(Point2d, ChamferEdgeOne, ChamferEdgeTwo, Type.Missing)`;
+- validation used `viewName = "ВИД1"`, `chamferEdgeOneCurveIndex = 9`, and `chamferEdgeTwoCurveIndex = 10`;
+- both edges were explicit caller-selected linear `DrawingCurve` objects from the same `DrawingView`;
+- created ChamferNote text was native Inventor/template output: `"10 x 45°"` with `formattedText = "<ChamferNote/>"`;
+- referenceKey and attachedEntity were present and native GOST dimension style was inherited;
+- Runtime performed no chamfer detection, edge-pair search, edge-order swapping, retry, angle calculation, distance calculation, or GOST/ESKD interpretation;
+- move uses native `ChamferNote.Position = Point2d(x,y)`;
+- requested `x/y` are native placement input, not guaranteed final exact `ChamferNote.Position`;
+- Inventor may normalize/reflow ChamferNote text placement while preserving identity, attachment, and text;
+- neither `ChamferNote.Position` readback nor `Leader.RootNode.Position` is guaranteed to equal the caller-requested point after native layout;
+- Runtime reports `requestedPosition`, factual `actualPosition`, and `positionNormalizedByInventor`;
+- delete uses native `ChamferNote.Delete()` and returned remaining ChamferNote count `0`.
+
+Package 57A does not implement SketchLine-based ChamferNote creation,
+automatic chamfer detection, edge-pair search, pair swapping/retry, chamfer
+angle calculation, chamfer distance calculation, note text editing, leader
+editing, style/layer mutation, automatic placement, or GOST/ESKD interpretation.
+
+Next capability check: PunchNote lifecycle.
+
+## Package 56A checkpoint
 
 Package 56A closes native drawing BendNote lifecycle primitives using existing
 `get_drawing_text_objects` BendNote read coverage plus factual

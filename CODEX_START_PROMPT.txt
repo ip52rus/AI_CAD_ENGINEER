@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 56A is complete.
-- Current checkpoint: `v0.49 complete bend note lifecycle`.
-- Live registry after Package 56A: `203 registered / 203 unique`, no duplicate command names.
+- Package 57A is complete.
+- Current checkpoint: `v0.50 complete chamfer note lifecycle`.
+- Live registry after Package 57A: `206 registered / 206 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -121,6 +121,9 @@ Verified Drawing Generation / Export Hands:
 - `create_bend_note`
 - `move_bend_note`
 - `delete_bend_note`
+- `create_chamfer_note`
+- `move_chamfer_note`
+- `delete_chamfer_note`
 
 Verified RevisionTable lifecycle:
 
@@ -288,6 +291,43 @@ remaining BendNote count `0`.
 Automatic bend-edge selection, bend geometry inference, bend angle/radius
 interpretation, text editing, leader editing, style/layer mutation, automatic
 placement, and GOST/ESKD interpretation remain deferred.
+
+Verified ChamferNote lifecycle:
+
+```text
+get_drawing_curves
+-> explicit two-DrawingCurve selection
+-> create_chamfer_note
+-> move_chamfer_note
+-> delete_chamfer_note
+```
+
+`create_chamfer_note` calls native
+`ChamferNotes.Add(Point2d, ChamferEdgeOne, ChamferEdgeTwo, Type.Missing)`.
+Live validation used two explicit caller-selected linear DrawingCurves from
+the same DrawingView: `chamferEdgeOneCurveIndex = 9` and
+`chamferEdgeTwoCurveIndex = 10`. The created ChamferNote returned native text
+`"10 x 45°"`, `formattedText = "<ChamferNote/>"`, referenceKey,
+attachedEntity, and natively inherited GOST dimension style. Runtime performs
+no chamfer detection, edge-pair search, edge-order swapping, retry, angle
+calculation, distance calculation, or GOST/ESKD interpretation.
+
+`move_chamfer_note` mutates only `ChamferNote.Position = Point2d(x,y)`.
+Caller `x/y` are requested native placement input, not a guaranteed final exact
+readback. Inventor may normalize/reflow ChamferNote text placement. Neither
+`ChamferNote.Position` readback nor `Leader.RootNode.Position` is guaranteed
+to equal the requested point after native layout. Runtime reports
+`requestedPosition`, factual `actualPosition`, and
+`positionNormalizedByInventor`; normalization is not failure. Runtime does not
+compensate coordinates or mutate leader nodes.
+
+`delete_chamfer_note` uses `ChamferNote.Delete()` and final readback returned
+remaining ChamferNote count `0`.
+
+SketchLine-based creation, automatic chamfer detection, edge-pair search,
+pair swapping/retry, chamfer angle/distance calculation, text editing, leader
+editing, style/layer mutation, automatic placement, and GOST/ESKD
+interpretation remain deferred.
 
 Verified CustomTable lifecycle:
 

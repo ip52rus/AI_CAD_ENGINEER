@@ -19,6 +19,19 @@ internal static class DrawingTextReadSupport
             index);
     }
 
+    internal static object ReadChamferNoteSnapshot(
+        DrawingDocument drawingDocument,
+        Sheet sheet,
+        ChamferNote note,
+        int index)
+    {
+        return ReadChamferNote(
+            drawingDocument,
+            sheet,
+            note,
+            index);
+    }
+
     public static string Execute(
         Inventor.Application inventor,
         JsonElement root)
