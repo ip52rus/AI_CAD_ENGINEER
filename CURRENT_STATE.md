@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after End-to-End Blocker 02:
+Current checkpoint after End-to-End Model Eyes hardening:
 
 ```text
-v0.54 support active part model parameters
+v0.55 support active part model eyes
 ```
 
 ## Runtime architecture
@@ -85,6 +85,33 @@ Application.ActiveDocument
 ```
 
 Existing DrawingDocument referenced-model behavior is preserved.
+
+## End-to-End Model Eyes hardening checkpoint
+
+During the first ESKD end-to-end test, the existing model Eyes were hardened
+and live-verified to support active `PartDocument` directly where their
+semantic purpose is reading model/PartDocument facts.
+
+Verified active PartDocument commands:
+
+```text
+get_hole_features
+get_thread_features
+get_surface_bodies
+get_body_faces
+get_face_edges
+get_feature_details
+get_sketches
+get_sketch_geometry
+get_sketch_constraints
+get_sketch_dimensions
+get_work_features
+```
+
+These commands preserve their existing DrawingDocument referenced-model paths.
+No new commands were added. Drawing-context reference Eyes such as
+`get_curve_model_reference` and `get_view_model_references` remain
+DrawingDocument/DrawingView commands.
 
 ## End-to-End Blocker 02 checkpoint
 

@@ -1,5 +1,31 @@
 # PROJECT REVIEW
 
+## End-to-End Model Eyes hardening checkpoint - current state
+
+The focused model-Eye hardening pass is verified. Existing model Eyes whose
+semantic purpose is reading PartDocument/model facts now support active
+`PartDocument` directly and preserve their DrawingDocument referenced-model
+paths.
+
+Verified active PartDocument commands:
+
+```text
+get_hole_features
+get_thread_features
+get_surface_bodies
+get_body_faces
+get_face_edges
+get_feature_details
+get_sketches
+get_sketch_geometry
+get_sketch_constraints
+get_sketch_dimensions
+get_work_features
+```
+
+No new commands were added. `get_curve_model_reference` and
+`get_view_model_references` remain intentionally DrawingView-context Eyes.
+
 ## End-to-End Blocker 02 checkpoint - current state
 
 `get_model_parameters` now supports active `PartDocument` directly while

@@ -24,19 +24,80 @@ public class GetThreadFeaturesCommand
     public string Execute(
         JsonElement root)
     {
-        DrawingDocument? drawing =
-            ModelFeatureReadSupport
-                .GetActiveDrawingDocument(
-                    _inventor,
-                    out string? documentError);
+        Document? activeDocument =
+            _inventor.ActiveDocument;
 
-        if (drawing == null)
+        if (activeDocument == null)
         {
             return ModelFeatureReadSupport
                 .CreateError(
-                    documentError ??
-                    "Unable to get active drawing document.");
+                    "В Inventor нет активного документа.");
         }
+
+        bool includeSuppressed =
+            ModelFeatureReadSupport
+                .GetOptionalBoolean(
+                    root,
+                    "includeSuppressed",
+                    true);
+
+        if (activeDocument.DocumentType ==
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            List<object> activePartDiagnostics =
+                new();
+
+            List<object> activePartThreads =
+                ModelFeatureReadSupport
+                    .ReadThreadFeatures(
+                        activeDocument,
+                        includeSuppressed,
+                        activePartDiagnostics);
+
+            return ModelFeatureReadSupport
+                .CreateSuccess(
+                    new
+                    {
+                        document =
+                            ModelFeatureReadSupport
+                                .ReadDocument(
+                                    activeDocument),
+
+                        modelDocument =
+                            ModelFeatureReadSupport
+                                .ReadDocument(
+                                    activeDocument),
+
+                        source =
+                            "activePartDocument",
+
+                        capability =
+                            "thread_features",
+
+                        includeSuppressed,
+
+                        count =
+                            activePartThreads.Count,
+
+                        items =
+                            activePartThreads,
+
+                        diagnostics =
+                            activePartDiagnostics
+                    });
+        }
+
+        if (activeDocument.DocumentType !=
+            DocumentTypeEnum.kDrawingDocumentObject)
+        {
+            return ModelFeatureReadSupport
+                .CreateError(
+                    "Active document must be a PartDocument or DrawingDocument.",
+                    activeDocument.DocumentType.ToString());
+        }
+
+        DrawingDocument drawing =
+            (DrawingDocument)activeDocument;
 
         if (!ModelFeatureReadSupport
                 .TryGetRequiredString(
@@ -61,13 +122,6 @@ public class GetThreadFeaturesCommand
                 .CreateError(
                     viewError);
         }
-
-        bool includeSuppressed =
-            ModelFeatureReadSupport
-                .GetOptionalBoolean(
-                    root,
-                    "includeSuppressed",
-                    true);
 
         Sheet? sheet =
             ModelFeatureReadSupport
@@ -109,7 +163,7 @@ public class GetThreadFeaturesCommand
                     referenceError);
         }
 
-        List<object> diagnostics =
+        List<object> drawingDiagnostics =
             new();
 
         List<object> threadFeatures =
@@ -117,7 +171,7 @@ public class GetThreadFeaturesCommand
                 .ReadThreadFeatures(
                     modelDocument,
                     includeSuppressed,
-                    diagnostics);
+                    drawingDiagnostics);
 
         return ModelFeatureReadSupport
             .CreateSuccess(
@@ -148,7 +202,8 @@ public class GetThreadFeaturesCommand
                     items =
                         threadFeatures,
 
-                    diagnostics
+                    diagnostics =
+                        drawingDiagnostics
                 });
     }
 }

@@ -47,9 +47,13 @@ public class GetSketchesCommand
             .CreateSuccess(
                 new
                 {
-                    drawing = drawing!.DisplayName,
-                    sheet = sheet!.Name,
-                    view = view!.Name,
+                    drawing = drawing?.DisplayName,
+                    sheet = sheet?.Name,
+                    view = view?.Name,
+                    source =
+                        drawing == null
+                            ? "activePartDocument"
+                            : "drawingViewReferencedPartDocument",
                     modelDocument =
                         ModelConstraintReadSupport
                             .ReadDocument(part),

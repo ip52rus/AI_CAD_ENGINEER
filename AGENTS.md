@@ -890,6 +890,33 @@ Live validation on active `вал тестовый.ipt` returned `success = true
 factual parameter expressions, values, units, and tolerances. The existing
 DrawingDocument referenced-model behavior is preserved.
 
+## Current milestone addendum after End-to-End Model Eyes hardening
+
+```text
+v0.55 support active part model eyes
+```
+
+The focused model-Eye compatibility pass is live-verified on active
+`вал тестовый.ipt`. These existing commands now support active `PartDocument`
+directly and preserve their DrawingDocument referenced-model paths:
+
+```text
+get_hole_features
+get_thread_features
+get_surface_bodies
+get_body_faces
+get_face_edges
+get_feature_details
+get_sketches
+get_sketch_geometry
+get_sketch_constraints
+get_sketch_dimensions
+get_work_features
+```
+
+No new commands were added. `get_curve_model_reference` and
+`get_view_model_references` remain DrawingView-context Eyes.
+
 Do not expose these setters as a generic absolute sheet-coordinate endpoint
 Hand without a future type-specific API contract.
 

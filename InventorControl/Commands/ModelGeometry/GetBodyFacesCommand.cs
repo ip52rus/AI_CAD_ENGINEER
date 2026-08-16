@@ -61,9 +61,13 @@ public class GetBodyFacesCommand
             .CreateSuccess(
                 new
                 {
-                    drawing = drawing!.DisplayName,
-                    sheet = sheet!.Name,
-                    view = view!.Name,
+                    drawing = drawing?.DisplayName,
+                    sheet = sheet?.Name,
+                    view = view?.Name,
+                    source =
+                        drawing == null
+                            ? "activePartDocument"
+                            : "drawingViewReferencedPartDocument",
                     modelDocument =
                         ModelGeometryReadSupport
                             .ReadDocument(part),
@@ -78,19 +82,35 @@ public class GetBodyFacesCommand
         out DrawingView? view,
         out string? error)
     {
-        drawing =
-            ModelGeometryReadSupport
-                .GetActiveDrawingDocument(
-                    _inventor,
-                    out error);
+        Document? activeDocument =
+            _inventor.ActiveDocument;
 
+        drawing = null;
         sheet = null;
         view = null;
+        error = null;
 
-        if (drawing == null)
+        if (activeDocument == null)
         {
+            error = "В Inventor нет активного документа.";
             return null;
         }
+
+        if (activeDocument.DocumentType ==
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            return (PartDocument)activeDocument;
+        }
+
+        if (activeDocument.DocumentType !=
+            DocumentTypeEnum.kDrawingDocumentObject)
+        {
+            error = "Active document must be a PartDocument or DrawingDocument.";
+            return null;
+        }
+
+        drawing =
+            (DrawingDocument)activeDocument;
 
         if (!ModelGeometryReadSupport
                 .TryGetRequiredString(

@@ -20,10 +20,12 @@ Current checkpoint context:
 - Package 59A is complete.
 - End-to-End Blocker 01 is complete.
 - End-to-End Blocker 02 is complete.
-- Current checkpoint: `v0.54 support active part model parameters`.
+- End-to-End Model Eyes hardening is complete.
+- Current checkpoint: `v0.55 support active part model eyes`.
 - Live registry after Package 59A: `211 registered / 211 unique`, no duplicate command names.
 - `get_model_feature_tree` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Features`; DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Parameters`; DrawingDocument referenced-model behavior is preserved.
+- Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported.
 
 Verified Drawing Generation / Export Hands:
 

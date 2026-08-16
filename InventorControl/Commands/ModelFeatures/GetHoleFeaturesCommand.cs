@@ -24,19 +24,70 @@ public class GetHoleFeaturesCommand
     public string Execute(
         JsonElement root)
     {
-        DrawingDocument? drawing =
-            ModelFeatureReadSupport
-                .GetActiveDrawingDocument(
-                    _inventor,
-                    out string? documentError);
+        Document? activeDocument =
+            _inventor.ActiveDocument;
 
-        if (drawing == null)
+        if (activeDocument == null)
         {
             return ModelFeatureReadSupport
                 .CreateError(
-                    documentError ??
-                    "Не удалось получить активный чертёж.");
+                    "В Inventor нет активного документа.");
         }
+
+        bool includeSuppressed =
+            ModelFeatureReadSupport
+                .GetOptionalBoolean(
+                    root,
+                    "includeSuppressed",
+                    true);
+
+        if (activeDocument.DocumentType ==
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            List<object> activePartHoles =
+                ModelFeatureReadSupport
+                    .ReadHoleFeatures(
+                        activeDocument,
+                        includeSuppressed);
+
+            return ModelFeatureReadSupport
+                .CreateSuccess(
+                    new
+                    {
+                        document =
+                            ModelFeatureReadSupport
+                                .ReadDocument(
+                                    activeDocument),
+
+                        modelDocument =
+                            ModelFeatureReadSupport
+                                .ReadDocument(
+                                    activeDocument),
+
+                        source =
+                            "activePartDocument",
+
+                        includeSuppressed,
+
+                        holeFeatureCount =
+                            activePartHoles.Count,
+
+                        holeFeatures =
+                            activePartHoles
+                    });
+        }
+
+        if (activeDocument.DocumentType !=
+            DocumentTypeEnum.kDrawingDocumentObject)
+        {
+            return ModelFeatureReadSupport
+                .CreateError(
+                    "Active document must be a PartDocument or DrawingDocument.",
+                    activeDocument.DocumentType.ToString());
+        }
+
+        DrawingDocument drawing =
+            (DrawingDocument)activeDocument;
 
         if (!ModelFeatureReadSupport
                 .TryGetRequiredString(
@@ -61,13 +112,6 @@ public class GetHoleFeaturesCommand
                 .CreateError(
                     viewError);
         }
-
-        bool includeSuppressed =
-            ModelFeatureReadSupport
-                .GetOptionalBoolean(
-                    root,
-                    "includeSuppressed",
-                    true);
 
         Sheet? sheet =
             ModelFeatureReadSupport

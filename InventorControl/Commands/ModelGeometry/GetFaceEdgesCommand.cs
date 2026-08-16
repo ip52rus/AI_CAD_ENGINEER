@@ -41,70 +41,18 @@ public class GetFaceEdgesCommand
                 .CreateError(faceError);
         }
 
-        DrawingDocument? drawing =
-            ModelGeometryReadSupport
-                .GetActiveDrawingDocument(
-                    _inventor,
-                    out string? error);
-
-        if (drawing == null)
-        {
-            return ModelGeometryReadSupport
-                .CreateError(error!);
-        }
-
-        if (!ModelGeometryReadSupport
-                .TryGetRequiredString(
-                    root,
-                    "sheetName",
-                    out string sheetName,
-                    out string sheetError))
-        {
-            return ModelGeometryReadSupport
-                .CreateError(
-                    sheetError);
-        }
-
-        if (!ModelGeometryReadSupport
-                .TryGetRequiredString(
-                    root,
-                    "viewName",
-                    out string viewName,
-                    out string viewError))
-        {
-            return ModelGeometryReadSupport
-                .CreateError(
-                    viewError);
-        }
-
-        Sheet? sheet =
-            ModelGeometryReadSupport
-                .FindSheet(drawing, sheetName);
-
-        DrawingView? view =
-            sheet == null
-                ? null
-                : ModelGeometryReadSupport
-                    .FindView(sheet, viewName);
-
-        if (sheet == null || view == null)
-        {
-            return ModelGeometryReadSupport
-                .CreateError("Лист или вид не найден.");
-        }
-
         PartDocument? part =
-            ModelGeometryReadSupport
-                .GetReferencedPartDocument(
-                    view,
-                    out string? referenceError);
+            ResolvePart(
+                root,
+                out DrawingDocument? drawing,
+                out Sheet? sheet,
+                out DrawingView? view,
+                out string? error);
 
         if (part == null)
         {
             return ModelGeometryReadSupport
-                .CreateError(
-                    "Не удалось получить модель детали.",
-                    referenceError);
+                .CreateError(error ?? "Не удалось получить модель детали.");
         }
 
         object? data =
@@ -125,13 +73,92 @@ public class GetFaceEdgesCommand
             .CreateSuccess(
                 new
                 {
-                    drawing = drawing.DisplayName,
-                    sheet = sheet.Name,
-                    view = view.Name,
+                    drawing = drawing?.DisplayName,
+                    sheet = sheet?.Name,
+                    view = view?.Name,
+                    source =
+                        drawing == null
+                            ? "activePartDocument"
+                            : "drawingViewReferencedPartDocument",
                     modelDocument =
                         ModelGeometryReadSupport
                             .ReadDocument(part),
                     data
                 });
+    }
+
+    private PartDocument? ResolvePart(
+        JsonElement root,
+        out DrawingDocument? drawing,
+        out Sheet? sheet,
+        out DrawingView? view,
+        out string? error)
+    {
+        Document? activeDocument =
+            _inventor.ActiveDocument;
+
+        drawing = null;
+        sheet = null;
+        view = null;
+        error = null;
+
+        if (activeDocument == null)
+        {
+            error = "В Inventor нет активного документа.";
+            return null;
+        }
+
+        if (activeDocument.DocumentType ==
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            return (PartDocument)activeDocument;
+        }
+
+        if (activeDocument.DocumentType !=
+            DocumentTypeEnum.kDrawingDocumentObject)
+        {
+            error = "Active document must be a PartDocument or DrawingDocument.";
+            return null;
+        }
+
+        drawing =
+            (DrawingDocument)activeDocument;
+
+        if (!ModelGeometryReadSupport
+                .TryGetRequiredString(
+                    root,
+                    "sheetName",
+                    out string sheetName,
+                    out error) ||
+            !ModelGeometryReadSupport
+                .TryGetRequiredString(
+                    root,
+                    "viewName",
+                    out string viewName,
+                    out error))
+        {
+            return null;
+        }
+
+        sheet =
+            ModelGeometryReadSupport
+                .FindSheet(drawing, sheetName);
+
+        view =
+            sheet == null
+                ? null
+                : ModelGeometryReadSupport
+                    .FindView(sheet, viewName);
+
+        if (sheet == null || view == null)
+        {
+            error = "Лист или вид не найден.";
+            return null;
+        }
+
+        return ModelGeometryReadSupport
+            .GetReferencedPartDocument(
+                view,
+                out error);
     }
 }

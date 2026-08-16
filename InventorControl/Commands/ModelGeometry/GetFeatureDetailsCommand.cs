@@ -59,9 +59,13 @@ public class GetFeatureDetailsCommand
             .CreateSuccess(
                 new
                 {
-                    drawing = drawing!.DisplayName,
-                    sheet = sheet!.Name,
-                    view = view!.Name,
+                    drawing = drawing?.DisplayName,
+                    sheet = sheet?.Name,
+                    view = view?.Name,
+                    source =
+                        drawing == null
+                            ? "activePartDocument"
+                            : "drawingViewReferencedPartDocument",
                     modelDocument =
                         ModelGeometryReadSupport
                             .ReadDocument(part!),
@@ -85,16 +89,33 @@ public class GetFeatureDetailsCommand
         part = null;
         error = null;
 
-        drawing =
-            ModelGeometryReadSupport
-                .GetActiveDrawingDocument(
-                    _inventor,
-                    out error);
+        Document? activeDocument =
+            _inventor.ActiveDocument;
 
-        if (drawing == null)
+        if (activeDocument == null)
         {
+            error = "В Inventor нет активного документа.";
             return false;
         }
+
+        if (activeDocument.DocumentType ==
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            part =
+                (PartDocument)activeDocument;
+
+            return true;
+        }
+
+        if (activeDocument.DocumentType !=
+            DocumentTypeEnum.kDrawingDocumentObject)
+        {
+            error = "Active document must be a PartDocument or DrawingDocument.";
+            return false;
+        }
+
+        drawing =
+            (DrawingDocument)activeDocument;
 
         if (!ModelGeometryReadSupport
                 .TryGetRequiredString(

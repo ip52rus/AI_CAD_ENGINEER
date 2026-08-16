@@ -3,13 +3,14 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.54 support active part model parameters`.
+- Current checkpoint: `v0.55 support active part model eyes`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: End-to-End Blocker 02 - active PartDocument model parameter support.
+- Latest completed checkpoint: End-to-End Model Eyes hardening - active PartDocument model Eye support.
 - Registry after Package 59A: `211 registered / 211 unique`, `0` duplicate command names.
 - `get_model_feature_tree` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
-- Working tree is expected to be clean after the v0.54 checkpoint commit.
+- Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported.
+- Working tree is expected to be clean after the v0.55 checkpoint commit.
 
 ## Architecture Rules
 

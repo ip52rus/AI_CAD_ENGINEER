@@ -50,15 +50,35 @@ internal static class ModelConstraintReadSupport
         view = null;
         error = null;
 
-        drawing =
-            GetActiveDrawingDocument(
-                inventor,
-                out error);
+        Document? activeDocument =
+            inventor.ActiveDocument;
 
-        if (drawing == null)
+        if (activeDocument == null)
         {
+            error =
+                "В Inventor нет активного документа.";
+
             return null;
         }
+
+        if (activeDocument.DocumentType ==
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            return
+                (PartDocument)activeDocument;
+        }
+
+        if (activeDocument.DocumentType !=
+            DocumentTypeEnum.kDrawingDocumentObject)
+        {
+            error =
+                "Active document must be a PartDocument or DrawingDocument.";
+
+            return null;
+        }
+
+        drawing =
+            (DrawingDocument)activeDocument;
 
         if (!TryGetRequiredString(
                 root,
