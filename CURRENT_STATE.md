@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after End-to-End Model Eyes hardening:
+Current checkpoint after Package 60A:
 
 ```text
-v0.55 support active part model eyes
+v0.56 add autonomous single-command runtime mode
 ```
 
 ## Runtime architecture
@@ -48,7 +48,7 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 59A checkpoint:
+Live command audit after Package 60A checkpoint:
 
 ```text
 211 registered JSON commands
@@ -59,6 +59,45 @@ Live command audit after Package 59A checkpoint:
 ```
 
 Always recalculate from the live repository before relying on these numbers.
+
+## Package 60A checkpoint
+
+Package 60A adds a deterministic single-command machine interface to the
+existing executable without adding Runtime CAD commands:
+
+```text
+AI_CAD_ENGINEER.exe --json-file "<command.json>"
+```
+
+`--json` is also supported, but `--json-file` is recommended for PowerShell and
+automation because it avoids shell quoting ambiguity.
+
+Single-command mode runs exactly one JSON command through the existing
+`InventorCommandDispatcher`, writes exactly one complete JSON response to
+stdout, emits no interactive banner/menu/prompt, returns deterministic process
+exit codes, and terminates.
+
+Single-command mode is attach-only. It uses:
+
+```text
+CLSIDFromProgIDEx("Inventor.Application")
+-> fallback CLSIDFromProgID(...)
+-> oleaut32!GetActiveObject(...)
+-> Inventor.Application
+```
+
+The executable entrypoint is `[STAThread]`. Single-command mode does not call
+`Activator.CreateInstance` and does not start Autodesk Inventor. Legacy
+interactive mode may still create Inventor if attach fails; that behavior is
+outside the Package 60A single-command safety contract.
+
+Live validation outside the managed Codex sandbox attached to existing Inventor
+PID `3600` and verified `ping`, `get_active_document`, and
+`get_model_feature_tree` with PID unchanged. Inside the managed Codex sandbox,
+`GetActiveObject` returned `MK_E_UNAVAILABLE` and ROT enumeration was empty;
+this is classified as sandbox COM ROT visibility isolation. Autonomous agents
+must execute the CLI from a process context that can access the same
+user/session Running Object Table as Autodesk Inventor.
 
 ## End-to-End Blocker 01 checkpoint
 

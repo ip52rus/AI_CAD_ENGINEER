@@ -1,5 +1,41 @@
 # PROJECT REVIEW
 
+## Package 60A checkpoint - current state
+
+Package 60A adds a deterministic single-command machine interface for
+autonomous tooling:
+
+```text
+AI_CAD_ENGINEER.exe --json-file "<command.json>"
+```
+
+`--json` is also supported, but `--json-file` is the recommended PowerShell and
+automation contract. Single-command mode executes one JSON command through the
+existing `InventorCommandDispatcher`, writes exactly one complete JSON response
+to stdout, emits no banner/menu/prompt text, returns deterministic exit codes,
+and exits.
+
+Single-command mode is attach-only. Its Inventor attach path is:
+
+```text
+CLSIDFromProgIDEx("Inventor.Application")
+-> fallback CLSIDFromProgID(...)
+-> oleaut32!GetActiveObject(...)
+-> Inventor.Application
+```
+
+The entrypoint is `[STAThread]`. Single-command mode does not call
+`Activator.CreateInstance` and does not start Autodesk Inventor. Legacy
+interactive startup behavior is unchanged and remains outside this safety
+contract.
+
+Live validation outside the managed Codex sandbox attached to existing Inventor
+PID `3600` and verified `ping`, `get_active_document`, and
+`get_model_feature_tree` without changing the Inventor PID list. In the managed
+Codex sandbox, `GetActiveObject` returned `MK_E_UNAVAILABLE` and ROT
+enumeration was empty; autonomous agents must run the CLI from a process context
+with access to the same user/session ROT as Inventor.
+
 ## End-to-End Model Eyes hardening checkpoint - current state
 
 The focused model-Eye hardening pass is verified. Existing model Eyes whose

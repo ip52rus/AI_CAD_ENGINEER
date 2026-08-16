@@ -848,7 +848,47 @@ testing proved the semantics are `CenterlineType`-dependent:
 - `kCenteredPatternCenterlineType` normalized caller values;
 - `kBisectorCenterlineType` constrained/transformed caller values.
 
+## Current milestone addendum after Package 60A
+
+```text
+v0.56 add autonomous single-command runtime mode
+```
+
+Package 60A adds a deterministic single-command machine interface:
+
+```text
+AI_CAD_ENGINEER.exe --json-file "<command.json>"
+```
+
+`--json` is also supported, but `--json-file` is recommended for PowerShell and
+automation. Single-command mode executes exactly one JSON command through the
+existing `InventorCommandDispatcher`, writes exactly one JSON response to
+stdout, emits no interactive banner/menu/prompt, returns deterministic exit
+codes, and terminates.
+
+Single-command mode is attach-only. The attach path is:
+
+```text
+CLSIDFromProgIDEx("Inventor.Application")
+-> fallback CLSIDFromProgID(...)
+-> oleaut32!GetActiveObject(...)
+-> Inventor.Application
+```
+
+The program entrypoint is `[STAThread]`. Single-command mode does not call
+`Activator.CreateInstance` and does not start Autodesk Inventor. Legacy
+interactive mode may still create Inventor if attach fails; that behavior is
+outside the Package 60A single-command safety contract.
+
+Live validation outside the managed Codex sandbox attached to existing Inventor
+PID `3600` and verified `ping`, `get_active_document`, and
+`get_model_feature_tree` with no new Inventor process. Inside the managed Codex
+sandbox, `GetActiveObject` returned `MK_E_UNAVAILABLE` and ROT enumeration was
+empty. Autonomous agents must invoke the CLI from a process context with access
+to the same user/session ROT as Inventor.
+
 ## Current milestone addendum after End-to-End Blocker 01
+
 
 ```text
 v0.53 support active part feature tree

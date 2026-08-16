@@ -5,7 +5,15 @@ namespace AI_CAD_ENGINEER.Core;
 
 public class InventorManager
 {
+    private const string InventorApplicationProgId =
+        "Inventor.Application";
+
     private Inventor.Application? _inventor;
+
+    [DllImport("ole32.dll", CharSet = CharSet.Unicode)]
+    private static extern int CLSIDFromProgIDEx(
+        string progId,
+        out Guid clsid);
 
     [DllImport("ole32.dll", CharSet = CharSet.Unicode)]
     private static extern int CLSIDFromProgID(
@@ -28,20 +36,22 @@ public class InventorManager
         return StartNewInventor();
     }
 
+    public bool AttachToRunningInventor()
+    {
+        return TryConnectToRunningInventor();
+    }
+
     private bool TryConnectToRunningInventor()
     {
         try
         {
-            int result = CLSIDFromProgID(
-                "Inventor.Application",
-                out Guid clsid);
-
-            if (result != 0)
+            if (!TryResolveInventorApplicationClsid(
+                    out Guid clsid))
             {
                 return false;
             }
 
-            result = GetActiveObject(
+            int result = GetActiveObject(
                 ref clsid,
                 IntPtr.Zero,
                 out object activeObject);
@@ -61,12 +71,37 @@ public class InventorManager
         }
     }
 
+    private static bool TryResolveInventorApplicationClsid(
+        out Guid clsid)
+    {
+        try
+        {
+            int result = CLSIDFromProgIDEx(
+                InventorApplicationProgId,
+                out clsid);
+
+            if (result == 0)
+            {
+                return true;
+            }
+        }
+        catch (EntryPointNotFoundException)
+        {
+        }
+
+        return CLSIDFromProgID(
+                   InventorApplicationProgId,
+                   out clsid) ==
+               0;
+    }
+
     private bool StartNewInventor()
     {
         try
         {
             Type? inventorType =
-                Type.GetTypeFromProgID("Inventor.Application");
+                Type.GetTypeFromProgID(
+                    InventorApplicationProgId);
 
             if (inventorType == null)
             {

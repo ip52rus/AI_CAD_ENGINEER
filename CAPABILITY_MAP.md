@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.55 support active part model eyes
+v0.56 add autonomous single-command runtime mode
 ```
 
 ## Ground rules
@@ -34,7 +34,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 
 | Capability | Status | Implemented commands | Inventor PASS confirmed | Experimental | Missing | Priority |
 |---|---|---|---|---|---|---|
-| Runtime connectivity | VERIFIED | `ping`, `get_active_document` | `ping`, `get_active_document` | - | - | P0 maintained |
+| Runtime connectivity | VERIFIED | `ping`, `get_active_document`; executable single-command mode `--json-file` / `--json` | `ping`, `get_active_document`; Package 60A single-command mode verified with one JSON response, deterministic exit, attach-only existing Inventor PID preservation | - | - | P0 maintained |
 | Document operations | PARTIAL | `get_open_documents`, `open_document`, `activate_document`, `update_active_document`, `save_document`, `save_document_as`, `close_document`, `create_drawing_document`, `export_pdf`, `export_dwg`, `export_dxf` | `create_drawing_document`, `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow | P1 |
 | Drawing sheets | VERIFIED | `get_drawing_sheets`, `get_sheets`, `get_sheet`, `activate_sheet`, `rename_sheet`, `create_sheet`, `delete_sheet`, `set_sheet_size`, `set_sheet_orientation` | `get_drawing_sheets` | - | no additional missing items confirmed by Package audits | P0 maintained |
 | Borders and title blocks | PARTIAL | `get_border_definitions`, `get_sheet_border`, `set_sheet_border`, `remove_sheet_border`, `get_title_block_definitions`, `get_sheet_title_block`, `set_sheet_title_block`, `remove_sheet_title_block`, `get_title_block_fields`, `set_title_block_field`, `set_title_block_field_by_name`, `fill_title_block`, `get_title_block_definition_text`, `set_title_block_definition_text`, `get_title_block_binding`, `get_title_block_bindings`, `get_title_block_field_map` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P1 |
