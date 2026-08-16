@@ -19,9 +19,11 @@ Current checkpoint context:
 
 - Package 59A is complete.
 - End-to-End Blocker 01 is complete.
-- Current checkpoint: `v0.53 support active part feature tree`.
+- End-to-End Blocker 02 is complete.
+- Current checkpoint: `v0.54 support active part model parameters`.
 - Live registry after Package 59A: `211 registered / 211 unique`, no duplicate command names.
 - `get_model_feature_tree` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Features`; DrawingDocument referenced-model behavior is preserved.
+- `get_model_parameters` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Parameters`; DrawingDocument referenced-model behavior is preserved.
 
 Verified Drawing Generation / Export Hands:
 

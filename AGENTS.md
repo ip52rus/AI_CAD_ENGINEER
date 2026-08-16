@@ -869,6 +869,27 @@ Live validation on active `вал тестовый.ipt` returned `success = true
 `featureCount = 9`, and factual feature-tree data. The existing DrawingDocument
 referenced-model behavior is preserved.
 
+## Current milestone addendum after End-to-End Blocker 02
+
+```text
+v0.54 support active part model parameters
+```
+
+During the first ESKD end-to-end test, `get_model_parameters` was fixed and
+live-verified for active `PartDocument`. The command now supports:
+
+```text
+Application.ActiveDocument
+-> kPartDocumentObject
+-> PartDocument
+-> ModelGeometryReadSupport.ReadAllParameters(...)
+-> PartDocument.ComponentDefinition.Parameters
+```
+
+Live validation on active `вал тестовый.ipt` returned `success = true` with
+factual parameter expressions, values, units, and tolerances. The existing
+DrawingDocument referenced-model behavior is preserved.
+
 Do not expose these setters as a generic absolute sheet-coordinate endpoint
 Hand without a future type-specific API contract.
 

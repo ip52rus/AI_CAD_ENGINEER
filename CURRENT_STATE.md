@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after End-to-End Blocker 01:
+Current checkpoint after End-to-End Blocker 02:
 
 ```text
-v0.53 support active part feature tree
+v0.54 support active part model parameters
 ```
 
 ## Runtime architecture
@@ -82,6 +82,33 @@ Application.ActiveDocument
 -> kPartDocumentObject
 -> ModelFeatureReadSupport.ReadFeatureTree(...)
 -> PartDocument.ComponentDefinition.Features
+```
+
+Existing DrawingDocument referenced-model behavior is preserved.
+
+## End-to-End Blocker 02 checkpoint
+
+During the first ESKD end-to-end test, `get_model_parameters` was fixed and
+live-verified for an active `PartDocument`.
+
+Verified command:
+
+```json
+{"command":"get_model_parameters"}
+```
+
+Live validation on active `вал тестовый.ipt` returned `success = true` with
+active PartDocument parameter data, including factual expressions, values,
+units, and tolerances.
+
+The active part path is:
+
+```text
+Application.ActiveDocument
+-> kPartDocumentObject
+-> PartDocument
+-> ModelGeometryReadSupport.ReadAllParameters(...)
+-> PartDocument.ComponentDefinition.Parameters
 ```
 
 Existing DrawingDocument referenced-model behavior is preserved.

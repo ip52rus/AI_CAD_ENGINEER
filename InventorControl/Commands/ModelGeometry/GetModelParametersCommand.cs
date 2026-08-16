@@ -19,17 +19,93 @@ public class GetModelParametersCommand
 
     public string Execute(JsonElement root)
     {
-        DrawingDocument? drawing =
-            ModelGeometryReadSupport
-                .GetActiveDrawingDocument(
-                    _inventor,
-                    out string? documentError);
+        Document? activeDocument =
+            _inventor.ActiveDocument;
 
-        if (drawing == null)
+        if (activeDocument == null)
         {
             return ModelGeometryReadSupport
-                .CreateError(documentError!);
+                .CreateError(
+                    "В Inventor нет активного документа.");
         }
+
+        bool includeModel =
+            ModelGeometryReadSupport
+                .GetOptionalBoolean(
+                    root,
+                    "includeModel",
+                    true);
+
+        bool includeUser =
+            ModelGeometryReadSupport
+                .GetOptionalBoolean(
+                    root,
+                    "includeUser",
+                    true);
+
+        bool includeReference =
+            ModelGeometryReadSupport
+                .GetOptionalBoolean(
+                    root,
+                    "includeReference",
+                    true);
+
+        if (activeDocument.DocumentType ==
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            PartDocument activePart =
+                (PartDocument)activeDocument;
+
+            List<object> activePartParameters =
+                ModelGeometryReadSupport
+                    .ReadAllParameters(
+                        activePart,
+                        includeModel,
+                        includeUser,
+                        includeReference);
+
+            return ModelGeometryReadSupport
+                .CreateSuccess(
+                    new
+                    {
+                        document =
+                            ModelGeometryReadSupport
+                                .ReadDocument(
+                                    activePart),
+
+                        modelDocument =
+                            ModelGeometryReadSupport
+                                .ReadDocument(
+                                    activePart),
+
+                        source =
+                            "activePartDocument",
+
+                        includeModel,
+
+                        includeUser,
+
+                        includeReference,
+
+                        parameterCount =
+                            activePartParameters.Count,
+
+                        parameters =
+                            activePartParameters
+                    });
+        }
+
+        if (activeDocument.DocumentType !=
+            DocumentTypeEnum.kDrawingDocumentObject)
+        {
+            return ModelGeometryReadSupport
+                .CreateError(
+                    "Active document must be a PartDocument or DrawingDocument.",
+                    activeDocument.DocumentType.ToString());
+        }
+
+        DrawingDocument drawing =
+            (DrawingDocument)activeDocument;
 
         if (!ModelGeometryReadSupport
                 .TryGetRequiredString(
@@ -82,27 +158,6 @@ public class GetModelParametersCommand
                     "Не удалось получить модель детали.",
                     referenceError);
         }
-
-        bool includeModel =
-            ModelGeometryReadSupport
-                .GetOptionalBoolean(
-                    root,
-                    "includeModel",
-                    true);
-
-        bool includeUser =
-            ModelGeometryReadSupport
-                .GetOptionalBoolean(
-                    root,
-                    "includeUser",
-                    true);
-
-        bool includeReference =
-            ModelGeometryReadSupport
-                .GetOptionalBoolean(
-                    root,
-                    "includeReference",
-                    true);
 
         List<object> parameters =
             ModelGeometryReadSupport

@@ -1,5 +1,25 @@
 # PROJECT REVIEW
 
+## End-to-End Blocker 02 checkpoint - current state
+
+`get_model_parameters` now supports active `PartDocument` directly while
+preserving the existing DrawingDocument referenced-model path.
+
+Live validation during the first ESKD end-to-end test used active
+`вал тестовый.ipt` and returned `success = true` with factual active
+PartDocument parameter data, including expressions, values, units, and
+tolerances.
+
+The active part path is:
+
+```text
+Application.ActiveDocument
+-> kPartDocumentObject
+-> PartDocument
+-> ModelGeometryReadSupport.ReadAllParameters(...)
+-> PartDocument.ComponentDefinition.Parameters
+```
+
 ## End-to-End Blocker 01 checkpoint - current state
 
 `get_model_feature_tree` now supports active `PartDocument` directly while

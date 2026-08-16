@@ -3,12 +3,13 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.53 support active part feature tree`.
+- Current checkpoint: `v0.54 support active part model parameters`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: End-to-End Blocker 01 - active PartDocument feature tree support.
+- Latest completed checkpoint: End-to-End Blocker 02 - active PartDocument model parameter support.
 - Registry after Package 59A: `211 registered / 211 unique`, `0` duplicate command names.
 - `get_model_feature_tree` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
-- Working tree is expected to be clean after the v0.53 checkpoint commit.
+- `get_model_parameters` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
+- Working tree is expected to be clean after the v0.54 checkpoint commit.
 
 ## Architecture Rules
 
