@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.51 complete punch note lifecycle
+v0.52 complete center mark and centerline delete lifecycle
 ```
 
 ## Ground rules
@@ -38,13 +38,13 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Document operations | PARTIAL | `get_open_documents`, `open_document`, `activate_document`, `update_active_document`, `save_document`, `save_document_as`, `close_document`, `create_drawing_document`, `export_pdf`, `export_dwg`, `export_dxf` | `create_drawing_document`, `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow | P1 |
 | Drawing sheets | VERIFIED | `get_drawing_sheets`, `get_sheets`, `get_sheet`, `activate_sheet`, `rename_sheet`, `create_sheet`, `delete_sheet`, `set_sheet_size`, `set_sheet_orientation` | `get_drawing_sheets` | - | no additional missing items confirmed by Package audits | P0 maintained |
 | Borders and title blocks | PARTIAL | `get_border_definitions`, `get_sheet_border`, `set_sheet_border`, `remove_sheet_border`, `get_title_block_definitions`, `get_sheet_title_block`, `set_sheet_title_block`, `remove_sheet_title_block`, `get_title_block_fields`, `set_title_block_field`, `set_title_block_field_by_name`, `fill_title_block`, `get_title_block_definition_text`, `set_title_block_definition_text`, `get_title_block_binding`, `get_title_block_bindings`, `get_title_block_field_map` | not separately recorded | - | no missing items confirmed by Package 13-17 audits | P1 |
-| Drawing views | PARTIAL | `get_drawing_views`, `get_drawing_view`, `get_drawing_views_detailed`, `get_drawing_view_relationships`, `get_drawing_curves`, `get_view_model_references`, `get_curve_model_reference`, `create_base_view`, `create_projected_view`, `create_auxiliary_view`, `add_drawing_view_break`, `move_drawing_view`, `delete_drawing_view`, `rename_drawing_view`, `rotate_drawing_view`, `set_drawing_view_scale`, `set_drawing_view_style`, `set_drawing_view_label_visibility`, `set_drawing_view_scale_inheritance`, `set_drawing_view_alignment`, `set_drawing_view_suppressed` | drawing views / relationships / curve geometry, `get_drawing_curves` with factual `DrawingCurve.EdgeType`, `create_auxiliary_view`, and `add_drawing_view_break` are verified areas | - | detail/crop view improvements not covered by confirmed commands | P1 |
+| Drawing views | PARTIAL | `get_drawing_views`, `get_drawing_view`, `get_drawing_views_detailed`, `get_drawing_view_relationships`, `get_drawing_curves`, `get_view_model_references`, `get_curve_model_reference`, `create_base_view`, `create_projected_view`, `create_auxiliary_view`, `add_drawing_view_break`, `move_drawing_view`, `delete_drawing_view`, `rename_drawing_view`, `rotate_drawing_view`, `set_drawing_view_scale`, `set_drawing_view_style`, `set_drawing_view_label_visibility`, `set_drawing_view_scale_inheritance`, `set_drawing_view_alignment`, `set_drawing_view_suppressed` | drawing views / relationships / curve geometry, `get_drawing_curves` with factual `DrawingCurve.EdgeType` and optional `startIndex`/`count` range support, `create_auxiliary_view`, and `add_drawing_view_break` are verified areas | - | detail/crop view improvements not covered by confirmed commands | P1 |
 | Drawing Generation Hands | PARTIAL | `create_drawing_document`, `create_sheet`, `create_base_view`, `create_projected_view`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | `create_drawing_document`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow and other drawing-generation Hands not yet audited | P1 |
 | Drawing Export Hands | VERIFIED | `export_pdf`, `export_dwg`, `export_dxf` | `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow is not implemented | P0 maintained |
 | Drawing dimensions | VERIFIED | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `create_angular_dimension`, `create_ordinate_dimension`, `get_drawing_view_origin_indicator`, `create_drawing_view_origin_indicator`, `create_baseline_dimension`, `create_chain_dimension`, `set_general_dimension_formatted_text`, `set_general_dimension_hide_value`, `set_general_dimension_precision`, `set_general_dimension_model_value_override`, `clear_general_dimension_model_value_override`, `set_general_dimension_style`, `set_general_dimension_layer`, `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | linear/diameter/radius plus Package 31-39 commands listed in explicit PASS section | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | symmetric/chamfer dimensions are not confirmed | P0 maintained |
 | General Dimension Tolerance Pipeline | VERIFIED | `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits` | all Package 37-39 tolerance commands | - | no automatic tolerance selection, no fit validation, no GOST/ESKD tolerance decisions in Runtime | P0 maintained |
 | Hole/thread notes | VERIFIED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | `create_hole_thread_note` verified for standalone `ThreadFeature` thread edge annotation; `get_hole_thread_notes` hardened and verified with referenceKey support | - | stable selector variants are still missing; current commands use indexes | P0 maintained |
-| Center Marks / Centerlines | VERIFIED | `get_center_marks`, `get_centerlines`, `create_center_mark`, `create_centerline_bisector`, `create_centerline_centered_pattern` | Package 40-41 commands and referenceKey support | - | generic `create_centerline`, work-feature centerline, delete centerline/center mark deferred | P0 maintained |
+| Center Marks / Centerlines | VERIFIED | `get_center_marks`, `get_centerlines`, `create_center_mark`, `create_centerline_bisector`, `create_centerline_centered_pattern`, `delete_center_mark`, `delete_centerline` | Package 40-41 creation commands and referenceKey support; Package 59A `Centermark.Delete()` and `Centerline.Delete()` lifecycle deletes | - | generic `create_centerline`, work-feature centerline, CenterMark move, and generic Centerline endpoint mutation deferred | P0 maintained |
 | Basic drawing annotation Eyes | VERIFIED | `get_general_notes`, `get_leader_notes`, `get_balloons`, `get_center_marks`, `get_centerlines` | `get_general_notes`, `get_leader_notes`, `get_balloons` referenceKey support, center marks/centerlines, and balloon creation/read coverage are verified areas | - | additional typed Eyes only if future audits prove a gap | P0 maintained |
 | Drawing Text Objects | VERIFIED | `get_drawing_text_objects` | `get_drawing_text_objects`, `get_drawing_text_objects` with `sheetName` | - | - | P0 maintained |
 | General Notes / Technical Requirements primitives | VERIFIED | `get_general_notes`, `get_drawing_text_objects`, `create_general_note_fitted`, `set_general_note_formatted_text`, `move_general_note`, `delete_general_note` | Package 43 full create/read/edit/read/move/read/delete/read lifecycle; final `get_general_notes` count = 0 | - | rectangular GeneralNotes, text style/layer setters, automatic technical requirement generation are not Runtime scope for this checkpoint | P0 maintained |
@@ -180,6 +180,8 @@ Exact commands explicitly confirmed:
 {"command":"create_center_mark"}
 {"command":"create_centerline_bisector"}
 {"command":"create_centerline_centered_pattern"}
+{"command":"delete_center_mark"}
+{"command":"delete_centerline"}
 {"command":"get_hole_features"}
 {"command":"get_thread_features"}
 {"command":"get_curve_model_reference"}
@@ -469,6 +471,30 @@ Package 40-41 commands are verified for center mark and centerline creation.
 supported. `create_centerline_centered_pattern` is verified for explicit
 pattern-center and member `GeometryIntent` objects passed through an
 `ObjectCollection` to `Centerlines.AddCenteredPattern`.
+
+Package 59A verifies native delete lifecycle primitives for center marks and
+centerlines. `delete_center_mark` uses `Centermark.Delete()` after capturing a
+factual `get_center_marks` snapshot; live validation returned a readable
+deleted snapshot, referenceKey, and `remainingCenterMarkCount = 0`.
+`delete_centerline` uses `Centerline.Delete()` after capturing a factual
+`get_centerlines` snapshot; live validation on a
+`kCenteredPatternCenterlineType` object returned a readable deleted snapshot,
+referenceKey, and `remainingCenterlineCount = 0`.
+
+Package 59A intentionally does not ship generic `set_centerline_endpoints`.
+Local Inventor Interop confirms `Centerline.StartPoint` and
+`Centerline.EndPoint` are writable, but live testing proved their semantics
+are `CenterlineType`-dependent. For `kCenteredPatternCenterlineType`, requested
+points were read back as normalized vectors. For `kBisectorCenterlineType`,
+requested points were constrained/transformed by native bisector geometry.
+Runtime therefore does not expose these setters as a generic absolute
+sheet-coordinate endpoint Hand.
+
+`get_drawing_curves` now supports optional read-only `startIndex` and `count`
+parameters for current 1-based DrawingCurve range inspection. Omitted
+parameters preserve the original behavior; ranged reads preserve original
+curve indices, include `totalRawCount` / `totalCount`, and perform no filtering
+or geometry inference.
 
 Package 42 commands are verified for the Hole / Thread annotation pipeline.
 `get_hole_features` is hardened for expanded `HoleFeature` facts, reference

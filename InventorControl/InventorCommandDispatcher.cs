@@ -112,11 +112,17 @@ public class InventorCommandDispatcher
     private readonly CreateCenterMarkCommand
         _createCenterMarkCommand;
 
+    private readonly DeleteCenterMarkCommand
+        _deleteCenterMarkCommand;
+
     private readonly CreateCenterlineBisectorCommand
         _createCenterlineBisectorCommand;
 
     private readonly CreateCenterlineCenteredPatternCommand
         _createCenterlineCenteredPatternCommand;
+
+    private readonly DeleteCenterlineCommand
+        _deleteCenterlineCommand;
 
     private readonly ActivateDocumentCommand
         _activateDocumentCommand;
@@ -779,12 +785,20 @@ public class InventorCommandDispatcher
             new CreateCenterMarkCommand(
                 inventor);
 
+        _deleteCenterMarkCommand =
+            new DeleteCenterMarkCommand(
+                inventor);
+
         _createCenterlineBisectorCommand =
             new CreateCenterlineBisectorCommand(
                 inventor);
 
         _createCenterlineCenteredPatternCommand =
             new CreateCenterlineCenteredPatternCommand(
+                inventor);
+
+        _deleteCenterlineCommand =
+            new DeleteCenterlineCommand(
                 inventor);
 
         _activateDocumentCommand =
@@ -1652,12 +1666,20 @@ public class InventorCommandDispatcher
                     _createCenterMarkCommand.Execute(
                         root),
 
+                "delete_center_mark" =>
+                    _deleteCenterMarkCommand.Execute(
+                        root),
+
                 "create_centerline_bisector" =>
                     _createCenterlineBisectorCommand.Execute(
                         root),
 
                 "create_centerline_centered_pattern" =>
                     _createCenterlineCenteredPatternCommand.Execute(
+                        root),
+
+                "delete_centerline" =>
+                    _deleteCenterlineCommand.Execute(
                         root),
 
                 "activate_document" =>

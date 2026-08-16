@@ -3,11 +3,11 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.51 complete punch note lifecycle`.
+- Current checkpoint: `v0.52 complete center mark and centerline delete lifecycle`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 58A - PunchNote lifecycle.
-- Registry after Package 58A: `209 registered / 209 unique`, `0` duplicate command names.
-- Working tree is expected to be clean after the Package 58A checkpoint commit.
+- Latest completed checkpoint: Package 59A - CenterMark and Centerline delete lifecycle.
+- Registry after Package 59A: `211 registered / 211 unique`, `0` duplicate command names.
+- Working tree is expected to be clean after the Package 59A checkpoint commit.
 
 ## Architecture Rules
 
@@ -83,6 +83,8 @@
 - Center mark Hand: `create_center_mark`.
 - Centerline bisector Hand: `create_centerline_bisector`.
 - Centerline centered-pattern Hand: `create_centerline_centered_pattern`.
+- Center mark delete Hand: `delete_center_mark`.
+- Centerline delete Hand: `delete_centerline`.
 - Hardened HoleFeature Eye: `get_hole_features`.
 - Standalone ThreadFeature Eye: `get_thread_features`.
 - Hole/thread note Hand: `create_hole_thread_note`.
@@ -109,6 +111,47 @@
 - SketchedSymbol Hand: `create_sketched_symbol`.
 - SketchedSymbol move Hand: `move_sketched_symbol`.
 - SketchedSymbol delete Hand: `delete_sketched_symbol`.
+
+## CenterMark / Centerline Delete Lifecycle
+
+Verified commands:
+
+```text
+get_center_marks
+delete_center_mark
+get_centerlines
+delete_centerline
+```
+
+`delete_center_mark` uses native `Centermark.Delete()`. Live validation used
+existing `create_center_mark` with `sheetName = "Лист:1"`, `viewName = "ВИД1"`,
+and `curveIndex = 12`. `get_center_marks` returned `count = 1`;
+`delete_center_mark` returned `success = true`, a readable deleted snapshot,
+referenceKey, and `remainingCenterMarkCount = 0`.
+
+`delete_centerline` uses native `Centerline.Delete()`. Live validation used
+existing `create_centerline_centered_pattern`, producing
+`centerlineType = kCenteredPatternCenterlineType`. `get_centerlines` returned
+`count = 1`; `delete_centerline` returned `success = true`, a readable deleted
+snapshot, referenceKey, and `remainingCenterlineCount = 0`.
+
+CenterMark move is deferred because local Inventor Interop confirms
+`Centermark.Position` is read-only.
+
+Generic `set_centerline_endpoints` is not shipped. Local Interop confirms
+`Centerline.StartPoint` and `Centerline.EndPoint` are writable, but live
+testing proved their semantics are `CenterlineType`-dependent:
+
+- `kCenteredPatternCenterlineType` normalized caller values;
+- `kBisectorCenterlineType` constrained/transformed caller values.
+
+Do not treat these setters as a generic absolute sheet-coordinate endpoint
+contract.
+
+`get_drawing_curves` supports optional read-only `startIndex` and `count`
+range parameters. Omitted parameters preserve prior behavior; ranged reads
+preserve original 1-based curve indices, return only the requested slice, and
+include `totalRawCount` / `totalCount`.
 
 ## PunchNote Lifecycle
 

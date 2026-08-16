@@ -1,6 +1,75 @@
 # PROJECT REVIEW
 
-## Package 58A checkpoint - current state
+## Package 59A checkpoint - current state
+
+Package 59A closes native CenterMark and Centerline delete lifecycle
+primitives and retains a narrow read-only `get_drawing_curves` range support
+enhancement.
+
+Current live command inventory after Package 59A:
+
+```text
+211 registered commands
+211 unique command names
+0 duplicate registrations
+0 duplicate command Name properties
+```
+
+Verified Package 59A commands:
+
+```text
+get_center_marks
+delete_center_mark
+get_centerlines
+delete_centerline
+```
+
+Live Inventor validation confirmed:
+
+- `delete_center_mark` was tested after existing `create_center_mark` on sheet `Лист:1`, view `ВИД1`, `curveIndex = 12`;
+- `get_center_marks` returned `count = 1`;
+- `delete_center_mark` returned `success = true`, `deletedCenterMarkIndex = 1`, a readable deleted snapshot, referenceKey, and `remainingCenterMarkCount = 0`;
+- `delete_center_mark` uses native `Centermark.Delete()`;
+- `delete_centerline` was tested after existing `create_centerline_centered_pattern`;
+- the created centerline was `kCenteredPatternCenterlineType`;
+- `get_centerlines` returned `count = 1`;
+- `delete_centerline` returned `success = true`, `deletedCenterlineIndex = 1`, a readable deleted snapshot, referenceKey, and `remainingCenterlineCount = 0`;
+- `delete_centerline` uses native `Centerline.Delete()`.
+
+CenterMark status:
+
+- detailed read and existing create are sufficient;
+- delete is verified;
+- move is deferred because `Centermark.Position` is read-only in local Inventor Interop.
+
+Centerline status:
+
+- detailed read is sufficient;
+- specific creation commands already exist: `create_centerline_bisector` and `create_centerline_centered_pattern`;
+- delete is verified;
+- generic `set_centerline_endpoints` is not shipped.
+
+Endpoint audit conclusion:
+
+- `Centerline.StartPoint` and `Centerline.EndPoint` are writable native API properties;
+- live `kCenteredPatternCenterlineType` testing normalized caller values rather than treating them as absolute sheet points;
+- live `kBisectorCenterlineType` testing constrained/transformed caller values through native bisector geometry;
+- a generic absolute-coordinate endpoint Hand is therefore deferred.
+
+`get_drawing_curves` now accepts optional `startIndex` and `count` range
+parameters for read-only curve inspection. Omitted parameters preserve prior
+behavior; ranged reads preserve current 1-based curve indices, expose
+`totalRawCount` / `totalCount`, and perform no filtering or geometry
+inference.
+
+Package 59A does not implement CenterMark move, generic Centerline creation,
+work-feature Centerline creation, Centerline endpoint mutation, style/layer
+mutation, automatic center placement, geometry inference, or GOST/ESKD
+interpretation.
+
+Next capability check: remaining drawing annotation lifecycle gaps.
+
+## Package 58A checkpoint
 
 Package 58A closes native drawing PunchNote lifecycle primitives using
 existing `get_drawing_curves` and `get_drawing_text_objects` coverage.

@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after the Package 58A documentation sync:
+Current checkpoint after the Package 59A documentation sync:
 
 ```text
-v0.51 complete punch note lifecycle
+v0.52 complete center mark and centerline delete lifecycle
 ```
 
 ## Runtime architecture
@@ -48,11 +48,11 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 58A checkpoint:
+Live command audit after Package 59A checkpoint:
 
 ```text
-209 registered JSON commands
-209 unique registered JSON commands
+211 registered JSON commands
+211 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
@@ -879,6 +879,89 @@ Package 57A does not implement SketchLine-based ChamferNote creation,
 automatic chamfer detection, edge-pair search, pair swapping/retry, chamfer
 angle calculation, chamfer distance calculation, note text editing, leader
 editing, style/layer mutation, automatic placement, or GOST/ESKD interpretation.
+
+## Package 59A checkpoint
+
+Package 59A complete: native CenterMark and Centerline delete lifecycle
+primitives are VERIFIED.
+
+Verified commands:
+
+```text
+get_center_marks
+delete_center_mark
+get_centerlines
+delete_centerline
+```
+
+Live CenterMark delete validation used existing `create_center_mark` with
+`sheetName = "Лист:1"`, `viewName = "ВИД1"`, and `curveIndex = 12`.
+Creation succeeded, `get_center_marks` returned `count = 1`, and
+`delete_center_mark` returned `success = true`, a readable deleted snapshot,
+referenceKey, and `remainingCenterMarkCount = 0`.
+
+Native CenterMark delete mutation:
+
+```text
+Centermark.Delete()
+```
+
+CenterMark status after Package 59A:
+
+- `get_center_marks` detailed read is sufficient;
+- `create_center_mark` already existed and remains sufficient;
+- `delete_center_mark` is VERIFIED;
+- `move_center_mark` remains deferred because local Inventor Interop confirms `Centermark.Position` is read-only.
+
+Live Centerline delete validation used existing `create_centerline_centered_pattern`.
+It created a `Centerline` with `centerlineType = kCenteredPatternCenterlineType`.
+`get_centerlines` returned `count = 1`, and `delete_centerline` returned
+`success = true`, a readable deleted snapshot, referenceKey, and
+`remainingCenterlineCount = 0`.
+
+Native Centerline delete mutation:
+
+```text
+Centerline.Delete()
+```
+
+Centerline status after Package 59A:
+
+- `get_centerlines` detailed read is sufficient;
+- specific creation commands already exist: `create_centerline_bisector` and `create_centerline_centered_pattern`;
+- `delete_centerline` is VERIFIED;
+- generic `set_centerline_endpoints` is NOT shipped.
+
+Endpoint audit result:
+
+- local Inventor Interop confirms `Centerline.StartPoint` and `Centerline.EndPoint` are writable;
+- live testing proved their semantics are `CenterlineType`-dependent;
+- for `kCenteredPatternCenterlineType`, requested `(10,10)` and `(20,10)` read back as normalized vectors `(0.7071067811865476,0.7071067811865476)` and `(0.8944271909999159,0.447213595499958)`;
+- for `kBisectorCenterlineType`, requested `(10,10)` and `(20,10)` read back as constrained/transformed points `(12.45257603775818,12.623335927389201)` and `(18.504311927996742,12.172299960051632)`;
+- therefore a generic absolute-coordinate endpoint mutation contract is deferred.
+
+During Package 59A validation, `get_drawing_curves` received optional
+read-only range support:
+
+```json
+{
+  "command": "get_drawing_curves",
+  "sheetName": "Лист:1",
+  "viewName": "ВИД1",
+  "startIndex": 1,
+  "count": 10
+}
+```
+
+Range support preserves existing behavior when omitted, preserves original
+1-based curve indices, returns only the requested slice, exposes
+`totalRawCount` / `totalCount`, and performs no filtering or geometry
+inference.
+
+Package 59A does not implement CenterMark move, generic Centerline creation,
+Centerline endpoint mutation, work-feature Centerline creation, automatic
+center placement, geometry inference, style/layer mutation, or GOST/ESKD
+interpretation.
 
 ## Package 58A checkpoint
 

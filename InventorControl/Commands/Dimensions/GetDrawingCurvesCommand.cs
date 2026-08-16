@@ -88,13 +88,53 @@ public class GetDrawingCurvesCommand : IInventorCommand
                 exception.Message);
         }
 
+        bool rangeRequested =
+            root.TryGetProperty(
+                "startIndex",
+                out _) ||
+            root.TryGetProperty(
+                "count",
+                out _);
+
+        if (!TryGetOptionalPositiveInteger(
+                root,
+                "startIndex",
+                out int startIndex,
+                out string? startIndexError))
+        {
+            return DimensionCommandSupport.CreateError(
+                startIndexError ??
+                "startIndex must be a positive 1-based integer.");
+        }
+
+        if (!TryGetOptionalPositiveInteger(
+                root,
+                "count",
+                out int requestedCount,
+                out string? countError))
+        {
+            return DimensionCommandSupport.CreateError(
+                countError ??
+                "count must be a positive integer.");
+        }
+
+        int effectiveStartIndex =
+            startIndex;
+
+        int effectiveEndIndex =
+            requestedCount > 0
+                ? (int)Math.Min(
+                    curves.Count,
+                    (long)effectiveStartIndex + requestedCount - 1)
+                : curves.Count;
+
         List<object> result = new();
 
-        for (int index = 0;
-             index < curves.Count;
-             index++)
+        for (int currentIndex = effectiveStartIndex;
+             currentIndex <= effectiveEndIndex;
+             currentIndex++)
         {
-            DrawingCurve curve = curves[index];
+            DrawingCurve curve = curves[currentIndex - 1];
 
             Point2d? startPoint = null;
             Point2d? endPoint = null;
@@ -165,7 +205,8 @@ public class GetDrawingCurvesCommand : IInventorCommand
             result.Add(
                 new
                 {
-                    index = index + 1,
+                    index =
+                        currentIndex,
 
                     curveType =
                         curve.CurveType.ToString(),
@@ -200,6 +241,42 @@ public class GetDrawingCurvesCommand : IInventorCommand
                 });
         }
 
+        if (rangeRequested)
+        {
+            return DimensionCommandSupport.CreateSuccess(
+                new
+                {
+                    document =
+                        drawingDocument.DisplayName,
+
+                    sheet =
+                        sheet.Name,
+
+                    view =
+                        view.Name,
+
+                    totalRawCount =
+                        curves.Count,
+
+                    totalCount =
+                        curves.Count,
+
+                    startIndex =
+                        effectiveStartIndex,
+
+                    requestedCount =
+                        requestedCount > 0
+                            ? (int?)requestedCount
+                            : null,
+
+                    curveCount =
+                        result.Count,
+
+                    curves =
+                        result
+                });
+        }
+
         return DimensionCommandSupport.CreateSuccess(
             new
             {
@@ -218,5 +295,39 @@ public class GetDrawingCurvesCommand : IInventorCommand
                 curves =
                     result
             });
+    }
+
+    private static bool TryGetOptionalPositiveInteger(
+        JsonElement root,
+        string propertyName,
+        out int value,
+        out string? error)
+    {
+        value =
+            propertyName == "startIndex"
+                ? 1
+                : 0;
+
+        error =
+            null;
+
+        if (!root.TryGetProperty(
+                propertyName,
+                out JsonElement element))
+        {
+            return true;
+        }
+
+        if (!element.TryGetInt32(
+                out value) ||
+            value < 1)
+        {
+            error =
+                $"{propertyName} must be a positive integer.";
+
+            return false;
+        }
+
+        return true;
     }
 }

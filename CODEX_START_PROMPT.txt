@@ -17,9 +17,9 @@ Current context:
 
 Current checkpoint context:
 
-- Package 58A is complete.
-- Current checkpoint: `v0.51 complete punch note lifecycle`.
-- Live registry after Package 58A: `209 registered / 209 unique`, no duplicate command names.
+- Package 59A is complete.
+- Current checkpoint: `v0.52 complete center mark and centerline delete lifecycle`.
+- Live registry after Package 59A: `211 registered / 211 unique`, no duplicate command names.
 
 Verified Drawing Generation / Export Hands:
 
@@ -65,6 +65,8 @@ Verified Drawing Generation / Export Hands:
 - `create_center_mark`
 - `create_centerline_bisector`
 - `create_centerline_centered_pattern`
+- `delete_center_mark`
+- `delete_centerline`
 - `get_hole_features`
 - `get_thread_features`
 - `create_hole_thread_note`
@@ -331,6 +333,37 @@ SketchLine-based creation, automatic chamfer detection, edge-pair search,
 pair swapping/retry, chamfer angle/distance calculation, text editing, leader
 editing, style/layer mutation, automatic placement, and GOST/ESKD
 interpretation remain deferred.
+
+Verified Package 59A CenterMark / Centerline delete lifecycle:
+
+```text
+get_center_marks
+delete_center_mark
+get_centerlines
+delete_centerline
+```
+
+`delete_center_mark` uses native `Centermark.Delete()`. Live validation used
+existing `create_center_mark` with `sheetName = "Лист:1"`, `viewName = "ВИД1"`,
+and `curveIndex = 12`; the deleted snapshot was readable, referenceKey was
+present, and `remainingCenterMarkCount = 0`.
+
+`delete_centerline` uses native `Centerline.Delete()`. Live validation used
+existing `create_centerline_centered_pattern`; the created object was
+`kCenteredPatternCenterlineType`; the deleted snapshot was readable,
+referenceKey was present, and `remainingCenterlineCount = 0`.
+
+CenterMark move remains deferred because `Centermark.Position` is read-only.
+Generic `set_centerline_endpoints` is not shipped: although
+`Centerline.StartPoint` and `Centerline.EndPoint` are writable, live
+`kCenteredPatternCenterlineType` and `kBisectorCenterlineType` tests proved
+type-dependent normalization/constraint behavior rather than a generic
+absolute sheet-coordinate endpoint contract.
+
+`get_drawing_curves` supports optional read-only `startIndex` and `count`
+range parameters. Omitted parameters preserve prior behavior; ranged reads
+preserve current 1-based curve indices and expose `totalRawCount` /
+`totalCount`.
 
 Verified PunchNote lifecycle:
 

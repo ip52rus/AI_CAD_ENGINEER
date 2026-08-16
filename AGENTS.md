@@ -800,11 +800,68 @@ Runtime does not generate technical requirement text, choose requirements,
 number requirements semantically, decide GOST/ESKD content, automatically
 choose geometry, automatically place annotations, or interpret drawing meaning.
 
-Next correct action completed by Package 58A. Current next correct action: run
-a Capability Audit for CenterMark / Centerline lifecycle hardening before
-writing code.
+Next correct action completed by Package 59A. Current next correct action: run
+a Capability Audit for the next remaining native drawing annotation lifecycle
+gap before writing code.
 
-## Current milestone addendum after Package 58A
+## Current milestone addendum after Package 59A
+
+```text
+Package 59A complete - CenterMark and Centerline delete lifecycle checkpoint
+```
+
+Verified commands:
+
+```text
+get_center_marks
+delete_center_mark
+get_centerlines
+delete_centerline
+```
+
+Current registry after Package 59A:
+
+```text
+211 registered JSON commands
+211 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+`delete_center_mark` uses native `Centermark.Delete()`. Live validation used
+existing `create_center_mark` on `sheetName = "Лист:1"`, `viewName = "ВИД1"`,
+and `curveIndex = 12`, then verified a readable deleted snapshot, referenceKey,
+and `remainingCenterMarkCount = 0`.
+
+`delete_centerline` uses native `Centerline.Delete()`. Live validation used
+existing `create_centerline_centered_pattern`, produced
+`centerlineType = kCenteredPatternCenterlineType`, then verified a readable
+deleted snapshot, referenceKey, and `remainingCenterlineCount = 0`.
+
+CenterMark move remains deferred because local Inventor Interop confirms
+`Centermark.Position` is read-only.
+
+Generic `set_centerline_endpoints` is not shipped. Local Interop confirms
+`Centerline.StartPoint` and `Centerline.EndPoint` are writable, but live
+testing proved the semantics are `CenterlineType`-dependent:
+
+- `kCenteredPatternCenterlineType` normalized caller values;
+- `kBisectorCenterlineType` constrained/transformed caller values.
+
+Do not expose these setters as a generic absolute sheet-coordinate endpoint
+Hand without a future type-specific API contract.
+
+`get_drawing_curves` now supports optional read-only `startIndex` and `count`
+parameters for current 1-based DrawingCurve range inspection. Omitted
+parameters preserve prior behavior; ranged reads return only the requested
+slice and expose `totalRawCount` / `totalCount`.
+
+Package 59A does not implement CenterMark move, generic Centerline creation,
+work-feature Centerline creation, Centerline endpoint mutation, automatic
+center placement, geometry inference, style/layer mutation, or GOST/ESKD
+interpretation.
+
+## Previous milestone addendum after Package 58A
 
 ```text
 Package 58A complete - PunchNote lifecycle checkpoint

@@ -233,7 +233,7 @@ internal static class AnnotationReadSupport
                     centerMarks[index];
 
                 items.Add(
-                    ReadCenterMark(
+                    ReadCenterMarkSnapshot(
                         centerMark,
                         sheet,
                         index));
@@ -275,7 +275,7 @@ internal static class AnnotationReadSupport
                     centerlines[index];
 
                 items.Add(
-                    ReadCenterline(
+                    ReadCenterlineSnapshot(
                         centerline,
                         sheet,
                         index));
@@ -601,7 +601,7 @@ internal static class AnnotationReadSupport
         };
     }
 
-    private static object ReadCenterMark(
+    public static object ReadCenterMarkSnapshot(
         Centermark centerMark,
         Sheet sheet,
         int index)
@@ -767,7 +767,7 @@ internal static class AnnotationReadSupport
         };
     }
 
-    private static object ReadCenterline(
+    public static object ReadCenterlineSnapshot(
         Centerline centerline,
         Sheet sheet,
         int index)
