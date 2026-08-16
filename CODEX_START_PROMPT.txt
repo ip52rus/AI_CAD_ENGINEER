@@ -23,13 +23,15 @@ Current checkpoint context:
 - End-to-End Model Eyes hardening is complete.
 - Package 60A is complete.
 - Package 61A is complete.
-- Current checkpoint: `v0.57 add drawing sheet preview eye`.
-- Live registry after Package 61A: `212 registered / 212 unique`, no duplicate command names.
+- Package 62A is complete.
+- Current checkpoint: `v0.58 add model visual preview eye`.
+- Live registry after Package 62A: `213 registered / 213 unique`, no duplicate command names.
 - Deterministic single-command automation is available via `AI_CAD_ENGINEER.exe --json-file "<command.json>"`; `--json-file` is recommended for PowerShell/automation.
 - Single-command mode emits exactly one JSON response on stdout, uses deterministic exit codes, reuses `InventorCommandDispatcher`, and is attach-only.
 - Single-command attach uses `CLSIDFromProgIDEx("Inventor.Application")`, fallback `CLSIDFromProgID`, then `oleaut32!GetActiveObject`; the entrypoint is `[STAThread]`.
 - Single-command mode does not call `Activator.CreateInstance` and does not launch Inventor. It must run from a process context with access to the same user/session COM ROT as Inventor; the managed Codex sandbox may not expose that ROT.
 - `capture_drawing_sheet_preview` is live-verified as a read-only visual Eye for external multimodal drawing QA. It captures the selected drawing sheet via `Application.ActiveView.Fit(true)` and `View.SaveAsBitmap(...)`, outputs PNG, preserves sheet aspect ratio, and performs no image interpretation or document-content mutation. Known limitation: viewport/camera state is touched and previous zoom/pan is not restored.
+- `capture_model_preview` is live-verified as a read-only visual Eye for external multimodal model understanding. It supports active `PartDocument` only, captures one requested Inventor/model standard orientation per invocation, uses `Application.ActiveView.Camera` with `Camera.Fit()` and `View.SaveAsBitmap(...)`, restores Eye/Target/UpVector/Perspective/PerspectiveAngle, works through attach-only `--json-file`, and performs no model mutation or visual interpretation. Supported orientations: `front`, `back`, `top`, `bottom`, `left`, `right`, `iso_top_right`, `iso_top_left`, `iso_bottom_right`, `iso_bottom_left`, `current`. Current Inventor display style determines appearance.
 - `get_model_feature_tree` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Features`; DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Parameters`; DrawingDocument referenced-model behavior is preserved.
 - Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported.
@@ -48,6 +50,7 @@ Verified Drawing Generation / Export Hands:
 - `export_dwg`
 - `export_dxf`
 - `capture_drawing_sheet_preview`
+- `capture_model_preview`
 - `create_parts_list`
 - `move_parts_list`
 - `delete_parts_list`

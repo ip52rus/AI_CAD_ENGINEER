@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after Package 61A:
+Current checkpoint after Package 62A:
 
 ```text
-v0.57 add drawing sheet preview eye
+v0.58 add model visual preview eye
 ```
 
 ## Runtime architecture
@@ -48,17 +48,107 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 61A checkpoint:
+Live command audit after Package 62A checkpoint:
 
 ```text
-212 registered JSON commands
-212 unique registered JSON commands
+213 registered JSON commands
+213 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
 ```
 
 Always recalculate from the live repository before relying on these numbers.
+
+## Package 62A checkpoint
+
+Package 62A adds one read-only model visual Eye:
+
+```json
+{"command":"capture_model_preview"}
+```
+
+Contract:
+
+```json
+{
+  "command": "capture_model_preview",
+  "orientation": "iso_top_right",
+  "outputPath": "...",
+  "widthPixels": 1600,
+  "heightPixels": 1200,
+  "overwrite": true
+}
+```
+
+One invocation captures one active `PartDocument` orientation to one raster
+image. Runtime only captures the image; it performs no feature recognition,
+model interpretation, view-choice reasoning, drawing planning, or visual
+analysis.
+
+Supported orientations are Inventor/model standard orientations only:
+
+```text
+front
+back
+top
+bottom
+left
+right
+iso_top_right
+iso_top_left
+iso_bottom_right
+iso_bottom_left
+current
+```
+
+Live-proven Inventor path:
+
+```text
+active PartDocument
+-> Application.ActiveView
+-> ActiveView.Camera
+-> snapshot Eye / Target / UpVector / Perspective / PerspectiveAngle
+-> set requested ViewOrientationType
+-> Perspective = false
+-> Camera.Fit()
+-> Camera.ApplyWithoutTransition()
+-> View.SaveAsBitmap(...)
+-> restore Eye / Target / UpVector / Perspective / PerspectiveAngle
+```
+
+Verified behavior on `вал тестовый.ipt`:
+
+- complete model visible;
+- no crop;
+- PNG output;
+- `1600 x 1200` validation images;
+- no model mutation;
+- no modal dialogs observed;
+- works through attach-only `--json-file`;
+- Inventor PID unchanged;
+- zoom/pan independence verified;
+- `activeViewStateTouched = true`;
+- `activeViewStateRestored = true`.
+
+The recess/cut associated with the earlier E2E review was visually clear in
+`front`, `right`, `iso_top_right`, and `iso_top_left`; `top` was weak/not useful
+for that recess. These are validation observations only. Runtime does not decide
+which preview is engineeringly best.
+
+Known limitations:
+
+- capture uses `Application.ActiveView`;
+- current Inventor display style is preserved and determines appearance;
+- Package 62A does not control display mode;
+- `TransientObjects.CreateCamera` with `PartDocument.ComponentDefinition` was
+  tested and rejected because the resulting bitmap contained no visible model
+  geometry.
+
+Model visual previews complement structural model Eyes. Images expose spatial
+and feature salience to the external multimodal LLM; structural Eyes remain the
+source for exact geometry, dimensions, parameters, faces, edges, sketches, and
+feature facts.
 
 ## Package 61A checkpoint
 

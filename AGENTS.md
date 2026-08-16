@@ -848,6 +848,85 @@ testing proved the semantics are `CenterlineType`-dependent:
 - `kCenteredPatternCenterlineType` normalized caller values;
 - `kBisectorCenterlineType` constrained/transformed caller values.
 
+## Current milestone addendum after Package 62A
+
+```text
+v0.58 add model visual preview eye
+```
+
+Package 62A adds one read-only model visual Eye:
+
+```text
+capture_model_preview
+```
+
+Purpose: external multimodal model understanding. Runtime captures one raster
+preview of the active `PartDocument` in one requested Inventor/model standard
+orientation. Runtime performs no feature recognition, visual interpretation,
+engineering view selection, drawing planning, or GOST/ESKD judgment.
+
+Supported orientations:
+
+```text
+front
+back
+top
+bottom
+left
+right
+iso_top_right
+iso_top_left
+iso_bottom_right
+iso_bottom_left
+current
+```
+
+Live-proven Inventor path:
+
+```text
+active PartDocument
+-> Application.ActiveView
+-> ActiveView.Camera
+-> snapshot Eye / Target / UpVector / Perspective / PerspectiveAngle
+-> set requested ViewOrientationType
+-> Perspective = false
+-> Camera.Fit()
+-> Camera.ApplyWithoutTransition()
+-> View.SaveAsBitmap(...)
+-> restore Eye / Target / UpVector / Perspective / PerspectiveAngle
+```
+
+Verified facts:
+
+- complete model visible;
+- no crop;
+- PNG output;
+- `1600 x 1200` validation images;
+- no model mutation;
+- no modal dialogs observed;
+- compatible with attach-only `--json-file`;
+- Inventor PID unchanged;
+- zoom/pan independence verified;
+- `activeViewStateTouched = true`;
+- `activeViewStateRestored = true`.
+
+Known limitations: capture uses `Application.ActiveView`, the current Inventor
+display style determines appearance, and Package 62A does not control display
+mode. `TransientObjects.CreateCamera` with `PartDocument.ComponentDefinition`
+was tested and rejected because the output contained no visible model geometry.
+
+Model visual previews complement structural model Eyes; they do not replace
+factual geometry/topology/parameter readback.
+
+Current registry after Package 62A:
+
+```text
+213 registered JSON commands
+213 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
 ## Current milestone addendum after Package 61A
 
 ```text

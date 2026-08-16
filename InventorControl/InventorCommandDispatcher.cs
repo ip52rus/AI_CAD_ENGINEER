@@ -145,6 +145,9 @@ public class InventorCommandDispatcher
     private readonly CaptureDrawingSheetPreviewCommand
         _captureDrawingSheetPreviewCommand;
 
+    private readonly CaptureModelPreviewCommand
+        _captureModelPreviewCommand;
+
     private readonly CloseDocumentCommand
         _closeDocumentCommand;
 
@@ -830,6 +833,10 @@ public class InventorCommandDispatcher
 
         _captureDrawingSheetPreviewCommand =
             new CaptureDrawingSheetPreviewCommand(
+                inventor);
+
+        _captureModelPreviewCommand =
+            new CaptureModelPreviewCommand(
                 inventor);
 
         _closeDocumentCommand =
@@ -1715,6 +1722,10 @@ public class InventorCommandDispatcher
 
                 "capture_drawing_sheet_preview" =>
                     _captureDrawingSheetPreviewCommand.Execute(
+                        root),
+
+                "capture_model_preview" =>
+                    _captureModelPreviewCommand.Execute(
                         root),
 
                 "close_document" =>

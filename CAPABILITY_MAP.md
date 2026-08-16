@@ -9,7 +9,7 @@ Branch: `cleanup/legacy-architecture`
 Checkpoint after this documentation sync:
 
 ```text
-v0.57 add drawing sheet preview eye
+v0.58 add model visual preview eye
 ```
 
 ## Ground rules
@@ -42,6 +42,7 @@ Do not merge `CustomTables` and `PartsLists` into one capability. In Inventor AP
 | Drawing Generation Hands | PARTIAL | `create_drawing_document`, `create_sheet`, `create_base_view`, `create_projected_view`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | `create_drawing_document`, `create_section_line`, `create_section_view`, `create_detail_view`, `create_auxiliary_view`, `add_drawing_view_break`, `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow and other drawing-generation Hands not yet audited | P1 |
 | Drawing Export Hands | VERIFIED | `export_pdf`, `export_dwg`, `export_dxf` | `export_pdf`, `export_dwg`, `export_dxf` | - | print workflow is not implemented | P0 maintained |
 | Drawing sheet visual preview Eye | VERIFIED | `capture_drawing_sheet_preview` | Package 61A full-sheet PNG preview: selected Sheet -> `Application.ActiveView.Fit(true)` -> `View.SaveAsBitmap(...)`; verified complete A3 sheet, border/frame, title block, views, dimensions, annotations, overwrite handling, no modal dialogs, and attach-only `--json-file` compatibility | - | native transient sheet camera capture was cropped in live validation; active view zoom/pan state is touched and not restored | P0 maintained |
+| Model visual preview Eye | VERIFIED | `capture_model_preview` | Package 62A active `PartDocument` PNG preview: one orientation per invocation; `Application.ActiveView.Camera` -> requested `ViewOrientationType` -> `Perspective=false` -> `Camera.Fit()` -> `View.SaveAsBitmap(...)`; restores Eye/Target/UpVector/Perspective/PerspectiveAngle; verified front/top/right/iso_top_right/iso_top_left, full model visible, no crop, no modal dialogs, attach-only `--json-file`, PID unchanged | - | display mode is not controlled; current Inventor display style determines appearance; transient camera with `PartDocument.ComponentDefinition` produced no visible model geometry and is not used | P0 maintained |
 | Drawing dimensions | VERIFIED | `get_drawing_dimensions`, `get_general_dimensions_detailed`, `get_dimension_geometry`, `create_linear_dimension`, `create_diameter_dimension`, `create_radius_dimension`, `create_angular_dimension`, `create_ordinate_dimension`, `get_drawing_view_origin_indicator`, `create_drawing_view_origin_indicator`, `create_baseline_dimension`, `create_chain_dimension`, `set_general_dimension_formatted_text`, `set_general_dimension_hide_value`, `set_general_dimension_precision`, `set_general_dimension_model_value_override`, `clear_general_dimension_model_value_override`, `set_general_dimension_style`, `set_general_dimension_layer`, `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits`, `move_drawing_dimension`, `move_general_dimension_text`, `move_linear_dimension`, `center_general_dimension_text`, `delete_drawing_dimension`, `delete_general_dimension` | linear/diameter/radius plus Package 31-39 commands listed in explicit PASS section | `analyze_dimension_layout`, `auto_arrange_dimensions`, `analyze_view_dimension_candidates` | symmetric/chamfer dimensions are not confirmed | P0 maintained |
 | General Dimension Tolerance Pipeline | VERIFIED | `get_general_dimension_tolerance`, `set_general_dimension_tolerance_default`, `set_general_dimension_tolerance_basic`, `set_general_dimension_tolerance_reference`, `set_general_dimension_tolerance_symmetric`, `set_general_dimension_tolerance_deviation`, `set_general_dimension_tolerance_limits`, `set_general_dimension_tolerance_fits` | all Package 37-39 tolerance commands | - | no automatic tolerance selection, no fit validation, no GOST/ESKD tolerance decisions in Runtime | P0 maintained |
 | Hole/thread notes | VERIFIED | `get_hole_thread_notes`, `create_hole_thread_note`, `move_hole_thread_note`, `delete_hole_thread_note`, `set_hole_thread_note_format` | `create_hole_thread_note` verified for standalone `ThreadFeature` thread edge annotation; `get_hole_thread_notes` hardened and verified with referenceKey support | - | stable selector variants are still missing; current commands use indexes | P0 maintained |
@@ -148,6 +149,7 @@ Exact commands explicitly confirmed:
 {"command":"export_dwg"}
 {"command":"export_dxf"}
 {"command":"capture_drawing_sheet_preview"}
+{"command":"capture_model_preview"}
 {"command":"create_parts_list"}
 {"command":"move_parts_list"}
 {"command":"delete_parts_list"}

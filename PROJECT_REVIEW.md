@@ -1,6 +1,71 @@
 # PROJECT REVIEW
 
-## Package 61A checkpoint - current state
+## Package 62A checkpoint - current state
+
+Package 62A adds one read-only model visual Eye:
+
+```json
+{"command":"capture_model_preview"}
+```
+
+Purpose: external multimodal model understanding before or during drawing
+planning. Runtime captures a raster preview of the active `PartDocument` only
+and performs no feature recognition, engineering interpretation, view-choice
+reasoning, or visual analysis.
+
+One invocation captures one requested Inventor/model standard orientation to one
+image. Supported orientations:
+
+```text
+front
+back
+top
+bottom
+left
+right
+iso_top_right
+iso_top_left
+iso_bottom_right
+iso_bottom_left
+current
+```
+
+Live-proven Inventor path:
+
+```text
+active PartDocument
+-> Application.ActiveView
+-> ActiveView.Camera
+-> snapshot Eye / Target / UpVector / Perspective / PerspectiveAngle
+-> set requested ViewOrientationType
+-> Perspective = false
+-> Camera.Fit()
+-> Camera.ApplyWithoutTransition()
+-> View.SaveAsBitmap(...)
+-> restore Eye / Target / UpVector / Perspective / PerspectiveAngle
+```
+
+Live validation on `вал тестовый.ipt` captured complete, uncropped PNG previews
+for `front`, `top`, `right`, `iso_top_right`, and `iso_top_left` through
+attach-only `--json-file` without modal dialogs or Inventor PID changes.
+Zoom/pan independence and camera restoration are verified with
+`activeViewStateTouched = true` and `activeViewStateRestored = true`.
+
+The test recess/cut was visually clear in `front`, `right`, `iso_top_right`,
+and `iso_top_left`; `top` was weak/not useful for the recess. This remains
+external validation evidence only. Runtime does not decide which orientation is
+engineeringly best.
+
+Known limitations: capture uses `Application.ActiveView`; current Inventor
+display style determines appearance; Package 62A does not control display mode.
+`TransientObjects.CreateCamera` with `PartDocument.ComponentDefinition` was
+tested and rejected because the output contained no visible model geometry.
+
+Model visual previews complement structural Eyes. Images help the external LLM
+notice spatially important features; structural Eyes remain authoritative for
+exact dimensions, parameters, topology, sketches, and feature facts.
+
+## Package 61A checkpoint - historical state
 
 Package 61A adds one read-only drawing visual Eye:
 
