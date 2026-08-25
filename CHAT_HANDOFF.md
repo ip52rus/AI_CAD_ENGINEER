@@ -3,10 +3,10 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.59 keep sketch eyes read-only`.
+- Current checkpoint: `v0.60 make save and export modal-safe`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 62A - model visual preview Eye.
-- Registry after Package 62A: `213 registered / 213 unique`, `0` duplicate command names.
+- Latest completed checkpoint: Package 63A - modal-safe explicit save/export.
+- Registry after Package 63A: `213 registered / 213 unique`, `0` duplicate command names.
 - Single-command automation is available via `AI_CAD_ENGINEER.exe --json-file "<command.json>"`; `--json-file` is recommended for PowerShell/automation.
 - Single-command mode writes exactly one complete JSON response to stdout, uses deterministic exit codes, reuses `InventorCommandDispatcher`, and is attach-only.
 - Single-command Inventor attach uses `CLSIDFromProgIDEx("Inventor.Application")`, fallback `CLSIDFromProgID`, then `oleaut32!GetActiveObject`; the program entrypoint is `[STAThread]`.
@@ -16,7 +16,8 @@
 - `get_model_feature_tree` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
 - Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported. `get_sketches` preserves pre-existing Inventor edit state and derives `isActive` from `Application.ActiveEditObject` identity, not `PlanarSketch.Edit()`.
-- Working tree is expected to be clean after the v0.59 checkpoint commit.
+- Explicit save/export Hands `save_document`, `save_document_as`, `export_pdf`, `export_dwg`, and `export_dxf` use scoped `Application.SilentOperation`, restore the previous value in `finally`, and report dirty snapshots. Live tests produced no modal Save dialog; referenced source IPT remained `dirty=false`; no unrelated open document was saved. `close_document` modal semantics remain unaudited/deferred.
+- Working tree is expected to be clean after the v0.60 checkpoint commit.
 
 ## Architecture Rules
 

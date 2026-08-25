@@ -24,8 +24,9 @@ Current checkpoint context:
 - Package 60A is complete.
 - Package 61A is complete.
 - Package 62A is complete.
-- Current checkpoint: `v0.59 keep sketch eyes read-only`.
-- Live registry after Package 62A: `213 registered / 213 unique`, no duplicate command names.
+- Package 63A is complete.
+- Current checkpoint: `v0.60 make save and export modal-safe`.
+- Live registry after Package 63A: `213 registered / 213 unique`, no duplicate command names.
 - Deterministic single-command automation is available via `AI_CAD_ENGINEER.exe --json-file "<command.json>"`; `--json-file` is recommended for PowerShell/automation.
 - Single-command mode emits exactly one JSON response on stdout, uses deterministic exit codes, reuses `InventorCommandDispatcher`, and is attach-only.
 - Single-command attach uses `CLSIDFromProgIDEx("Inventor.Application")`, fallback `CLSIDFromProgID`, then `oleaut32!GetActiveObject`; the entrypoint is `[STAThread]`.
@@ -35,6 +36,7 @@ Current checkpoint context:
 - `get_model_feature_tree` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Features`; DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Parameters`; DrawingDocument referenced-model behavior is preserved.
 - Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported. `get_sketches` preserves pre-existing Inventor edit state and derives `isActive` from `Application.ActiveEditObject` identity, not `PlanarSketch.Edit()`.
+- Explicit save/export Hands `save_document`, `save_document_as`, `export_pdf`, `export_dwg`, and `export_dxf` use scoped `Application.SilentOperation`: previous value is restored in `finally`, live tests produced no modal Save dialog, referenced source IPT remained `dirty=false`, and no unrelated open document was saved. `close_document` modal semantics remain unaudited/deferred.
 
 Verified Drawing Generation / Export Hands:
 

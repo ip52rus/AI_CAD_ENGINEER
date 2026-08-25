@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after Package 62A bugfix:
+Current checkpoint after Package 63A:
 
 ```text
-v0.59 keep sketch eyes read-only
+v0.60 make save and export modal-safe
 ```
 
 ## Runtime architecture
@@ -48,7 +48,7 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 62A checkpoint:
+Live command audit after Package 63A checkpoint:
 
 ```text
 213 registered JSON commands
@@ -59,6 +59,36 @@ Live command audit after Package 62A checkpoint:
 ```
 
 Always recalculate from the live repository before relying on these numbers.
+
+## Package 63A checkpoint
+
+Package 63A hardens existing explicit save/export Hands against Inventor modal
+Save dialogs. No command was added.
+
+Guarded commands:
+
+```text
+save_document
+save_document_as
+export_pdf
+export_dwg
+export_dxf
+```
+
+Each command snapshots `Application.SilentOperation`, sets it to `true` only
+around the explicit save/export operation, and restores the previous value in
+`finally`. Responses report `silentOperationBefore`,
+`silentOperationDuring`, `silentOperationAfter`,
+`silentOperationRestored`, and open-document dirty snapshots before/after.
+
+Live validation on `вал тестовый_E2E_ESKD_02.idw` verified
+`save_document`, `export_pdf`, and `save_document_as` with
+`saveCopyAs=true`: no modal Save dialog appeared, Inventor PID was unchanged,
+the referenced source `вал тестовый.ipt` remained `dirty=false`, and no
+unrelated document was saved or dirtied.
+
+`close_document` modal semantics remain unaudited and deferred; Package 63A
+does not broaden save/export hardening to document close.
 
 ## Package 62A checkpoint
 

@@ -65,6 +65,17 @@ public sealed class ExportDxfCommand : IInventorCommand
             return CreateError("Invalid overwrite value.", diagnostics);
         }
 
+        if (!DocumentCommandSupport.TryGetOptionalBoolean(
+                root,
+                "silent",
+                true,
+                out bool silent,
+                out string silentError))
+        {
+            diagnostics.Add(new { scope = "input.silent", message = silentError });
+            return CreateError("Invalid silent value.", diagnostics);
+        }
+
         bool fileExistedBefore = System.IO.File.Exists(outputPath);
         long? fileSizeBefore = null;
         DateTime? lastWriteUtcBefore = null;
@@ -96,138 +107,170 @@ public sealed class ExportDxfCommand : IInventorCommand
         TranslatorAddIn dxfTranslator =
             translator!;
 
+        List<object> openDocumentsBefore =
+            DocumentCommandSupport
+                .SnapshotOpenDocuments(
+                    _inventor);
+
+        bool wasDirty =
+            document.Dirty;
+
+        bool silentOperationBefore;
+        bool silentOperationDuring;
+        bool silentOperationAfter;
+
         try
         {
-            TranslationContext context =
-                _inventor.TransientObjects.CreateTranslationContext();
-
-            context.Type =
-                IOMechanismEnum.kFileBrowseIOMechanism;
-
-            NameValueMap options =
-                _inventor.TransientObjects.CreateNameValueMap();
-
-            bool hasSaveCopyAsOptions =
-                dxfTranslator.HasSaveCopyAsOptions[
-                    document,
-                    context,
-                    options];
-
-            diagnostics.Add(new
+            using (DocumentCommandSupport.SilentOperationScope silentScope =
+                   DocumentCommandSupport
+                       .BeginSilentOperation(
+                           _inventor,
+                           silent))
             {
-                scope = "TranslatorAddIn.HasSaveCopyAsOptions",
-                hasSaveCopyAsOptions
-            });
+                silentOperationBefore =
+                    silentScope.PreviousSilentOperation;
 
-            List<object> optionEntries =
-                new();
+                silentOperationDuring =
+                    silentScope.AppliedSilentOperation;
 
-            bool exportAcadIniFileExistsBefore =
-                false;
+                TranslationContext context =
+                    _inventor.TransientObjects.CreateTranslationContext();
 
-            for (int optionIndex = 1;
-                 optionIndex <= options.Count;
-                 optionIndex++)
-            {
-                string optionName =
-                    options.Name[optionIndex];
+                context.Type =
+                    IOMechanismEnum.kFileBrowseIOMechanism;
 
-                if (string.Equals(
-                        optionName,
-                        "Export_Acad_IniFile",
-                        StringComparison.OrdinalIgnoreCase))
+                NameValueMap options =
+                    _inventor.TransientObjects.CreateNameValueMap();
+
+                bool hasSaveCopyAsOptions =
+                    dxfTranslator.HasSaveCopyAsOptions[
+                        document,
+                        context,
+                        options];
+
+                diagnostics.Add(new
                 {
-                    exportAcadIniFileExistsBefore =
-                        true;
-                }
+                    scope = "TranslatorAddIn.HasSaveCopyAsOptions",
+                    hasSaveCopyAsOptions
+                });
 
-                try
+                List<object> optionEntries =
+                    new();
+
+                bool exportAcadIniFileExistsBefore =
+                    false;
+
+                for (int optionIndex = 1;
+                     optionIndex <= options.Count;
+                     optionIndex++)
                 {
-                    object? optionValue =
-                        options.Value[optionName];
+                    string optionName =
+                        options.Name[optionIndex];
 
-                    optionEntries.Add(new
-                    {
-                        index =
-                            optionIndex,
-
-                        name =
+                    if (string.Equals(
                             optionName,
-
-                        value =
-                            optionValue?.ToString()
-                    });
-                }
-                catch (Exception exception)
-                {
-                    optionEntries.Add(new
+                            "Export_Acad_IniFile",
+                            StringComparison.OrdinalIgnoreCase))
                     {
-                        index =
-                            optionIndex,
+                        exportAcadIniFileExistsBefore =
+                            true;
+                    }
 
-                        name =
-                            optionName,
+                    try
+                    {
+                        object? optionValue =
+                            options.Value[optionName];
 
-                        valueReadError =
-                            exception.Message,
+                        optionEntries.Add(new
+                        {
+                            index =
+                                optionIndex,
 
-                        exceptionType =
-                            exception.GetType().FullName
-                    });
+                            name =
+                                optionName,
+
+                            value =
+                                optionValue?.ToString()
+                        });
+                    }
+                    catch (Exception exception)
+                    {
+                        optionEntries.Add(new
+                        {
+                            index =
+                                optionIndex,
+
+                            name =
+                                optionName,
+
+                            valueReadError =
+                                exception.Message,
+
+                            exceptionType =
+                                exception.GetType().FullName
+                        });
+                    }
                 }
-            }
 
-            diagnostics.Add(new
-            {
-                scope =
-                    "NameValueMap.AfterHasSaveCopyAsOptions",
+                diagnostics.Add(new
+                {
+                    scope =
+                        "NameValueMap.AfterHasSaveCopyAsOptions",
 
-                count =
-                    options.Count,
+                    count =
+                        options.Count,
 
-                exportAcadIniFileExistsBefore,
-
-                entries =
-                    optionEntries
-            });
-
-            options.Value["Export_Acad_IniFile"] =
-                iniPath;
-
-            diagnostics.Add(new
-            {
-                scope =
-                    "NameValueMap.Export_Acad_IniFile",
-
-                mechanism =
-                    "NameValueMap.Value setter",
-
-                existedBefore =
                     exportAcadIniFileExistsBefore,
 
-                value =
-                    iniPath
-            });
+                    entries =
+                        optionEntries
+                });
 
-            DataMedium dataMedium =
-                _inventor.TransientObjects.CreateDataMedium();
+                options.Value["Export_Acad_IniFile"] =
+                    iniPath;
 
-            dataMedium.FileName =
-                outputPath;
+                diagnostics.Add(new
+                {
+                    scope =
+                        "NameValueMap.Export_Acad_IniFile",
 
-            dxfTranslator.SaveCopyAs(
-                document,
-                context,
-                options,
-                dataMedium);
+                    mechanism =
+                        "NameValueMap.Value setter",
+
+                    existedBefore =
+                        exportAcadIniFileExistsBefore,
+
+                    value =
+                        iniPath
+                });
+
+                DataMedium dataMedium =
+                    _inventor.TransientObjects.CreateDataMedium();
+
+                dataMedium.FileName =
+                    outputPath;
+
+                dxfTranslator.SaveCopyAs(
+                    document,
+                    context,
+                    options,
+                    dataMedium);
+            }
+
+            silentOperationAfter =
+                _inventor.SilentOperation;
         }
         catch (Exception exception)
         {
+            silentOperationAfter =
+                _inventor.SilentOperation;
+
             diagnostics.Add(new
             {
                 scope = "TranslatorAddIn.SaveCopyAs",
                 message = exception.Message,
-                exceptionType = exception.GetType().FullName
+                exceptionType = exception.GetType().FullName,
+                silentOperationAfter
             });
 
             return CreateError("DXF export failed.", diagnostics);
@@ -248,6 +291,11 @@ public sealed class ExportDxfCommand : IInventorCommand
             return CreateError("DXF export did not create the expected file.", diagnostics);
         }
 
+        List<object> openDocumentsAfter =
+            DocumentCommandSupport
+                .SnapshotOpenDocuments(
+                    _inventor);
+
         return CreateSuccess(new
         {
             capability = "export_dxf",
@@ -263,7 +311,17 @@ public sealed class ExportDxfCommand : IInventorCommand
             fileSizeBytes = outputFile.Length,
             lastWriteUtc = outputFile.LastWriteTimeUtc,
             dxfTranslatorClientId = DxfTranslatorClientId,
+            silent,
+            silentOperationBefore,
+            silentOperationDuring,
+            silentOperationAfter,
+            silentOperationRestored =
+                silentOperationAfter ==
+                silentOperationBefore,
+            wasDirty,
             dirty = document.Dirty,
+            openDocumentsBefore,
+            openDocumentsAfter,
             diagnostics
         });
     }

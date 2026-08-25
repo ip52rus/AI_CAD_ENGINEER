@@ -49,6 +49,19 @@ public class SaveDocumentAsCommand : IInventorCommand
                     saveCopyAsError);
         }
 
+        if (!DocumentCommandSupport
+                .TryGetOptionalBoolean(
+                    root,
+                    "silent",
+                    true,
+                    out bool silent,
+                    out string silentError))
+        {
+            return DocumentCommandSupport
+                .CreateError(
+                    silentError);
+        }
+
         Document? document;
 
         if (root.TryGetProperty(
@@ -106,14 +119,47 @@ public class SaveDocumentAsCommand : IInventorCommand
                     directory);
         }
 
+        List<object> openDocumentsBefore =
+            DocumentCommandSupport
+                .SnapshotOpenDocuments(
+                    _inventor);
+
+        string previousFileName =
+            document.FullFileName;
+
+        bool wasDirty =
+            document.Dirty;
+
+        bool silentOperationBefore;
+        bool silentOperationDuring;
+        bool silentOperationAfter;
+
         try
         {
-            string previousFileName =
-                document.FullFileName;
+            using (DocumentCommandSupport.SilentOperationScope silentScope =
+                   DocumentCommandSupport
+                       .BeginSilentOperation(
+                           _inventor,
+                           silent))
+            {
+                silentOperationBefore =
+                    silentScope.PreviousSilentOperation;
 
-            document.SaveAs(
-                filePath,
-                saveCopyAs);
+                silentOperationDuring =
+                    silentScope.AppliedSilentOperation;
+
+                document.SaveAs(
+                    filePath,
+                    saveCopyAs);
+            }
+
+            silentOperationAfter =
+                _inventor.SilentOperation;
+
+            List<object> openDocumentsAfter =
+                DocumentCommandSupport
+                    .SnapshotOpenDocuments(
+                        _inventor);
 
             return DocumentCommandSupport
                 .CreateSuccess(
@@ -135,16 +181,40 @@ public class SaveDocumentAsCommand : IInventorCommand
                         currentFileName =
                             document.FullFileName,
 
-                        saveCopyAs
+                        saveCopyAs,
+
+                        silent,
+
+                        silentOperationBefore,
+
+                        silentOperationDuring,
+
+                        silentOperationAfter,
+
+                        silentOperationRestored =
+                            silentOperationAfter ==
+                            silentOperationBefore,
+
+                        wasDirty,
+
+                        dirty =
+                            document.Dirty,
+
+                        openDocumentsBefore,
+
+                        openDocumentsAfter
                     });
         }
         catch (Exception exception)
         {
+            silentOperationAfter =
+                _inventor.SilentOperation;
+
             return DocumentCommandSupport
                 .CreateError(
                     $"Не удалось сохранить документ " +
                     $"\"{document.DisplayName}\".",
-                    exception.Message);
+                    $"{exception.Message} SilentOperationAfter={silentOperationAfter}.");
         }
     }
 }

@@ -6,6 +6,67 @@ namespace AI_CAD_ENGINEER.InventorControl.Commands;
 
 internal static class DocumentCommandSupport
 {
+    public static SilentOperationScope
+        BeginSilentOperation(
+            Inventor.Application inventor,
+            bool silent)
+    {
+        ArgumentNullException.ThrowIfNull(
+            inventor);
+
+        return new SilentOperationScope(
+            inventor,
+            silent);
+    }
+
+    public static List<object>
+        SnapshotOpenDocuments(
+            Inventor.Application inventor)
+    {
+        ArgumentNullException.ThrowIfNull(
+            inventor);
+
+        List<object> documents =
+            new();
+
+        int index =
+            1;
+
+        foreach (Document document
+                 in inventor.Documents)
+        {
+            bool isActive =
+                ReferenceEquals(
+                    document,
+                    inventor.ActiveDocument);
+
+            documents.Add(
+                new
+                {
+                    index,
+
+                    name =
+                        document.DisplayName,
+
+                    fullFileName =
+                        document.FullFileName,
+
+                    documentType =
+                        document.DocumentType
+                            .ToString(),
+
+                    dirty =
+                        document.Dirty,
+
+                    isActive
+                });
+
+            index++;
+        }
+
+        return documents;
+    }
+
     public static Document? FindDocument(
         Inventor.Application inventor,
         string documentNameOrPath)
@@ -182,5 +243,68 @@ internal static class DocumentCommandSupport
                 JavaScriptEncoder
                     .UnsafeRelaxedJsonEscaping
         };
+    }
+
+    internal sealed class SilentOperationScope :
+        IDisposable
+    {
+        private readonly Inventor.Application
+            _inventor;
+
+        private readonly bool
+            _previousSilentOperation;
+
+        private bool
+            _disposed;
+
+        public SilentOperationScope(
+            Inventor.Application inventor,
+            bool silent)
+        {
+            _inventor =
+                inventor;
+
+            _previousSilentOperation =
+                inventor.SilentOperation;
+
+            RequestedSilentOperation =
+                silent;
+
+            inventor.SilentOperation =
+                silent;
+
+            AppliedSilentOperation =
+                inventor.SilentOperation;
+        }
+
+        public bool PreviousSilentOperation =>
+            _previousSilentOperation;
+
+        public bool RequestedSilentOperation
+        {
+            get;
+        }
+
+        public bool AppliedSilentOperation
+        {
+            get;
+        }
+
+        public bool CurrentSilentOperation =>
+            _inventor.SilentOperation;
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _inventor.SilentOperation =
+                _previousSilentOperation;
+
+            _disposed =
+                true;
+        }
     }
 }

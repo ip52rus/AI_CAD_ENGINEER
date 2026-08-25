@@ -47,6 +47,17 @@ public sealed class ExportPdfCommand : IInventorCommand
             return CreateError("Invalid overwrite value.", diagnostics);
         }
 
+        if (!DocumentCommandSupport.TryGetOptionalBoolean(
+                root,
+                "silent",
+                true,
+                out bool silent,
+                out string silentError))
+        {
+            diagnostics.Add(new { scope = "input.silent", message = silentError });
+            return CreateError("Invalid silent value.", diagnostics);
+        }
+
         bool fileExistedBefore = System.IO.File.Exists(outputPath);
         long? fileSizeBefore = null;
         DateTime? lastWriteUtcBefore = null;
@@ -78,36 +89,68 @@ public sealed class ExportPdfCommand : IInventorCommand
         TranslatorAddIn pdfTranslator =
             translator!;
 
+        List<object> openDocumentsBefore =
+            DocumentCommandSupport
+                .SnapshotOpenDocuments(
+                    _inventor);
+
+        bool wasDirty =
+            document.Dirty;
+
+        bool silentOperationBefore;
+        bool silentOperationDuring;
+        bool silentOperationAfter;
+
         try
         {
-            TranslationContext context =
-                _inventor.TransientObjects.CreateTranslationContext();
+            using (DocumentCommandSupport.SilentOperationScope silentScope =
+                   DocumentCommandSupport
+                       .BeginSilentOperation(
+                           _inventor,
+                           silent))
+            {
+                silentOperationBefore =
+                    silentScope.PreviousSilentOperation;
 
-            context.Type =
-                IOMechanismEnum.kFileBrowseIOMechanism;
+                silentOperationDuring =
+                    silentScope.AppliedSilentOperation;
 
-            NameValueMap options =
-                _inventor.TransientObjects.CreateNameValueMap();
+                TranslationContext context =
+                    _inventor.TransientObjects.CreateTranslationContext();
 
-            DataMedium dataMedium =
-                _inventor.TransientObjects.CreateDataMedium();
+                context.Type =
+                    IOMechanismEnum.kFileBrowseIOMechanism;
 
-            dataMedium.FileName =
-                outputPath;
+                NameValueMap options =
+                    _inventor.TransientObjects.CreateNameValueMap();
 
-            pdfTranslator.SaveCopyAs(
-                document,
-                context,
-                options,
-                dataMedium);
+                DataMedium dataMedium =
+                    _inventor.TransientObjects.CreateDataMedium();
+
+                dataMedium.FileName =
+                    outputPath;
+
+                pdfTranslator.SaveCopyAs(
+                    document,
+                    context,
+                    options,
+                    dataMedium);
+            }
+
+            silentOperationAfter =
+                _inventor.SilentOperation;
         }
         catch (Exception exception)
         {
+            silentOperationAfter =
+                _inventor.SilentOperation;
+
             diagnostics.Add(new
             {
                 scope = "TranslatorAddIn.SaveCopyAs",
                 message = exception.Message,
-                exceptionType = exception.GetType().FullName
+                exceptionType = exception.GetType().FullName,
+                silentOperationAfter
             });
 
             return CreateError("PDF export failed.", diagnostics);
@@ -128,6 +171,11 @@ public sealed class ExportPdfCommand : IInventorCommand
             return CreateError("PDF export did not create the expected file.", diagnostics);
         }
 
+        List<object> openDocumentsAfter =
+            DocumentCommandSupport
+                .SnapshotOpenDocuments(
+                    _inventor);
+
         return CreateSuccess(new
         {
             capability = "export_pdf",
@@ -142,7 +190,17 @@ public sealed class ExportPdfCommand : IInventorCommand
             fileSizeBytes = outputFile.Length,
             lastWriteUtc = outputFile.LastWriteTimeUtc,
             pdfTranslatorClientId = PdfTranslatorClientId,
+            silent,
+            silentOperationBefore,
+            silentOperationDuring,
+            silentOperationAfter,
+            silentOperationRestored =
+                silentOperationAfter ==
+                silentOperationBefore,
+            wasDirty,
             dirty = document.Dirty,
+            openDocumentsBefore,
+            openDocumentsAfter,
             diagnostics
         });
     }

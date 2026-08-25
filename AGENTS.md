@@ -848,6 +848,46 @@ testing proved the semantics are `CenterlineType`-dependent:
 - `kCenteredPatternCenterlineType` normalized caller values;
 - `kBisectorCenterlineType` constrained/transformed caller values.
 
+## Current milestone addendum after Package 63A
+
+```text
+v0.60 make save and export modal-safe
+```
+
+Package 63A hardens existing explicit save/export commands:
+
+```text
+save_document
+save_document_as
+export_pdf
+export_dwg
+export_dxf
+```
+
+Each command snapshots `Application.SilentOperation`, sets it to `true` only
+around the explicit `Document.Save`, `Document.SaveAs`, or translator
+`SaveCopyAs` operation, and restores the previous value in `finally`. The
+commands report the previous/during/after SilentOperation values and
+open-document dirty snapshots before/after.
+
+Live validation on `вал тестовый_E2E_ESKD_02.idw` verified `save_document`,
+`export_pdf`, and `save_document_as` with `saveCopyAs=true`: no modal Save
+dialog appeared, Inventor PID was unchanged, the referenced source
+`вал тестовый.ipt` remained `dirty=false`, and no unrelated open document was
+saved or dirtied.
+
+No command was added. Registry remains:
+
+```text
+213 registered JSON commands
+213 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+`close_document` modal semantics remain unaudited/deferred and are not part of
+Package 63A.
+
 ## Current milestone addendum after Package 62A bugfix
 
 ```text

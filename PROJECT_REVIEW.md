@@ -1,5 +1,22 @@
 # PROJECT REVIEW
 
+## Package 63A checkpoint - current state
+
+Explicit document save/export Hands are modal-safe for autonomous runs.
+`save_document`, `save_document_as`, `export_pdf`, `export_dwg`, and
+`export_dxf` snapshot `Application.SilentOperation`, set it to `true` only for
+the requested save/export operation, and restore the previous value in
+`finally`.
+
+Live validation on `вал тестовый_E2E_ESKD_02.idw` verified
+`save_document`, `export_pdf`, and `save_document_as` with
+`saveCopyAs=true`: no Inventor modal Save dialog appeared, Inventor PID was
+unchanged, the referenced source `вал тестовый.ipt` remained `dirty=false`,
+and no unrelated open document was saved or dirtied.
+
+No command was added. `close_document` modal semantics remain
+unaudited/deferred and were not changed by Package 63A.
+
 ## Package 62A bugfix checkpoint - current state
 
 `get_sketches` is read-only and preserves pre-existing Inventor edit state.

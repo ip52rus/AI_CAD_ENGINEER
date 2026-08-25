@@ -75,12 +75,55 @@ public class SaveDocumentCommand : IInventorCommand
                     "Используй команду save_document_as.");
         }
 
+        if (!DocumentCommandSupport
+                .TryGetOptionalBoolean(
+                    root,
+                    "silent",
+                    true,
+                    out bool silent,
+                    out string silentError))
+        {
+            return DocumentCommandSupport
+                .CreateError(
+                    silentError);
+        }
+
+        List<object> openDocumentsBefore =
+            DocumentCommandSupport
+                .SnapshotOpenDocuments(
+                    _inventor);
+
+        bool wasDirty =
+            document.Dirty;
+
+        bool silentOperationBefore;
+        bool silentOperationDuring;
+        bool silentOperationAfter;
+
         try
         {
-            bool wasDirty =
-                document.Dirty;
+            using (DocumentCommandSupport.SilentOperationScope silentScope =
+                   DocumentCommandSupport
+                       .BeginSilentOperation(
+                           _inventor,
+                           silent))
+            {
+                silentOperationBefore =
+                    silentScope.PreviousSilentOperation;
 
-            document.Save();
+                silentOperationDuring =
+                    silentScope.AppliedSilentOperation;
+
+                document.Save();
+            }
+
+            silentOperationAfter =
+                _inventor.SilentOperation;
+
+            List<object> openDocumentsAfter =
+                DocumentCommandSupport
+                    .SnapshotOpenDocuments(
+                        _inventor);
 
             return DocumentCommandSupport
                 .CreateSuccess(
@@ -95,19 +138,38 @@ public class SaveDocumentCommand : IInventorCommand
                         fullFileName =
                             document.FullFileName,
 
+                        silent,
+
+                        silentOperationBefore,
+
+                        silentOperationDuring,
+
+                        silentOperationAfter,
+
+                        silentOperationRestored =
+                            silentOperationAfter ==
+                            silentOperationBefore,
+
                         wasDirty,
 
                         dirty =
-                            document.Dirty
+                            document.Dirty,
+
+                        openDocumentsBefore,
+
+                        openDocumentsAfter
                     });
         }
         catch (Exception exception)
         {
+            silentOperationAfter =
+                _inventor.SilentOperation;
+
             return DocumentCommandSupport
                 .CreateError(
                     $"Не удалось сохранить документ " +
                     $"\"{document.DisplayName}\".",
-                    exception.Message);
+                    $"{exception.Message} SilentOperationAfter={silentOperationAfter}.");
         }
     }
 }
