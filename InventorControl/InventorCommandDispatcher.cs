@@ -61,6 +61,9 @@ public class InventorCommandDispatcher
     private readonly SetDrawingViewLabelVisibilityCommand
         _setDrawingViewLabelVisibilityCommand;
 
+    private readonly MoveDrawingViewAnnotationTextCommand
+        _moveDrawingViewAnnotationTextCommand;
+
     private readonly SetDrawingViewScaleInheritanceCommand
         _setDrawingViewScaleInheritanceCommand;
 
@@ -724,6 +727,10 @@ public class InventorCommandDispatcher
 
         _setDrawingViewLabelVisibilityCommand =
             new SetDrawingViewLabelVisibilityCommand(
+                inventor);
+
+        _moveDrawingViewAnnotationTextCommand =
+            new MoveDrawingViewAnnotationTextCommand(
                 inventor);
 
         _setDrawingViewScaleInheritanceCommand =
@@ -1617,6 +1624,10 @@ public class InventorCommandDispatcher
 
                 "set_drawing_view_label_visibility" =>
                     _setDrawingViewLabelVisibilityCommand.Execute(
+                        root),
+
+                "move_drawing_view_annotation_text" =>
+                    _moveDrawingViewAnnotationTextCommand.Execute(
                         root),
 
                 "set_drawing_view_scale_inheritance" =>

@@ -1,5 +1,25 @@
 # PROJECT REVIEW
 
+## Package 65A checkpoint - current state
+
+`get_drawing_layout_map` now includes factual `DrawingView.ViewAnnotation`
+readback and detail-definition facts where Inventor exposes them. The new
+atomic Hand `move_drawing_view_annotation_text` moves one selected
+`DrawingViewAnnotation` text slot by setting `TextPosition` or
+`SecondTextPosition` to an explicit caller-supplied sheet point.
+
+Live validation on a disposable copy of `вал тестовый_E2E_ESKD_02.idw`
+verified detail view `РЕЦЕСС`: primary `Text="РЕЦЕСС"` at `(8,13.4)` was the
+visible source-side label; moving primary to `(5,13.4)` returned actual
+`(5,13.4)` with `positionNormalizedByInventor=false`; preview confirmed
+movement; restoring to `(8,13.4)` passed. Detail fence, detail view position,
+source/parent view, and source IPT `dirty=false` were preserved.
+
+Known limitations: `DrawingViewAnnotation.RangeBox` was unavailable on the
+fixture, `SecondTextPosition` / `SecondFormattedText` may throw COM exceptions,
+and `DrawingViewAnnotation.GetReferenceKey` was not readable in the live
+fixture.
+
 ## Package 64A checkpoint - current state
 
 `get_drawing_layout_map` is a VERIFIED read-only Eye for normalized factual

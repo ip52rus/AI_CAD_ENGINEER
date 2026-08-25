@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after Package 64A:
+Current checkpoint after Package 65A:
 
 ```text
-v0.61 add drawing layout map eye
+v0.62 add detail view annotation text control
 ```
 
 ## Runtime architecture
@@ -48,17 +48,74 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 64A checkpoint:
+Live command audit after Package 65A checkpoint:
 
 ```text
-214 registered JSON commands
-214 unique registered JSON commands
+215 registered JSON commands
+215 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
 ```
 
 Always recalculate from the live repository before relying on these numbers.
+
+## Package 65A checkpoint
+
+Package 65A extends the existing `get_drawing_layout_map` Eye with factual
+`DrawingView.ViewAnnotation` readback and detail-definition facts where
+Inventor exposes them. Runtime still reports facts only and performs no detail
+layout decisions, collision detection, automatic source-label positioning,
+ESKD/GOST judgment, or fence movement.
+
+Package 65A adds one atomic Hand:
+
+```text
+move_drawing_view_annotation_text
+```
+
+Contract:
+
+```json
+{
+  "command": "move_drawing_view_annotation_text",
+  "sheetName": "Лист:1",
+  "viewName": "РЕЦЕСС",
+  "textSlot": "primary",
+  "position": {
+    "x": 5.0,
+    "y": 13.4
+  }
+}
+```
+
+Supported `textSlot` values are `primary` and `second`. The external caller
+selects the slot; Runtime does not infer which visible text should be moved.
+
+Live validation on a disposable copy of
+`вал тестовый_E2E_ESKD_02.idw` verified detail view `РЕЦЕСС`:
+
+- `ViewAnnotation.Text = "РЕЦЕСС"`;
+- primary `TextPosition = (8,13.4)`;
+- primary slot was the visible source-side label;
+- moving primary to `(5,13.4)` produced actual `(5,13.4)`;
+- `positionNormalizedByInventor=false`;
+- visual preview confirmed movement;
+- restoring to `(8,13.4)` passed;
+- detail fence, detail view position, source/parent view, and source IPT
+  `dirty=false` were preserved.
+
+Live-proven read facts include `DrawingView.ViewAnnotation`,
+`DrawingViewAnnotation.Text`, `FormattedText`, `TextPosition`, `SecondText`,
+`SecondFormattedText`, `SecondTextPosition`, and detail-definition properties
+`DisplayDefinitionInBase`, `CircularFence`, `FenceCenter`, `FenceRadius`,
+`FenceCornerOne`, and `FenceCornerTwo`.
+
+Known limitations:
+
+- `DrawingViewAnnotation.RangeBox` was unavailable on the fixture;
+- `SecondTextPosition` / `SecondFormattedText` may throw COM exceptions;
+- `DrawingViewAnnotation.GetReferenceKey` was not readable in the live fixture.
 
 ## Package 64A checkpoint
 

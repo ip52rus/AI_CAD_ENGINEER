@@ -26,14 +26,16 @@ Current checkpoint context:
 - Package 62A is complete.
 - Package 63A is complete.
 - Package 64A is complete.
-- Current checkpoint: `v0.61 add drawing layout map eye`.
-- Live registry after Package 64A: `214 registered / 214 unique`, no duplicate command names.
+- Package 65A is complete.
+- Current checkpoint: `v0.62 add detail view annotation text control`.
+- Live registry after Package 65A: `215 registered / 215 unique`, no duplicate command names.
 - Deterministic single-command automation is available via `AI_CAD_ENGINEER.exe --json-file "<command.json>"`; `--json-file` is recommended for PowerShell/automation.
 - Single-command mode emits exactly one JSON response on stdout, uses deterministic exit codes, reuses `InventorCommandDispatcher`, and is attach-only.
 - Single-command attach uses `CLSIDFromProgIDEx("Inventor.Application")`, fallback `CLSIDFromProgID`, then `oleaut32!GetActiveObject`; the entrypoint is `[STAThread]`.
 - Single-command mode does not call `Activator.CreateInstance` and does not launch Inventor. It must run from a process context with access to the same user/session COM ROT as Inventor; the managed Codex sandbox may not expose that ROT.
 - `capture_drawing_sheet_preview` is live-verified as a read-only visual Eye for external multimodal drawing QA. It captures the selected drawing sheet via `Application.ActiveView.Fit(true)` and `View.SaveAsBitmap(...)`, outputs PNG, preserves sheet aspect ratio, and performs no image interpretation or document-content mutation. Known limitation: viewport/camera state is touched and previous zoom/pan is not restored.
-- `get_drawing_layout_map` is live-verified as a read-only normalized factual sheet-space Eye for external post-content-freeze global layout reasoning. It returns sheet geometry, reserved areas, drawing views, dimensions, notes, tables, center annotations, symbols, common layout envelopes where available, stable reference keys where Inventor exposes them, and isolated diagnostics. Runtime performs no collision detection, layout scoring, automatic placement, annotation optimization, visual interpretation, or ESKD/GOST judgment. Live validation returned 4 views, 6 dimensions, 9 general notes, 2 hole/thread notes, 3 sketched symbols, border bounds `0,0 -> 42,29.7`, title block bounds `23,0 -> 42,6`, and 6/6 dimensions with text bounds, dimension-line geometry, and both extension-line geometries. Known limitations: hole/thread note leader geometry is not always exposed, dimension parent-view linkage remains partial, view label bounds are not reliably available, and some symbol subtypes may lack bounds.
+- `get_drawing_layout_map` is live-verified as a read-only normalized factual sheet-space Eye for external post-content-freeze global layout reasoning. It returns sheet geometry, reserved areas, drawing views, dimensions, notes, tables, center annotations, symbols, common layout envelopes where available, stable reference keys where Inventor exposes them, and isolated diagnostics. Package 65A extends drawing views with `DrawingView.ViewAnnotation` and detail-definition facts. Runtime performs no collision detection, layout scoring, automatic placement, annotation optimization, visual interpretation, or ESKD/GOST judgment. Known limitations: hole/thread note leader geometry is not always exposed, dimension parent-view linkage remains partial, view label bounds are not reliably available, some symbol subtypes may lack bounds, and `DrawingViewAnnotation.RangeBox` / referenceKey may be unavailable.
+- `move_drawing_view_annotation_text` is live-verified as an atomic Hand for moving one explicit drawing-view annotation text slot. It sets `DrawingViewAnnotation.TextPosition` for `textSlot="primary"` or `SecondTextPosition` for `textSlot="second"`. Live validation on detail view `РЕЦЕСС` moved the visible source-side primary text `(8,13.4) -> (5,13.4)`, restored it to `(8,13.4)`, and preserved the detail fence, detail view position, source/parent view, and source IPT `dirty=false`.
 - `capture_model_preview` is live-verified as a read-only visual Eye for external multimodal model understanding. It supports active `PartDocument` only, captures one requested Inventor/model standard orientation per invocation, uses `Application.ActiveView.Camera` with `Camera.Fit()` and `View.SaveAsBitmap(...)`, restores Eye/Target/UpVector/Perspective/PerspectiveAngle, works through attach-only `--json-file`, and performs no model mutation or visual interpretation. Supported orientations: `front`, `back`, `top`, `bottom`, `left`, `right`, `iso_top_right`, `iso_top_left`, `iso_bottom_right`, `iso_bottom_left`, `current`. Current Inventor display style determines appearance.
 - `get_model_feature_tree` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Features`; DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Parameters`; DrawingDocument referenced-model behavior is preserved.
@@ -55,6 +57,7 @@ Verified Drawing Generation / Export Hands:
 - `export_dxf`
 - `capture_drawing_sheet_preview`
 - `get_drawing_layout_map`
+- `move_drawing_view_annotation_text`
 - `capture_model_preview`
 - `create_parts_list`
 - `move_parts_list`

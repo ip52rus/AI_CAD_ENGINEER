@@ -527,6 +527,18 @@ internal static class DrawingLayoutMapReadSupport
                 view,
                 diagnostics);
 
+        object? viewAnnotation =
+            ReadViewAnnotation(
+                drawingDocument,
+                view,
+                parentView,
+                diagnostics);
+
+        object? detailDefinition =
+            ReadDetailDefinition(
+                view,
+                diagnostics);
+
         return new
         {
             index,
@@ -614,6 +626,8 @@ internal static class DrawingLayoutMapReadSupport
                     "ShowLabel",
                     diagnostics),
             label,
+            viewAnnotation,
+            detailDefinition,
             referencedDocument =
                 ReadReferencedDocument(
                     view,
@@ -626,6 +640,192 @@ internal static class DrawingLayoutMapReadSupport
                     parentView),
             propertyDiagnostics =
                 diagnostics
+        };
+    }
+
+    private static object ReadViewAnnotation(
+        DrawingDocument drawingDocument,
+        DrawingView view,
+        object? sourceView,
+        List<object> ownerDiagnostics)
+    {
+        List<object> diagnostics = new();
+
+        object? annotation =
+            SafeObjectProperty(
+                view,
+                "ViewAnnotation",
+                diagnostics);
+
+        if (annotation == null)
+        {
+            return new
+            {
+                available =
+                    false,
+                reason =
+                    "DrawingView.ViewAnnotation was not readable.",
+                bounds =
+                    (object?)null,
+                diagnostics
+            };
+        }
+
+        PointFact? textPosition =
+            ReadPointProperty(
+                annotation,
+                "TextPosition",
+                diagnostics);
+
+        PointFact? secondTextPosition =
+            ReadPointProperty(
+                annotation,
+                "SecondTextPosition",
+                diagnostics);
+
+        BoundsFact? bounds =
+            ReadBoundsProperty(
+                annotation,
+                "RangeBox",
+                diagnostics);
+
+        if (bounds == null)
+        {
+            AddDiagnostic(
+                diagnostics,
+                "DrawingViewAnnotation.RangeBox",
+                "DrawingViewAnnotation does not expose factual bounds through RangeBox.");
+        }
+
+        object? referenceKey =
+            ReadReferenceKey(
+                drawingDocument,
+                annotation,
+                diagnostics);
+
+        object parentView =
+            new
+            {
+                name =
+                    SafeString(
+                        () => view.Name,
+                        ownerDiagnostics,
+                        "DrawingView.Name"),
+                objectTypeRaw =
+                    SafeString(
+                        () => view.Type.ToString(),
+                        ownerDiagnostics,
+                        "DrawingView.Type"),
+                objectType =
+                    ReadEnumName(
+                        view.Type)
+            };
+
+        return new
+        {
+            available =
+                true,
+            objectTypeRaw =
+                SafeString(
+                    annotation,
+                    "Type",
+                    diagnostics),
+            objectType =
+                ReadObjectTypeName(
+                    annotation,
+                    diagnostics),
+            referenceKey,
+            text =
+                SafeString(
+                    annotation,
+                    "Text",
+                    diagnostics),
+            formattedText =
+                SafeString(
+                    annotation,
+                    "FormattedText",
+                    diagnostics),
+            textPosition,
+            secondText =
+                SafeString(
+                    annotation,
+                    "SecondText",
+                    diagnostics),
+            secondFormattedText =
+                SafeString(
+                    annotation,
+                    "SecondFormattedText",
+                    diagnostics),
+            secondTextPosition,
+            bounds,
+            parentView,
+            sourceView,
+            layout =
+                CreateLayout(
+                    textPosition,
+                    bounds,
+                    referenceKey,
+                    parentView),
+            diagnostics
+        };
+    }
+
+    private static object? ReadDetailDefinition(
+        DrawingView view,
+        List<object> diagnostics)
+    {
+        bool isDetailView =
+            SafeString(
+                () => view.ViewType.ToString(),
+                diagnostics,
+                "DrawingView.ViewType")
+            == DrawingViewTypeEnum
+                .kDetailDrawingViewType
+                .ToString();
+
+        if (!isDetailView)
+        {
+            return null;
+        }
+
+        bool? circularFence =
+            SafeNullableBoolean(
+                view,
+                "CircularFence",
+                diagnostics);
+
+        return new
+        {
+            available =
+                true,
+            displayDefinitionInBase =
+                SafeNullableBoolean(
+                    view,
+                    "DisplayDefinitionInBase",
+                    diagnostics),
+            circularFence,
+            fenceCenter =
+                ReadPointProperty(
+                    view,
+                    "FenceCenter",
+                    diagnostics),
+            fenceRadius =
+                SafeNullableDouble(
+                    view,
+                    "FenceRadius",
+                    diagnostics),
+            fenceCornerOne =
+                ReadPointProperty(
+                    view,
+                    "FenceCornerOne",
+                    diagnostics),
+            fenceCornerTwo =
+                ReadPointProperty(
+                    view,
+                    "FenceCornerTwo",
+                    diagnostics),
+            diagnostics =
+                Array.Empty<object>()
         };
     }
 
@@ -2738,10 +2938,8 @@ internal static class DrawingLayoutMapReadSupport
             keyContext =
                 manager.CreateKeyContext();
 
-            Array referenceKey =
-                Array.CreateInstance(
-                    typeof(byte),
-                    0);
+            byte[] referenceKey =
+                Array.Empty<byte>();
 
             dynamic dynamicOwner =
                 owner;
@@ -2750,9 +2948,12 @@ internal static class DrawingLayoutMapReadSupport
                 ref referenceKey,
                 keyContext);
 
+            Array referenceKeyArray =
+                referenceKey;
+
             string keyString =
                 manager.KeyToString(
-                    ref referenceKey);
+                    ref referenceKeyArray);
 
             return new
             {
@@ -2918,6 +3119,8 @@ internal static class DrawingLayoutMapReadSupport
                     dynamicOwner.Label,
                 "Leader" =>
                     dynamicOwner.Leader,
+                "CircularFence" =>
+                    dynamicOwner.CircularFence,
                 "MaxPoint" =>
                     dynamicOwner.MaxPoint,
                 "MidPoint" =>
@@ -2958,8 +3161,24 @@ internal static class DrawingLayoutMapReadSupport
                     dynamicOwner.Rows,
                 "ScaleString" =>
                     dynamicOwner.ScaleString,
+                "SecondFormattedText" =>
+                    dynamicOwner.SecondFormattedText,
+                "SecondText" =>
+                    dynamicOwner.SecondText,
+                "SecondTextPosition" =>
+                    dynamicOwner.SecondTextPosition,
                 "ShowLabel" =>
                     dynamicOwner.ShowLabel,
+                "DisplayDefinitionInBase" =>
+                    dynamicOwner.DisplayDefinitionInBase,
+                "FenceCenter" =>
+                    dynamicOwner.FenceCenter,
+                "FenceCornerOne" =>
+                    dynamicOwner.FenceCornerOne,
+                "FenceCornerTwo" =>
+                    dynamicOwner.FenceCornerTwo,
+                "FenceRadius" =>
+                    dynamicOwner.FenceRadius,
                 "StartPoint" =>
                     dynamicOwner.StartPoint,
                 "TableColumns" =>
@@ -2968,10 +3187,14 @@ internal static class DrawingLayoutMapReadSupport
                     dynamicOwner.TableRows,
                 "Text" =>
                     dynamicOwner.Text,
+                "TextPosition" =>
+                    dynamicOwner.TextPosition,
                 "Title" =>
                     dynamicOwner.Title,
                 "Type" =>
                     dynamicOwner.Type,
+                "ViewAnnotation" =>
+                    dynamicOwner.ViewAnnotation,
                 "Visible" =>
                     dynamicOwner.Visible,
                 "Width" =>

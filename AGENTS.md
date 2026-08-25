@@ -848,6 +848,64 @@ testing proved the semantics are `CenterlineType`-dependent:
 - `kCenteredPatternCenterlineType` normalized caller values;
 - `kBisectorCenterlineType` constrained/transformed caller values.
 
+## Current milestone addendum after Package 65A
+
+```text
+v0.62 add detail view annotation text control
+```
+
+Package 65A extends the existing `get_drawing_layout_map` Eye with factual
+`DrawingView.ViewAnnotation` and `DetailDrawingView` detail-definition facts
+where Inventor exposes them. Runtime reports facts only and does not perform
+detail/source-label layout decisions, collision detection, automatic placement,
+ESKD/GOST judgment, or fence movement.
+
+Package 65A adds one atomic Hand:
+
+```text
+move_drawing_view_annotation_text
+```
+
+Contract:
+
+```json
+{
+  "command": "move_drawing_view_annotation_text",
+  "sheetName": "Лист:1",
+  "viewName": "РЕЦЕСС",
+  "textSlot": "primary",
+  "position": {
+    "x": 5.0,
+    "y": 13.4
+  }
+}
+```
+
+Supported `textSlot` values are `primary` and `second`. Runtime does not infer
+which text slot should be moved.
+
+Live validation on a disposable copy of `вал тестовый_E2E_ESKD_02.idw`
+verified detail view `РЕЦЕСС`: `ViewAnnotation.Text = "РЕЦЕСС"`, primary
+`TextPosition = (8,13.4)`, and primary was the visible source-side label.
+Moving primary to `(5,13.4)` returned actual `(5,13.4)` with
+`positionNormalizedByInventor=false`; visual preview confirmed movement; restore
+to `(8,13.4)` passed. Detail fence, detail view position, source/parent view,
+and source IPT `dirty=false` were preserved.
+
+Known limitations: `DrawingViewAnnotation.RangeBox` was unavailable on the
+fixture, `SecondTextPosition` / `SecondFormattedText` may throw COM exceptions,
+and `DrawingViewAnnotation.GetReferenceKey` was not readable in the live
+fixture.
+
+Current registry after Package 65A:
+
+```text
+215 registered JSON commands
+215 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
 ## Current milestone addendum after Package 64A
 
 ```text
