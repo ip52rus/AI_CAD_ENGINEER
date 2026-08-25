@@ -1,5 +1,32 @@
 # PROJECT REVIEW
 
+## Package 64A checkpoint - current state
+
+`get_drawing_layout_map` is a VERIFIED read-only Eye for normalized factual
+sheet-space state after drawing content freeze. It is intended for external
+LLM global layout reasoning together with `capture_drawing_sheet_preview` and
+existing atomic move Hands.
+
+Runtime returns facts only: sheet geometry, reserved areas, drawing views,
+dimensions, notes, tables, center annotations, symbols, common `layout`
+envelopes where available, stable reference keys where Inventor exposes them,
+and isolated diagnostics. It performs no collision detection, layout scoring,
+automatic placement, annotation optimization, ESKD/GOST judgment, or visual
+interpretation.
+
+Live validation on the existing E2E drawing returned 4 drawing views,
+6 dimensions, 9 general notes, 2 hole/thread notes, and 3 sketched symbols.
+Border bounds were `0,0 -> 42,29.7`; title block bounds were `23,0 -> 42,6`.
+All 6 dimensions returned text bounds, dimension-line geometry, both
+extension-line geometries, and stable reference keys across repeated reads.
+Stable reference keys were also verified for views, general notes,
+hole/thread notes, and sketched symbols. Failure isolation and read-only
+safety are verified.
+
+Known limitations: hole/thread note leader geometry is not always exposed,
+dimension parent-view linkage remains partial, view label bounds are not
+reliably available, and some symbol subtypes may lack bounds.
+
 ## Package 63A checkpoint - current state
 
 Explicit document save/export Hands are modal-safe for autonomous runs.

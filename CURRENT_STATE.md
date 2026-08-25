@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after Package 63A:
+Current checkpoint after Package 64A:
 
 ```text
-v0.60 make save and export modal-safe
+v0.61 add drawing layout map eye
 ```
 
 ## Runtime architecture
@@ -48,17 +48,67 @@ CommandProcessor
 
 ## Dispatcher and command inventory
 
-Live command audit after Package 63A checkpoint:
+Live command audit after Package 64A checkpoint:
 
 ```text
-213 registered JSON commands
-213 unique registered JSON commands
+214 registered JSON commands
+214 unique registered JSON commands
 0 duplicate registered command names
 0 duplicate command Name properties
 0 unregistered command classes
 ```
 
 Always recalculate from the live repository before relying on these numbers.
+
+## Package 64A checkpoint
+
+Package 64A adds one read-only normalized sheet-space Eye:
+
+```json
+{"command":"get_drawing_layout_map"}
+```
+
+Contract:
+
+```json
+{
+  "command": "get_drawing_layout_map",
+  "sheetName": "Лист:1"
+}
+```
+
+`sheetName` may be omitted to use `DrawingDocument.ActiveSheet`.
+
+Purpose: provide factual 2D drawing-sheet state for external post-content-freeze
+global layout reasoning. Runtime reports facts only. It performs no collision
+detection, layout scoring, automatic placement, ESKD/GOST judgment, or
+annotation optimization.
+
+Live validation on the existing E2E drawing verified that the command returns
+sheet geometry, reserved areas, drawing views, dimensions, notes, tables,
+center annotations, symbols, and isolated diagnostics. Fixture counts were
+4 drawing views, 6 dimensions, 9 general notes, 2 hole/thread notes, and
+3 sketched symbols.
+
+Live-verified layout facts:
+
+- border bounds: `0,0 -> 42,29.7`;
+- title block bounds: `23,0 -> 42,6`;
+- 6/6 dimensions returned text bounds;
+- 6/6 dimensions returned dimension-line geometry;
+- 6/6 dimensions returned both extension-line geometries;
+- stable reference keys were verified across repeated reads for views,
+  dimensions, general notes, hole/thread notes, and sketched symbols;
+- failure isolation is verified: unsupported or unavailable subtype properties
+  produce object/category diagnostics without failing the whole map;
+- read-only safety is verified.
+
+Known limitations:
+
+- hole/thread note leader geometry is not always exposed by Inventor;
+- dimension parent-view linkage remains partial;
+- view label bounds are not reliably available;
+- some symbol subtypes may lack bounds.
 
 ## Package 63A checkpoint
 

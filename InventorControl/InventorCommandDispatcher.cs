@@ -607,6 +607,9 @@ public class InventorCommandDispatcher
     private readonly GetDrawingTableCollectionsCommand
         _getDrawingTableCollectionsCommand;
 
+    private readonly GetDrawingLayoutMapCommand
+        _getDrawingLayoutMapCommand;
+
     private readonly GetCustomTablesCommand
         _getCustomTablesCommand;
 
@@ -1449,6 +1452,10 @@ public class InventorCommandDispatcher
 
         _getDrawingTableCollectionsCommand =
             new GetDrawingTableCollectionsCommand(
+                inventor);
+
+        _getDrawingLayoutMapCommand =
+            new GetDrawingLayoutMapCommand(
                 inventor);
 
         _getCustomTablesCommand =
@@ -2338,6 +2345,10 @@ public class InventorCommandDispatcher
 
                 "get_drawing_table_collections" =>
                     _getDrawingTableCollectionsCommand.Execute(
+                        root),
+
+                "get_drawing_layout_map" =>
+                    _getDrawingLayoutMapCommand.Execute(
                         root),
 
                 "get_custom_tables" =>

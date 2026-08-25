@@ -848,6 +848,64 @@ testing proved the semantics are `CenterlineType`-dependent:
 - `kCenteredPatternCenterlineType` normalized caller values;
 - `kBisectorCenterlineType` constrained/transformed caller values.
 
+## Current milestone addendum after Package 64A
+
+```text
+v0.61 add drawing layout map eye
+```
+
+Package 64A adds one read-only normalized sheet-space Eye:
+
+```text
+get_drawing_layout_map
+```
+
+Contract:
+
+```json
+{
+  "command": "get_drawing_layout_map",
+  "sheetName": "Лист:1"
+}
+```
+
+`sheetName` may be omitted to use `DrawingDocument.ActiveSheet`.
+
+Purpose: expose factual 2D drawing-sheet state for external post-content-freeze
+global layout reasoning. Runtime reports facts only. Runtime does not perform
+collision detection, layout scoring, automatic placement, annotation
+optimization, visual interpretation, or ESKD/GOST layout judgment.
+
+Live validation on the existing E2E drawing verified sheet geometry, reserved
+areas, drawing views, dimensions, notes, tables, center annotations, symbols,
+and isolated diagnostics. The fixture returned 4 drawing views, 6 dimensions,
+9 general notes, 2 hole/thread notes, and 3 sketched symbols.
+
+Verified layout facts:
+
+- border bounds: `0,0 -> 42,29.7`;
+- title block bounds: `23,0 -> 42,6`;
+- 6/6 dimensions returned text bounds;
+- 6/6 dimensions returned dimension-line geometry;
+- 6/6 dimensions returned both extension-line geometries;
+- stable reference keys were verified across repeated reads for views,
+  dimensions, general notes, hole/thread notes, and sketched symbols;
+- failure isolation is verified;
+- read-only safety is verified.
+
+Known limitations: hole/thread note leader geometry is not always exposed,
+dimension parent-view linkage remains partial, view label bounds are not
+reliably available, and some symbol subtypes may lack bounds.
+
+Current registry after Package 64A:
+
+```text
+214 registered JSON commands
+214 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
 ## Current milestone addendum after Package 63A
 
 ```text

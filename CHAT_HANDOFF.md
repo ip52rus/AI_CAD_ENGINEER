@@ -3,21 +3,22 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.60 make save and export modal-safe`.
+- Current checkpoint: `v0.61 add drawing layout map eye`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
-- Latest completed checkpoint: Package 63A - modal-safe explicit save/export.
-- Registry after Package 63A: `213 registered / 213 unique`, `0` duplicate command names.
+- Latest completed checkpoint: Package 64A - drawing layout map Eye.
+- Registry after Package 64A: `214 registered / 214 unique`, `0` duplicate command names.
 - Single-command automation is available via `AI_CAD_ENGINEER.exe --json-file "<command.json>"`; `--json-file` is recommended for PowerShell/automation.
 - Single-command mode writes exactly one complete JSON response to stdout, uses deterministic exit codes, reuses `InventorCommandDispatcher`, and is attach-only.
 - Single-command Inventor attach uses `CLSIDFromProgIDEx("Inventor.Application")`, fallback `CLSIDFromProgID`, then `oleaut32!GetActiveObject`; the program entrypoint is `[STAThread]`.
 - Single-command mode does not call `Activator.CreateInstance` and does not launch Inventor. Autonomous agents must invoke it from a process context with access to the same user/session COM ROT as Inventor; the managed Codex sandbox may not expose that ROT.
 - `capture_drawing_sheet_preview` is live-verified for full-sheet PNG visual QA. It uses `Application.ActiveView.Fit(true)` and `View.SaveAsBitmap(...)`, preserves sheet aspect ratio, performs no image interpretation or document-content mutation, and works through attach-only `--json-file`. Known limitation: active view zoom/pan camera state is touched and not restored.
+- `get_drawing_layout_map` is live-verified as a read-only normalized factual sheet-space Eye for external post-content-freeze global layout reasoning. It returns sheet geometry, reserved areas, drawing views, dimensions, notes, tables, center annotations, symbols, common layout envelopes where available, stable reference keys where Inventor exposes them, and isolated diagnostics. It performs no collision detection, layout scoring, automatic placement, annotation optimization, visual interpretation, or ESKD/GOST judgment. Live validation returned 4 views, 6 dimensions, 9 general notes, 2 hole/thread notes, 3 sketched symbols, border bounds `0,0 -> 42,29.7`, title block bounds `23,0 -> 42,6`, and 6/6 dimensions with text bounds, dimension-line geometry, and both extension-line geometries. Limitations: hole/thread note leader geometry is not always exposed, dimension parent-view linkage remains partial, view label bounds are not reliably available, and some symbol subtypes may lack bounds.
 - `capture_model_preview` is live-verified for active `PartDocument` model PNG previews. It captures one requested Inventor/model standard orientation per invocation, uses `Application.ActiveView.Camera` with `Camera.Fit()` and `View.SaveAsBitmap(...)`, restores Eye/Target/UpVector/Perspective/PerspectiveAngle, works through attach-only `--json-file`, does not mutate the model, and performs no visual interpretation. Supported orientations: `front`, `back`, `top`, `bottom`, `left`, `right`, `iso_top_right`, `iso_top_left`, `iso_bottom_right`, `iso_bottom_left`, `current`.
 - `get_model_feature_tree` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
 - Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported. `get_sketches` preserves pre-existing Inventor edit state and derives `isActive` from `Application.ActiveEditObject` identity, not `PlanarSketch.Edit()`.
 - Explicit save/export Hands `save_document`, `save_document_as`, `export_pdf`, `export_dwg`, and `export_dxf` use scoped `Application.SilentOperation`, restore the previous value in `finally`, and report dirty snapshots. Live tests produced no modal Save dialog; referenced source IPT remained `dirty=false`; no unrelated open document was saved. `close_document` modal semantics remain unaudited/deferred.
-- Working tree is expected to be clean after the v0.60 checkpoint commit.
+- Working tree is expected to be clean after the v0.61 checkpoint commit.
 
 ## Architecture Rules
 
@@ -60,6 +61,7 @@
 - DWG Export Hand: `export_dwg`.
 - DXF Export Hand: `export_dxf`.
 - Drawing sheet preview Eye: `capture_drawing_sheet_preview`.
+- Drawing layout map Eye: `get_drawing_layout_map`.
 - Model preview Eye: `capture_model_preview`.
 - PartsList Eye: `get_parts_lists`.
 - PartsList creation Hand: `create_parts_list`.
