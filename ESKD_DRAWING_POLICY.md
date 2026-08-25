@@ -1,4 +1,4 @@
-# ESKD Drawing Policy v1
+# ESKD Drawing Policy v1.1
 
 This policy controls how the external AI CAD engineer reasons about machine-part
 working drawings. It does not define Runtime behavior.
@@ -152,6 +152,82 @@ Allowed status values:
 
 `FULLY_DEFINED` means the future drawing, without the model, communicates the
 feature's manufacturing geometry and requirements unambiguously. [PROJECT POLICY]
+
+### Feature requirement checklist
+
+Every manufacturing-significant feature must be decomposed into atomic
+requirements before it can be marked `FULLY_DEFINED`. [PROJECT POLICY]
+
+MODEL KNOWLEDGE IS NOT DRAWING COVERAGE. For every requirement row, the final
+audit must identify drawing-side evidence visible or readable from the drawing
+itself: a dimension, native callout, section geometry, visible geometry, hidden
+geometry, symbol, table, or a technical requirement where text is legitimately
+the correct representation. [PROJECT POLICY]
+
+If the model contains a fact but the final drawing preview/readback does not
+communicate it to a reader without the 3D model, that requirement is
+`MISSING` or `PARTIAL`. [PROJECT POLICY]
+
+Use this requirement checklist as the minimum decomposition:
+
+```text
+FEATURE
+REQUIREMENT
+MODEL FACT
+DRAWING-SIDE EVIDENCE
+STATUS
+```
+
+Requirement status values:
+
+- `COVERED`
+- `PARTIAL`
+- `MISSING`
+
+Feature status is derived from requirement rows:
+
+- `FULLY_DEFINED` only when every required row is `COVERED`.
+- `PARTIALLY_DEFINED` when at least one required row is `PARTIAL` or `MISSING`
+  but the feature is at least represented.
+- `MISSING` when the feature has no usable drawing representation.
+
+Hole requirement rows include:
+
+- count;
+- diameter;
+- position;
+- depth or through condition;
+- axis or orientation where relevant;
+- countersink/counterbore geometry where present;
+- internal end or drill-point geometry where manufacturing-relevant;
+- tolerance if factually provided by source or specification.
+
+Thread requirement rows include:
+
+- designation;
+- internal/external state;
+- class/tolerance where provided;
+- length or depth;
+- position;
+- termination where relevant.
+
+Recess, slot, flat, and cut-feature requirement rows include:
+
+- length;
+- width;
+- depth;
+- position;
+- orientation;
+- end geometry;
+- chamfers, radii, or transitions.
+
+Repeated-feature requirement rows include:
+
+- quantity;
+- feature size;
+- feature condition, such as through/blind/threaded;
+- complete pattern or individual location definition;
+- orientation or plane where relevant.
 
 ## 5. View-selection policy
 
@@ -318,6 +394,20 @@ Project rule:
 - A note saying `5 отв. Ø2` does not define the hole pattern by itself.
   Positions must be dimensioned by baseline, ordinate, chain, coordinates, hole
   table, or another clear standard method. [PROJECT POLICY]
+- A note, view, or model fact saying a hole exists does not automatically cover
+  depth or through condition. The drawing-side evidence must visibly communicate
+  through, blind depth, or other end condition. [PROJECT POLICY]
+- For repeated through holes, the final drawing must communicate quantity,
+  diameter, through condition, and all locations or a complete pattern
+  definition. If the visible/native note shows only `Ø2`, quantity and through
+  condition remain not covered even when the model Eye proves them. [PROJECT POLICY]
+- A native Inventor `HoleThreadNote` is sufficient only after readback and/or
+  preview confirms that the visible/formatted output contains every required
+  semantic element for that hole. [PROJECT POLICY]
+- If a native note omits a required element, try safe existing formatting
+  capabilities before accepting the deficiency. If it still cannot be expressed,
+  record the exact limitation and keep the feature `PARTIALLY_DEFINED`.
+  [PROJECT POLICY]
 - If a hole table is used, verify that hole tags, table rows, and view geometry
   together define the feature. [PROJECT POLICY]
 - If the holes are not equally spaced, do not imply equal spacing. [PROJECT POLICY]
@@ -385,6 +475,38 @@ Consider a section when:
 - depth or wall thickness cannot be dimensioned clearly from an exterior view;
 - a hole, recess, or undercut needs its internal profile shown.
 
+### Internal-geometry representation gate
+
+For blind holes, counterbores, countersinks, internal shoulders, drill-point or
+conical bottoms, and internal recesses, ask:
+
+```text
+Can the internal profile be unambiguously understood from the selected views?
+```
+
+If the answer is no, consider a section, local section, broken-out section, or
+hidden-line view before accepting the feature as represented. [PROJECT POLICY]
+
+This is not a claim that every blind hole normatively requires a section. It is
+an AI_CAD_ENGINEER coverage gate to prevent the agent from replacing internal
+profile reasoning with an end-view note. [PROJECT POLICY]
+
+During drawing planning, every internal feature must include this row set:
+
+```text
+FEATURE
+VISIBLE IN NORMAL VIEW?
+HIDDEN-LINE REPRESENTATION SUFFICIENT?
+SECTION NEEDED?
+PLANNED REPRESENTATION
+```
+
+If a blind hole has a drill-point or conical bottom that affects manufacture or
+inspection, the requirement checklist must include that internal end geometry.
+It may be covered by a clear section/hidden-line representation, a standard
+native callout that visibly communicates the end condition, or a legitimate
+technical requirement when text is the correct representation. [PROJECT POLICY]
+
 Consider a local section when:
 
 - only one region needs internal clarification;
@@ -438,6 +560,16 @@ only as needed to keep working.
 
 Declare content freeze only when no planned manufacturing information remains to
 be added.
+
+Before content freeze, every feature must have a requirement checklist with
+drawing-side evidence for each required fact. Content freeze is allowed only
+when no requirement is `MISSING`, unless the missing item is explicitly recorded
+as a Runtime or source-data limitation. If such a limitation remains, the final
+result cannot be `COMPLETE`. [PROJECT POLICY]
+
+Do not promote `PARTIAL` requirement rows to `COVERED` because the agent knows
+the model fact, because the feature is visible, or because a related note exists.
+[PROJECT POLICY]
 
 ### PHASE G - GLOBAL LAYOUT
 
@@ -494,6 +626,12 @@ Evaluate:
 
 A collision-free drawing may still be badly composed. [PROJECT POLICY]
 
+Distribute information among available suitable views according to semantic
+relevance. Do not overload the main view while leaving another technically
+suitable view unused. Dimensions and callouts may be placed on another valid
+view if that view represents the same feature more clearly and reduces
+ambiguity or crowding. [PROJECT POLICY]
+
 ## 14. Dimension layout hierarchy
 
 Use these reasoning rules, not hard-coded sheet coordinates:
@@ -520,6 +658,8 @@ Use `capture_drawing_sheet_preview` after meaningful layout stages.
 The AI must critique the image as a human drafter would:
 
 - Can each dimension be read immediately?
+- What manufacturing facts are actually visible to a reader who has no access to
+  the model?
 - Which feature does each dimension belong to?
 - Are dimensions crossing geometry?
 - Are dimension numbers crossed by any lines?
@@ -531,6 +671,13 @@ The AI must critique the image as a human drafter would:
 - Does the drawing read in a logical order?
 - Are source/detail labels clear and not touching model geometry?
 - Are title block and border clear?
+- Can the reader tell whether each hole is through or blind?
+- Can the reader understand the internal end geometry of blind holes,
+  counterbores, countersinks, and drill-point bottoms where relevant?
+- Can the reader tell the orientation or side of recesses, flats, slots, and
+  one-sided cuts?
+- Do native notes visibly contain all required elements, such as quantity,
+  diameter, depth/through condition, thread designation, and class?
 
 If visual evidence contradicts structural AABB checks, trust the visual problem
 and investigate. [PROJECT POLICY]
@@ -560,17 +707,40 @@ looks bad despite barely missing a bounding box. [PROJECT POLICY]
 
 Return to the original feature inventory.
 
-For every feature mark:
+For every feature, produce a requirement table:
+
+```text
+FEATURE
+REQUIREMENT
+MODEL FACT
+DRAWING EVIDENCE
+STATUS
+```
+
+Requirement status values:
+
+- `COVERED`
+- `PARTIAL`
+- `MISSING`
+
+Then derive the feature status from the requirement rows:
 
 - `FULLY_DEFINED`
 - `PARTIALLY_DEFINED`
 - `MISSING`
+
+Do not use a single summary row such as `Lower axial hole - FULLY_DEFINED`
+without checking each required subrequirement. [PROJECT POLICY]
 
 The drawing must not be declared complete while any manufacturing-significant
 feature is `MISSING`. [PROJECT POLICY]
 
 `PARTIALLY_DEFINED` must be reported explicitly with the missing information and
 the reason it could not be added. [PROJECT POLICY]
+
+A feature is `FULLY_DEFINED` only if every required subrequirement has
+drawing-side evidence. Model facts, mental memory, or preview understanding are
+not substitutes for drawing-side evidence. [PROJECT POLICY]
 
 ## 18. Final ESKD QA checklist
 
@@ -580,14 +750,20 @@ Before final save/export, verify:
 - sections/details: each one serves a defined manufacturing need;
 - dimensions: minimum but sufficient, non-duplicated, readable;
 - holes: quantity, diameter, condition, depth, and positions defined;
+- internal hole geometry: countersinks, counterbores, drill points, blind ends,
+  and internal shoulders are represented or legitimately called out;
 - threads: designation, length, location, and representation defined;
 - chamfers: size/angle or standard note present where required;
 - radii/fillets: defined where manufacturing-significant;
 - recesses/slots/flats: length, width, depth, position, orientation, ends, and
   transitions defined;
 - repeated features: quantity and pattern definition complete;
+- repeated features: size, condition, complete location definition, and
+  orientation/plane are covered by drawing-side evidence;
 - annotations: native callouts used where available; prose limited to proper
   textual requirements;
+- native notes: visible/formatted output contains every required semantic
+  element; source metadata alone is not enough;
 - scale: sheet/title view scale facts are correct; nonstandard view scales are
   indicated;
 - frame/title block: present and not obstructed;
@@ -643,6 +819,30 @@ ANTI-PATTERN: use model preview as substitute for manufacturing definition.
 Correct rule: previews inform understanding; the drawing must communicate the
 manufacturing definition. [PROJECT POLICY]
 
+ANTI-PATTERN: model fact known therefore drawing fact covered.
+
+Correct rule: every required fact must have drawing-side evidence visible or
+readable from the drawing. [PROJECT POLICY]
+
+ANTI-PATTERN: native note exists therefore the hole/thread feature is fully
+defined.
+
+Correct rule: verify the visible/formatted native note output contains every
+required element; otherwise the missing element remains `PARTIAL` or `MISSING`.
+[PROJECT POLICY]
+
+ANTI-PATTERN: summarize a complex feature as `FULLY_DEFINED` without checking
+subrequirements.
+
+Correct rule: derive feature status from atomic requirement rows. [PROJECT POLICY]
+
+ANTI-PATTERN: use an end view or leader note to avoid considering internal
+profile representation.
+
+Correct rule: blind holes, countersinks, counterbores, drill-point bottoms, and
+internal shoulders require an explicit internal-geometry representation decision.
+[PROJECT POLICY]
+
 ANTI-PATTERN: move dimensions/notes without readback and visual verification.
 
 Correct rule: after movement, read factual state and inspect preview. [PROJECT POLICY]
@@ -671,6 +871,18 @@ For `вал тестовый.ipt`, this policy would have prevented the observed
   global layout.
 - Layout accepted because collisions were zero: global layout policy explicitly
   rejects collision-free as sufficient.
+- Lower blind axial hole internal geometry omitted: the internal-geometry gate
+  requires the blind bore, countersink, and drill-point/conical end to be checked
+  as drawing requirements, not just known from the model.
+- Repeated Ø2 holes accepted without visible through condition: the hole
+  checklist separates count, diameter, location, and through/blind condition, so
+  the feature remains `PARTIALLY_DEFINED` until the drawing communicates through.
+- Repeated-hole orientation/location underchecked: the repeated-feature checklist
+  requires feature condition, complete location definition, and orientation or
+  plane where relevant.
+- Main view overloaded while another suitable view is underused: the global
+  layout policy now requires distributing information by semantic relevance
+  rather than preserving first placement.
 
 ## Areas requiring engineering judgment
 
