@@ -39,9 +39,25 @@ public class GetSketchesCommand
                     "Не удалось получить модель детали.");
         }
 
+        object? activeEditObject =
+            null;
+
+        try
+        {
+            activeEditObject =
+                _inventor.ActiveEditObject;
+        }
+        catch
+        {
+            activeEditObject =
+                null;
+        }
+
         List<object> sketches =
             ModelConstraintReadSupport
-                .ReadSketches(part);
+                .ReadSketches(
+                    part,
+                    activeEditObject);
 
         return ModelConstraintReadSupport
             .CreateSuccess(

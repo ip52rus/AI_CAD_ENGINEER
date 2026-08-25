@@ -3,7 +3,7 @@
 ## Current State
 
 - Branch: `cleanup/legacy-architecture`.
-- Current checkpoint: `v0.58 add model visual preview eye`.
+- Current checkpoint: `v0.59 keep sketch eyes read-only`.
 - Latest commit after checkpoint commit: see `git log -1 --oneline --decorate`.
 - Latest completed checkpoint: Package 62A - model visual preview Eye.
 - Registry after Package 62A: `213 registered / 213 unique`, `0` duplicate command names.
@@ -15,8 +15,8 @@
 - `capture_model_preview` is live-verified for active `PartDocument` model PNG previews. It captures one requested Inventor/model standard orientation per invocation, uses `Application.ActiveView.Camera` with `Camera.Fit()` and `View.SaveAsBitmap(...)`, restores Eye/Target/UpVector/Perspective/PerspectiveAngle, works through attach-only `--json-file`, does not mutate the model, and performs no visual interpretation. Supported orientations: `front`, `back`, `top`, `bottom`, `left`, `right`, `iso_top_right`, `iso_top_left`, `iso_bottom_right`, `iso_bottom_left`, `current`.
 - `get_model_feature_tree` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument`; existing DrawingDocument referenced-model behavior is preserved.
-- Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported.
-- Working tree is expected to be clean after the v0.58 checkpoint commit.
+- Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported. `get_sketches` preserves pre-existing Inventor edit state and derives `isActive` from `Application.ActiveEditObject` identity, not `PlanarSketch.Edit()`.
+- Working tree is expected to be clean after the v0.59 checkpoint commit.
 
 ## Architecture Rules
 

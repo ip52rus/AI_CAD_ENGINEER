@@ -848,7 +848,30 @@ testing proved the semantics are `CenterlineType`-dependent:
 - `kCenteredPatternCenterlineType` normalized caller values;
 - `kBisectorCenterlineType` constrained/transformed caller values.
 
-## Current milestone addendum after Package 62A
+## Current milestone addendum after Package 62A bugfix
+
+```text
+v0.59 keep sketch eyes read-only
+```
+
+Bugfix checkpoint: `get_sketches` is read-only and preserves pre-existing
+Inventor edit state. It no longer invokes `PlanarSketch.Edit()` while reading
+`isActive`; the active sketch fact comes from `Application.ActiveEditObject`
+identity. From normal part environment it preserves `PMxPartEnvironment`,
+`ActiveEditObject`, and dirty state. If a sketch is already being edited, it
+preserves that edit environment and reports the already active sketch with
+`isActive = true`.
+
+No command was added. Registry remains:
+
+```text
+213 registered JSON commands
+213 unique registered JSON commands
+0 duplicate registered command names
+0 duplicate command Name properties
+```
+
+## Previous milestone addendum after Package 62A
 
 ```text
 v0.58 add model visual preview eye

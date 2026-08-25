@@ -1,6 +1,12 @@
 # PROJECT REVIEW
 
-## Package 62A checkpoint - current state
+## Package 62A bugfix checkpoint - current state
+
+`get_sketches` is read-only and preserves pre-existing Inventor edit state.
+It no longer invokes `PlanarSketch.Edit()` when reporting `isActive`.
+The active sketch fact is derived from `Application.ActiveEditObject` identity.
+
+## Package 62A checkpoint - historical state
 
 Package 62A adds one read-only model visual Eye:
 
@@ -158,6 +164,8 @@ get_work_features
 
 No new commands were added. `get_curve_model_reference` and
 `get_view_model_references` remain intentionally DrawingView-context Eyes.
+`get_sketches` preserves pre-existing Inventor edit state; its `isActive` fact
+comes from `Application.ActiveEditObject` identity, not `PlanarSketch.Edit()`.
 
 ## End-to-End Blocker 02 checkpoint - current state
 

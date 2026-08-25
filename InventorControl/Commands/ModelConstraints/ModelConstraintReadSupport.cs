@@ -281,7 +281,8 @@ internal static class ModelConstraintReadSupport
     }
 
     public static List<object> ReadSketches(
-        PartDocument partDocument)
+        PartDocument partDocument,
+        object? activeEditObject)
     {
         List<object> result = new();
 
@@ -316,7 +317,8 @@ internal static class ModelConstraintReadSupport
             result.Add(
                 ReadSketch(
                     sketchObject,
-                    index));
+                    index,
+                    activeEditObject));
         }
 
         return result;
@@ -650,7 +652,8 @@ internal static class ModelConstraintReadSupport
 
     private static object ReadSketch(
         object sketchObject,
-        int index)
+        int index,
+        object? activeEditObject)
     {
         return new
         {
@@ -682,9 +685,9 @@ internal static class ModelConstraintReadSupport
                     "Shared"),
 
             isActive =
-                GetBooleanProperty(
+                IsSameSketchObject(
                     sketchObject,
-                    "Edit"),
+                    activeEditObject),
 
             geometryCount =
                 GetNestedCollectionCount(
@@ -987,6 +990,120 @@ internal static class ModelConstraintReadSupport
                     value,
                     "Type")
         };
+    }
+
+    private static bool IsSameSketchObject(
+        object sketchObject,
+        object? activeEditObject)
+    {
+        if (activeEditObject == null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(
+                sketchObject,
+                activeEditObject))
+        {
+            return true;
+        }
+
+        if (TryCompareComIdentity(
+                sketchObject,
+                activeEditObject,
+                out bool sameComObject))
+        {
+            return sameComObject;
+        }
+
+        string sketchType =
+            GetEnumRawValue(
+                sketchObject,
+                "Type");
+
+        string activeType =
+            GetEnumRawValue(
+                activeEditObject,
+                "Type");
+
+        if (string.IsNullOrWhiteSpace(sketchType) ||
+            !string.Equals(
+                sketchType,
+                activeType,
+                StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        string sketchName =
+            GetStringProperty(
+                sketchObject,
+                "Name");
+
+        string activeName =
+            GetStringProperty(
+                activeEditObject,
+                "Name");
+
+        return !string.IsNullOrWhiteSpace(sketchName) &&
+               string.Equals(
+                   sketchName,
+                   activeName,
+                   StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool TryCompareComIdentity(
+        object left,
+        object right,
+        out bool same)
+    {
+        same =
+            false;
+
+        IntPtr leftUnknown =
+            IntPtr.Zero;
+
+        IntPtr rightUnknown =
+            IntPtr.Zero;
+
+        try
+        {
+            if (!System.Runtime.InteropServices.Marshal.IsComObject(left) ||
+                !System.Runtime.InteropServices.Marshal.IsComObject(right))
+            {
+                return false;
+            }
+
+#pragma warning disable CA1416
+            leftUnknown =
+                System.Runtime.InteropServices.Marshal.GetIUnknownForObject(left);
+
+            rightUnknown =
+                System.Runtime.InteropServices.Marshal.GetIUnknownForObject(right);
+#pragma warning restore CA1416
+
+            same =
+                leftUnknown != IntPtr.Zero &&
+                leftUnknown == rightUnknown;
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+        finally
+        {
+            if (leftUnknown != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.Release(leftUnknown);
+            }
+
+            if (rightUnknown != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.Release(rightUnknown);
+            }
+        }
     }
 
     private static List<object> ReadWorkFeatureCollection(
@@ -1617,7 +1734,6 @@ internal static class ModelConstraintReadSupport
                 "Visible" => (bool)owner.Visible,
                 "Consumed" => (bool)owner.Consumed,
                 "Shared" => (bool)owner.Shared,
-                "Edit" => (bool)owner.Edit,
                 "Reference" => (bool)owner.Reference,
                 "Construction" => (bool)owner.Construction,
                 "Grounded" => (bool)owner.Grounded,

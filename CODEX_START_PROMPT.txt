@@ -24,7 +24,7 @@ Current checkpoint context:
 - Package 60A is complete.
 - Package 61A is complete.
 - Package 62A is complete.
-- Current checkpoint: `v0.58 add model visual preview eye`.
+- Current checkpoint: `v0.59 keep sketch eyes read-only`.
 - Live registry after Package 62A: `213 registered / 213 unique`, no duplicate command names.
 - Deterministic single-command automation is available via `AI_CAD_ENGINEER.exe --json-file "<command.json>"`; `--json-file` is recommended for PowerShell/automation.
 - Single-command mode emits exactly one JSON response on stdout, uses deterministic exit codes, reuses `InventorCommandDispatcher`, and is attach-only.
@@ -34,7 +34,7 @@ Current checkpoint context:
 - `capture_model_preview` is live-verified as a read-only visual Eye for external multimodal model understanding. It supports active `PartDocument` only, captures one requested Inventor/model standard orientation per invocation, uses `Application.ActiveView.Camera` with `Camera.Fit()` and `View.SaveAsBitmap(...)`, restores Eye/Target/UpVector/Perspective/PerspectiveAngle, works through attach-only `--json-file`, and performs no model mutation or visual interpretation. Supported orientations: `front`, `back`, `top`, `bottom`, `left`, `right`, `iso_top_right`, `iso_top_left`, `iso_bottom_right`, `iso_bottom_left`, `current`. Current Inventor display style determines appearance.
 - `get_model_feature_tree` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Features`; DrawingDocument referenced-model behavior is preserved.
 - `get_model_parameters` is live-verified for active `PartDocument` via `Application.ActiveDocument -> PartDocument.ComponentDefinition.Parameters`; DrawingDocument referenced-model behavior is preserved.
-- Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported.
+- Existing model Eyes for holes, threads, surface bodies, body faces, face edges, feature details, sketches, sketch geometry/constraints/dimensions, and work features are live-verified for active `PartDocument`; DrawingDocument referenced-model paths remain supported. `get_sketches` preserves pre-existing Inventor edit state and derives `isActive` from `Application.ActiveEditObject` identity, not `PlanarSketch.Edit()`.
 
 Verified Drawing Generation / Export Hands:
 

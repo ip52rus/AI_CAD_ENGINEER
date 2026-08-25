@@ -14,10 +14,10 @@ Current working branch:
 cleanup/legacy-architecture
 ```
 
-Current checkpoint after Package 62A:
+Current checkpoint after Package 62A bugfix:
 
 ```text
-v0.58 add model visual preview eye
+v0.59 keep sketch eyes read-only
 ```
 
 ## Runtime architecture
@@ -150,6 +150,15 @@ and feature salience to the external multimodal LLM; structural Eyes remain the
 source for exact geometry, dimensions, parameters, faces, edges, sketches, and
 feature facts.
 
+## Package 62A bugfix checkpoint
+
+`get_sketches` is read-only and preserves pre-existing Inventor edit state.
+It no longer reads `PlanarSketch.Edit`; `isActive` is derived from
+`Application.ActiveEditObject` identity. From normal part environment,
+`get_sketches` leaves `PMxPartEnvironment`, `ActiveEditObject`, and dirty state
+unchanged. If a sketch is already being edited, the same edit environment is
+preserved and the active sketch is reported with `isActive = true`.
+
 ## Package 61A checkpoint
 
 Package 61A adds one read-only visual Eye:
@@ -277,6 +286,8 @@ get_work_features
 ```
 
 These commands preserve their existing DrawingDocument referenced-model paths.
+`get_sketches` preserves pre-existing Inventor edit state; its `isActive` fact
+comes from `Application.ActiveEditObject` identity, not `PlanarSketch.Edit()`.
 No new commands were added. Drawing-context reference Eyes such as
 `get_curve_model_reference` and `get_view_model_references` remain
 DrawingDocument/DrawingView commands.
