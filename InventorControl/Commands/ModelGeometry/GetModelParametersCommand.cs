@@ -19,16 +19,6 @@ public class GetModelParametersCommand
 
     public string Execute(JsonElement root)
     {
-        Document? activeDocument =
-            _inventor.ActiveDocument;
-
-        if (activeDocument == null)
-        {
-            return ModelGeometryReadSupport
-                .CreateError(
-                    "В Inventor нет активного документа.");
-        }
-
         bool includeModel =
             ModelGeometryReadSupport
                 .GetOptionalBoolean(
@@ -50,114 +40,21 @@ public class GetModelParametersCommand
                     "includeReference",
                     true);
 
-        if (activeDocument.DocumentType ==
-            DocumentTypeEnum.kPartDocumentObject)
-        {
-            PartDocument activePart =
-                (PartDocument)activeDocument;
-
-            List<object> activePartParameters =
-                ModelGeometryReadSupport
-                    .ReadAllParameters(
-                        activePart,
-                        includeModel,
-                        includeUser,
-                        includeReference);
-
-            return ModelGeometryReadSupport
-                .CreateSuccess(
-                    new
-                    {
-                        document =
-                            ModelGeometryReadSupport
-                                .ReadDocument(
-                                    activePart),
-
-                        modelDocument =
-                            ModelGeometryReadSupport
-                                .ReadDocument(
-                                    activePart),
-
-                        source =
-                            "activePartDocument",
-
-                        includeModel,
-
-                        includeUser,
-
-                        includeReference,
-
-                        parameterCount =
-                            activePartParameters.Count,
-
-                        parameters =
-                            activePartParameters
-                    });
-        }
-
-        if (activeDocument.DocumentType !=
-            DocumentTypeEnum.kDrawingDocumentObject)
-        {
-            return ModelGeometryReadSupport
-                .CreateError(
-                    "Active document must be a PartDocument or DrawingDocument.",
-                    activeDocument.DocumentType.ToString());
-        }
-
-        DrawingDocument drawing =
-            (DrawingDocument)activeDocument;
-
-        if (!ModelGeometryReadSupport
-                .TryGetRequiredString(
-                    root,
-                    "sheetName",
-                    out string sheetName,
-                    out string sheetError))
-        {
-            return ModelGeometryReadSupport
-                .CreateError(sheetError);
-        }
-
-        if (!ModelGeometryReadSupport
-                .TryGetRequiredString(
-                    root,
-                    "viewName",
-                    out string viewName,
-                    out string viewError))
-        {
-            return ModelGeometryReadSupport
-                .CreateError(viewError);
-        }
-
-        Sheet? sheet =
+        ModelGeometryReadSupport.PartDocumentResolution? resolution =
             ModelGeometryReadSupport
-                .FindSheet(drawing, sheetName);
+                .ResolvePartDocument(
+                    _inventor,
+                    root,
+                    out string? error);
 
-        DrawingView? view =
-            sheet == null
-                ? null
-                : ModelGeometryReadSupport
-                    .FindView(sheet, viewName);
-
-        if (sheet == null || view == null)
+        if (resolution == null)
         {
             return ModelGeometryReadSupport
-                .CreateError("Лист или вид не найден.");
+                .CreateError(error ?? "Unable to resolve model document.");
         }
 
-        PartDocument? part =
-            ModelGeometryReadSupport
-                .GetReferencedPartDocument(
-                    view,
-                    out string? referenceError);
-
-        if (part == null)
-        {
-            return ModelGeometryReadSupport
-                .CreateError(
-                    "Не удалось получить модель детали.",
-                    referenceError);
-        }
+        PartDocument part =
+            resolution.PartDocument;
 
         List<object> parameters =
             ModelGeometryReadSupport
@@ -171,16 +68,42 @@ public class GetModelParametersCommand
             .CreateSuccess(
                 new
                 {
-                    drawing = drawing.DisplayName,
-                    sheet = sheet.Name,
-                    view = view.Name,
+                    document =
+                        resolution.Source == "activePartDocument"
+                            ? ModelGeometryReadSupport
+                                .ReadDocument(part)
+                            : null,
+
+                    drawing =
+                        resolution.Drawing?.DisplayName,
+
+                    sheet =
+                        resolution.Sheet?.Name,
+
+                    view =
+                        resolution.View?.Name,
+
+                    source =
+                        resolution.Source,
+
+                    target =
+                        ModelGeometryReadSupport
+                            .ReadAssemblyTargetContext(
+                                resolution),
+
                     modelDocument =
                         ModelGeometryReadSupport
                             .ReadDocument(part),
+
                     includeModel,
+
                     includeUser,
+
                     includeReference,
-                    parameterCount = parameters.Count,
+
+                    parameterCount =
+                        parameters.Count,
+
                     parameters
                 });
     }
