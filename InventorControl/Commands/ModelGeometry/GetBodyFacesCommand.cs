@@ -30,19 +30,21 @@ public class GetBodyFacesCommand
                 .CreateError(bodyError);
         }
 
-        PartDocument? part =
-            ResolvePart(
-                root,
-                out DrawingDocument? drawing,
-                out Sheet? sheet,
-                out DrawingView? view,
-                out string? error);
+        ModelGeometryReadSupport.PartDocumentResolution? resolution =
+            ModelGeometryReadSupport
+                .ResolvePartDocument(
+                    _inventor,
+                    root,
+                    out string? error);
 
-        if (part == null)
+        if (resolution == null)
         {
             return ModelGeometryReadSupport
-                .CreateError(error ?? "Не удалось получить модель.");
+                .CreateError(error ?? "Unable to resolve model document.");
         }
+
+        PartDocument part =
+            resolution.PartDocument;
 
         object? data =
             ModelGeometryReadSupport
@@ -54,99 +56,35 @@ public class GetBodyFacesCommand
         {
             return ModelGeometryReadSupport
                 .CreateError(
-                    $"Тело с индексом {bodyIndex} не найдено.");
+                    $"Body with index {bodyIndex} was not found.");
         }
 
         return ModelGeometryReadSupport
             .CreateSuccess(
                 new
                 {
-                    drawing = drawing?.DisplayName,
-                    sheet = sheet?.Name,
-                    view = view?.Name,
+                    drawing =
+                        resolution.Drawing?.DisplayName,
+
+                    sheet =
+                        resolution.Sheet?.Name,
+
+                    view =
+                        resolution.View?.Name,
+
                     source =
-                        drawing == null
-                            ? "activePartDocument"
-                            : "drawingViewReferencedPartDocument",
+                        resolution.Source,
+
+                    target =
+                        ModelGeometryReadSupport
+                            .ReadAssemblyTargetContext(
+                                resolution),
+
                     modelDocument =
                         ModelGeometryReadSupport
                             .ReadDocument(part),
+
                     data
                 });
-    }
-
-    private PartDocument? ResolvePart(
-        JsonElement root,
-        out DrawingDocument? drawing,
-        out Sheet? sheet,
-        out DrawingView? view,
-        out string? error)
-    {
-        Document? activeDocument =
-            _inventor.ActiveDocument;
-
-        drawing = null;
-        sheet = null;
-        view = null;
-        error = null;
-
-        if (activeDocument == null)
-        {
-            error = "В Inventor нет активного документа.";
-            return null;
-        }
-
-        if (activeDocument.DocumentType ==
-            DocumentTypeEnum.kPartDocumentObject)
-        {
-            return (PartDocument)activeDocument;
-        }
-
-        if (activeDocument.DocumentType !=
-            DocumentTypeEnum.kDrawingDocumentObject)
-        {
-            error = "Active document must be a PartDocument or DrawingDocument.";
-            return null;
-        }
-
-        drawing =
-            (DrawingDocument)activeDocument;
-
-        if (!ModelGeometryReadSupport
-                .TryGetRequiredString(
-                    root,
-                    "sheetName",
-                    out string sheetName,
-                    out error) ||
-            !ModelGeometryReadSupport
-                .TryGetRequiredString(
-                    root,
-                    "viewName",
-                    out string viewName,
-                    out error))
-        {
-            return null;
-        }
-
-        sheet =
-            ModelGeometryReadSupport
-                .FindSheet(drawing, sheetName);
-
-        view =
-            sheet == null
-                ? null
-                : ModelGeometryReadSupport
-                    .FindView(sheet, viewName);
-
-        if (sheet == null || view == null)
-        {
-            error = "Лист или вид не найден.";
-            return null;
-        }
-
-        return ModelGeometryReadSupport
-            .GetReferencedPartDocument(
-                view,
-                out error);
     }
 }

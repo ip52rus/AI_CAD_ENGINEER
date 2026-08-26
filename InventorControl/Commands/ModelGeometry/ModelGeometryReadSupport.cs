@@ -6,6 +6,23 @@ namespace AI_CAD_ENGINEER.InventorControl.Commands;
 
 internal static class ModelGeometryReadSupport
 {
+    public sealed class PartDocumentResolution
+    {
+        public required PartDocument PartDocument { get; init; }
+
+        public required Document ModelDocument { get; init; }
+
+        public DrawingDocument? Drawing { get; init; }
+
+        public Sheet? Sheet { get; init; }
+
+        public DrawingView? View { get; init; }
+
+        public required string Source { get; init; }
+
+        public object? AssemblyTarget { get; init; }
+    }
+
     public static DrawingDocument? GetActiveDrawingDocument(
         Inventor.Application inventor,
         out string? error)
@@ -119,6 +136,464 @@ internal static class ModelGeometryReadSupport
         }
 
         return (PartDocument)document;
+    }
+
+    public static PartDocumentResolution? ResolvePartDocument(
+        Inventor.Application inventor,
+        JsonElement root,
+        out string? error)
+    {
+        ArgumentNullException.ThrowIfNull(inventor);
+
+        error = null;
+
+        Document? activeDocument =
+            inventor.ActiveDocument;
+
+        if (activeDocument == null)
+        {
+            error =
+                "Inventor has no active document.";
+
+            return null;
+        }
+
+        if (TryReadOccurrenceTarget(
+                root,
+                out string occurrencePath,
+                out bool hasTarget,
+                out error))
+        {
+            if (hasTarget)
+            {
+                return ResolveAssemblyOccurrencePartDocument(
+                    activeDocument,
+                    occurrencePath,
+                    out error);
+            }
+        }
+        else
+        {
+            return null;
+        }
+
+        if (activeDocument.DocumentType ==
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            return new PartDocumentResolution
+            {
+                PartDocument =
+                    (PartDocument)activeDocument,
+
+                ModelDocument =
+                    activeDocument,
+
+                Source =
+                    "activePartDocument"
+            };
+        }
+
+        if (activeDocument.DocumentType !=
+            DocumentTypeEnum.kDrawingDocumentObject)
+        {
+            error =
+                "Active document must be a PartDocument or DrawingDocument.";
+
+            return null;
+        }
+
+        DrawingDocument drawing =
+            (DrawingDocument)activeDocument;
+
+        if (!TryGetRequiredString(
+                root,
+                "sheetName",
+                out string sheetName,
+                out error) ||
+            !TryGetRequiredString(
+                root,
+                "viewName",
+                out string viewName,
+                out error))
+        {
+            return null;
+        }
+
+        Sheet? sheet =
+            FindSheet(
+                drawing,
+                sheetName);
+
+        DrawingView? view =
+            sheet == null
+                ? null
+                : FindView(
+                    sheet,
+                    viewName);
+
+        if (sheet == null ||
+            view == null)
+        {
+            error =
+                "Sheet or view was not found.";
+
+            return null;
+        }
+
+        Document? modelDocument =
+            GetReferencedDocument(
+                view,
+                out error);
+
+        if (modelDocument == null)
+        {
+            return null;
+        }
+
+        if (modelDocument.DocumentType !=
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            error =
+                "Referenced document is not a PartDocument.";
+
+            return null;
+        }
+
+        PartDocument partDocument =
+            (PartDocument)modelDocument;
+
+        return new PartDocumentResolution
+        {
+            PartDocument =
+                partDocument,
+
+            ModelDocument =
+                modelDocument,
+
+            Drawing =
+                drawing,
+
+            Sheet =
+                sheet,
+
+            View =
+                view,
+
+            Source =
+                "drawingViewReferencedPartDocument"
+        };
+    }
+
+    public static object? ReadAssemblyTargetContext(
+        PartDocumentResolution resolution)
+    {
+        ArgumentNullException.ThrowIfNull(
+            resolution);
+
+        return resolution.AssemblyTarget;
+    }
+
+    private static bool TryReadOccurrenceTarget(
+        JsonElement root,
+        out string occurrencePath,
+        out bool hasTarget,
+        out string? error)
+    {
+        occurrencePath =
+            string.Empty;
+
+        hasTarget =
+            false;
+
+        error =
+            null;
+
+        if (!root.TryGetProperty(
+                "target",
+                out JsonElement targetElement))
+        {
+            return true;
+        }
+
+        hasTarget =
+            true;
+
+        if (targetElement.ValueKind !=
+            JsonValueKind.Object)
+        {
+            error =
+                "Field \"target\" must be an object.";
+
+            return false;
+        }
+
+        if (!targetElement.TryGetProperty(
+                "occurrencePath",
+                out JsonElement occurrencePathElement) ||
+            occurrencePathElement.ValueKind !=
+                JsonValueKind.String)
+        {
+            error =
+                "Field \"target.occurrencePath\" must be a string.";
+
+            return false;
+        }
+
+        occurrencePath =
+            occurrencePathElement.GetString()?
+                .Trim()
+            ?? string.Empty;
+
+        if (occurrencePath.Length == 0)
+        {
+            error =
+                "Field \"target.occurrencePath\" must not be empty.";
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private static PartDocumentResolution? ResolveAssemblyOccurrencePartDocument(
+        Document activeDocument,
+        string occurrencePath,
+        out string? error)
+    {
+        error =
+            null;
+
+        if (activeDocument.DocumentType !=
+            DocumentTypeEnum.kAssemblyDocumentObject)
+        {
+            error =
+                "Field \"target.occurrencePath\" can only be used when the active document is an AssemblyDocument.";
+
+            return null;
+        }
+
+        AssemblyDocument assemblyDocument =
+            (AssemblyDocument)activeDocument;
+
+        List<OccurrencePathMatch> matches =
+            new();
+
+        ReadOccurrencePathMatches(
+            assemblyDocument.ComponentDefinition.Occurrences,
+            parentPath: string.Empty,
+            occurrencePath,
+            matches);
+
+        if (matches.Count == 0)
+        {
+            error =
+                $"Occurrence path \"{occurrencePath}\" was not found in the active AssemblyDocument.";
+
+            return null;
+        }
+
+        if (matches.Count > 1)
+        {
+            error =
+                $"Occurrence path \"{occurrencePath}\" is ambiguous in the active AssemblyDocument.";
+
+            return null;
+        }
+
+        OccurrencePathMatch match =
+            matches[0];
+
+        object occurrenceObject =
+            match.Occurrence;
+
+        if (GetBooleanProperty(
+                occurrenceObject,
+                "Suppressed"))
+        {
+            error =
+                $"Occurrence path \"{occurrencePath}\" is suppressed.";
+
+            return null;
+        }
+
+        Document? referencedDocument =
+            GetOccurrenceReferencedDocument(
+                occurrenceObject,
+                out string? referenceError);
+
+        if (referencedDocument == null)
+        {
+            error =
+                $"Occurrence path \"{occurrencePath}\" does not expose a referenced document. {referenceError}";
+
+            return null;
+        }
+
+        if (referencedDocument.DocumentType !=
+            DocumentTypeEnum.kPartDocumentObject)
+        {
+            error =
+                $"Occurrence path \"{occurrencePath}\" references {referencedDocument.DocumentType}, not a PartDocument.";
+
+            return null;
+        }
+
+        PartDocument partDocument =
+            (PartDocument)referencedDocument;
+
+        return new PartDocumentResolution
+        {
+            PartDocument =
+                partDocument,
+
+            ModelDocument =
+                referencedDocument,
+
+            Source =
+                "assemblyOccurrenceReferencedPartDocument",
+
+            AssemblyTarget =
+                new
+                {
+                    occurrencePath =
+                        match.Path,
+
+                    occurrenceName =
+                        GetStringProperty(
+                            occurrenceObject,
+                            "Name"),
+
+                    referencedDocument =
+                        ReadDocument(
+                            partDocument),
+
+                    targetDocumentType =
+                        partDocument
+                            .DocumentType
+                            .ToString()
+                }
+        };
+    }
+
+    private static void ReadOccurrencePathMatches(
+        object occurrencesObject,
+        string parentPath,
+        string targetPath,
+        List<OccurrencePathMatch> matches)
+    {
+        dynamic occurrences =
+            occurrencesObject;
+
+        int count =
+            GetCollectionCount(
+                occurrencesObject);
+
+        for (int index = 1;
+             index <= count;
+             index++)
+        {
+            object occurrenceObject;
+
+            try
+            {
+                occurrenceObject =
+                    occurrences[index];
+            }
+            catch
+            {
+                continue;
+            }
+
+            string name =
+                GetStringProperty(
+                    occurrenceObject,
+                    "Name");
+
+            string path =
+                string.IsNullOrWhiteSpace(
+                    parentPath)
+                    ? name
+                    : $"{parentPath}/{name}";
+
+            if (string.Equals(
+                    path,
+                    targetPath,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                matches.Add(
+                    new OccurrencePathMatch(
+                        occurrenceObject,
+                        path));
+            }
+
+            object? subOccurrences =
+                GetObjectProperty(
+                    occurrenceObject,
+                    "SubOccurrences");
+
+            if (subOccurrences != null)
+            {
+                ReadOccurrencePathMatches(
+                    subOccurrences,
+                    path,
+                    targetPath,
+                    matches);
+            }
+        }
+    }
+
+    private static Document? GetOccurrenceReferencedDocument(
+        object occurrenceObject,
+        out string? error)
+    {
+        error =
+            null;
+
+        object? definition =
+            GetObjectProperty(
+                occurrenceObject,
+                "Definition");
+
+        if (definition != null)
+        {
+            object? definitionDocument =
+                GetObjectProperty(
+                    definition,
+                    "Document");
+
+            if (definitionDocument is Document document)
+            {
+                return document;
+            }
+        }
+
+        object? descriptor =
+            GetObjectProperty(
+                occurrenceObject,
+                "ReferencedDocumentDescriptor");
+
+        if (descriptor == null)
+        {
+            error =
+                "ReferencedDocumentDescriptor was not readable.";
+
+            return null;
+        }
+
+        object? referencedDocument =
+            GetObjectProperty(
+                descriptor,
+                "ReferencedDocument");
+
+        if (referencedDocument is Document referenced)
+        {
+            return referenced;
+        }
+
+        error =
+            "ReferencedDocument was not readable.";
+
+        return null;
     }
 
     public static bool TryGetRequiredString(
@@ -1439,6 +1914,11 @@ internal static class ModelGeometryReadSupport
                 "Parent" => owner.Parent,
                 "Profile" => owner.Profile,
                 "Sketch" => owner.Sketch,
+                "Definition" => owner.Definition,
+                "Document" => owner.Document,
+                "SubOccurrences" => owner.SubOccurrences,
+                "ReferencedDocumentDescriptor" => owner.ReferencedDocumentDescriptor,
+                "ReferencedDocument" => owner.ReferencedDocument,
                 "CreatedByFeature" => owner.CreatedByFeature,
                 "Geometry" => owner.Geometry,
                 "Evaluator" => owner.Evaluator,
@@ -1634,6 +2114,10 @@ internal static class ModelGeometryReadSupport
             : GetCollectionCount(
                 collection);
     }
+
+    private sealed record OccurrencePathMatch(
+        object Occurrence,
+        string Path);
 
     public static string CreateSuccess(
         object data)

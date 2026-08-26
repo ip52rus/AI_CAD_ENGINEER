@@ -24,16 +24,6 @@ public class GetModelFeatureTreeCommand
     public string Execute(
         JsonElement root)
     {
-        Document? activeDocument =
-            _inventor.ActiveDocument;
-
-        if (activeDocument == null)
-        {
-            return ModelFeatureReadSupport
-                .CreateError(
-                    "В Inventor нет активного документа.");
-        }
-
         bool includeSuppressed =
             ModelFeatureReadSupport
                 .GetOptionalBoolean(
@@ -41,141 +31,61 @@ public class GetModelFeatureTreeCommand
                     "includeSuppressed",
                     true);
 
-        if (activeDocument.DocumentType ==
-            DocumentTypeEnum.kPartDocumentObject)
-        {
-            List<object> activePartFeatures =
-                ModelFeatureReadSupport
-                    .ReadFeatureTree(
-                        activeDocument,
-                        includeSuppressed);
-
-            return ModelFeatureReadSupport
-                .CreateSuccess(
-                    new
-                    {
-                        document =
-                            ModelFeatureReadSupport
-                                .ReadDocument(
-                                    activeDocument),
-
-                        modelDocument =
-                            ModelFeatureReadSupport
-                                .ReadDocument(
-                                    activeDocument),
-
-                        source =
-                            "activePartDocument",
-
-                        includeSuppressed,
-
-                        featureCount =
-                            activePartFeatures.Count,
-
-                        features =
-                            activePartFeatures
-                    });
-        }
-
-        if (activeDocument.DocumentType !=
-            DocumentTypeEnum.kDrawingDocumentObject)
-        {
-            return ModelFeatureReadSupport
-                .CreateError(
-                    "Active document must be a PartDocument or DrawingDocument.",
-                    activeDocument.DocumentType.ToString());
-        }
-
-        DrawingDocument drawing =
-            (DrawingDocument)activeDocument;
-
-        if (!ModelFeatureReadSupport
-                .TryGetRequiredString(
+        ModelGeometryReadSupport.PartDocumentResolution? resolution =
+            ModelGeometryReadSupport
+                .ResolvePartDocument(
+                    _inventor,
                     root,
-                    "sheetName",
-                    out string sheetName,
-                    out string sheetError))
+                    out string? error);
+
+        if (resolution == null)
         {
             return ModelFeatureReadSupport
                 .CreateError(
-                    sheetError);
+                    error ?? "Unable to resolve model document.");
         }
 
-        if (!ModelFeatureReadSupport
-                .TryGetRequiredString(
-                    root,
-                    "viewName",
-                    out string viewName,
-                    out string viewError))
-        {
-            return ModelFeatureReadSupport
-                .CreateError(
-                    viewError);
-        }
-
-        Sheet? sheet =
-            ModelFeatureReadSupport
-                .FindSheet(
-                    drawing,
-                    sheetName);
-
-        if (sheet == null)
-        {
-            return ModelFeatureReadSupport
-                .CreateError(
-                    $"Лист \"{sheetName}\" не найден.");
-        }
-
-        DrawingView? view =
-            ModelFeatureReadSupport
-                .FindView(
-                    sheet,
-                    viewName);
-
-        if (view == null)
-        {
-            return ModelFeatureReadSupport
-                .CreateError(
-                    $"Вид \"{viewName}\" не найден.");
-        }
-
-        Document? modelDocument =
-            ModelFeatureReadSupport
-                .GetReferencedDocument(
-                    view,
-                    out string? referenceError);
-
-        if (modelDocument == null)
-        {
-            return ModelFeatureReadSupport
-                .CreateError(
-                    "Не удалось получить документ модели.",
-                    referenceError);
-        }
+        PartDocument part =
+            resolution.PartDocument;
 
         List<object> features =
             ModelFeatureReadSupport
                 .ReadFeatureTree(
-                    modelDocument,
+                    resolution.ModelDocument,
                     includeSuppressed);
 
         return ModelFeatureReadSupport
             .CreateSuccess(
                 new
                 {
+                    document =
+                        resolution.Source == "activePartDocument"
+                            ? ModelFeatureReadSupport
+                                .ReadDocument(
+                                    resolution.ModelDocument)
+                            : null,
+
                     drawing =
-                        drawing.DisplayName,
+                        resolution.Drawing?.DisplayName,
 
                     sheet =
-                        sheet.Name,
+                        resolution.Sheet?.Name,
 
                     view =
-                        view.Name,
+                        resolution.View?.Name,
+
+                    source =
+                        resolution.Source,
+
+                    target =
+                        ModelGeometryReadSupport
+                            .ReadAssemblyTargetContext(
+                                resolution),
 
                     modelDocument =
                         ModelFeatureReadSupport
                             .ReadDocument(
-                                modelDocument),
+                                resolution.ModelDocument),
 
                     includeSuppressed,
 
