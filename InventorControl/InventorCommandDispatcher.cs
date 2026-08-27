@@ -631,6 +631,12 @@ public class InventorCommandDispatcher
     private readonly DeleteCustomTableCommand
         _deleteCustomTableCommand;
 
+    private readonly SetCustomTableCellValueCommand
+        _setCustomTableCellValueCommand;
+
+    private readonly SetCustomTableColumnWidthCommand
+        _setCustomTableColumnWidthCommand;
+
     private readonly GetPartsListsCommand
         _getPartsListsCommand;
 
@@ -1493,6 +1499,14 @@ public class InventorCommandDispatcher
 
         _deleteCustomTableCommand =
             new DeleteCustomTableCommand(
+                inventor);
+
+        _setCustomTableCellValueCommand =
+            new SetCustomTableCellValueCommand(
+                inventor);
+
+        _setCustomTableColumnWidthCommand =
+            new SetCustomTableColumnWidthCommand(
                 inventor);
 
         _getPartsListsCommand =
@@ -2398,6 +2412,14 @@ public class InventorCommandDispatcher
 
                 "delete_custom_table" =>
                     _deleteCustomTableCommand.Execute(
+                        root),
+
+                "set_custom_table_cell_value" =>
+                    _setCustomTableCellValueCommand.Execute(
+                        root),
+
+                "set_custom_table_column_width" =>
+                    _setCustomTableColumnWidthCommand.Execute(
                         root),
 
                 "get_parts_lists" =>

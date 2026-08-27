@@ -203,6 +203,135 @@ internal static class CustomTableCommandSupport
         return valid;
     }
 
+    public static bool TryGetSetCellValueInputs(
+        JsonElement root,
+        List<object> diagnostics,
+        out string sheetName,
+        out int customTableIndex,
+        out int rowIndex,
+        out int columnIndex,
+        out string value)
+    {
+        bool valid =
+            true;
+
+        if (!HoleThreadNoteCommandSupport.TryGetRequiredString(root, "sheetName", out sheetName, out string sheetNameError))
+        {
+            diagnostics.Add(new { scope = "input.sheetName", message = sheetNameError });
+            valid =
+                false;
+        }
+
+        if (!TryGetCustomTableIndex(
+                root,
+                diagnostics,
+                out customTableIndex))
+        {
+            valid =
+                false;
+        }
+
+        if (!TryGetPositiveInt32(
+                root,
+                "row",
+                diagnostics,
+                out rowIndex))
+        {
+            valid =
+                false;
+        }
+
+        if (!TryGetPositiveInt32(
+                root,
+                "column",
+                diagnostics,
+                out columnIndex))
+        {
+            valid =
+                false;
+        }
+
+        value =
+            string.Empty;
+
+        if (!root.TryGetProperty(
+                "value",
+                out JsonElement valueElement) ||
+            valueElement.ValueKind !=
+            JsonValueKind.String)
+        {
+            diagnostics.Add(new { scope = "input.value", message = "value must be a string." });
+            valid =
+                false;
+        }
+        else
+        {
+            value =
+                valueElement.GetString()
+                ?? string.Empty;
+        }
+
+        return valid;
+    }
+
+    public static bool TryGetSetColumnWidthInputs(
+        JsonElement root,
+        List<object> diagnostics,
+        out string sheetName,
+        out int customTableIndex,
+        out int columnIndex,
+        out double width)
+    {
+        bool valid =
+            true;
+
+        if (!HoleThreadNoteCommandSupport.TryGetRequiredString(root, "sheetName", out sheetName, out string sheetNameError))
+        {
+            diagnostics.Add(new { scope = "input.sheetName", message = sheetNameError });
+            valid =
+                false;
+        }
+
+        if (!TryGetCustomTableIndex(
+                root,
+                diagnostics,
+                out customTableIndex))
+        {
+            valid =
+                false;
+        }
+
+        if (!TryGetPositiveInt32(
+                root,
+                "column",
+                diagnostics,
+                out columnIndex))
+        {
+            valid =
+                false;
+        }
+
+        width =
+            0.0;
+
+        if (!HoleThreadNoteCommandSupport.TryGetRequiredDouble(root, "width", out width, out string widthError))
+        {
+            diagnostics.Add(new { scope = "input.width", message = widthError });
+            valid =
+                false;
+        }
+        else if (width <= 0.0 ||
+                 double.IsNaN(width) ||
+                 double.IsInfinity(width))
+        {
+            diagnostics.Add(new { scope = "input.width", message = "width must be a positive finite number.", width });
+            valid =
+                false;
+        }
+
+        return valid;
+    }
+
     public static CustomTable? ResolveCustomTable(
         Sheet sheet,
         int customTableIndex,
@@ -367,6 +496,141 @@ internal static class CustomTableCommandSupport
             diagnostics.Add(new { scope = "CustomTable.Title.Read", message = exception.Message, exceptionType = exception.GetType().FullName });
             return null;
         }
+    }
+
+    public static Row? ResolveRow(
+        CustomTable customTable,
+        int rowIndex,
+        List<object> diagnostics)
+    {
+        try
+        {
+            int rowCount =
+                customTable.Rows.Count;
+
+            if (rowIndex < 1 ||
+                rowIndex > rowCount)
+            {
+                diagnostics.Add(new { scope = "input.row", message = $"row {rowIndex} is outside CustomTable.Rows range 1..{rowCount}.", row = rowIndex, rowCount });
+                return null;
+            }
+
+            return customTable.Rows[rowIndex];
+        }
+        catch (Exception exception)
+        {
+            diagnostics.Add(new { scope = "CustomTable.Rows.Item", message = exception.Message, exceptionType = exception.GetType().FullName, rowIndex });
+            return null;
+        }
+    }
+
+    public static Column? ResolveColumn(
+        CustomTable customTable,
+        int columnIndex,
+        List<object> diagnostics)
+    {
+        try
+        {
+            int columnCount =
+                customTable.Columns.Count;
+
+            if (columnIndex < 1 ||
+                columnIndex > columnCount)
+            {
+                diagnostics.Add(new { scope = "input.column", message = $"column {columnIndex} is outside CustomTable.Columns range 1..{columnCount}.", column = columnIndex, columnCount });
+                return null;
+            }
+
+            return customTable.Columns[columnIndex];
+        }
+        catch (Exception exception)
+        {
+            diagnostics.Add(new { scope = "CustomTable.Columns.Item", message = exception.Message, exceptionType = exception.GetType().FullName, columnIndex });
+            return null;
+        }
+    }
+
+    public static Cell? ResolveCell(
+        Row row,
+        int rowIndex,
+        int columnIndex,
+        List<object> diagnostics)
+    {
+        try
+        {
+            int cellCount =
+                row.Count;
+
+            if (columnIndex < 1 ||
+                columnIndex > cellCount)
+            {
+                diagnostics.Add(new { scope = "input.column", message = $"column {columnIndex} is outside Row cell range 1..{cellCount}.", row = rowIndex, column = columnIndex, cellCount });
+                return null;
+            }
+
+            return row[columnIndex];
+        }
+        catch (Exception exception)
+        {
+            diagnostics.Add(new { scope = "CustomTable.Row.Item", message = exception.Message, exceptionType = exception.GetType().FullName, rowIndex, columnIndex });
+            return null;
+        }
+    }
+
+    public static string? TryReadCellValue(
+        Cell cell,
+        List<object> diagnostics,
+        string scope)
+    {
+        try
+        {
+            return cell.Value;
+        }
+        catch (Exception exception)
+        {
+            diagnostics.Add(new { scope, message = exception.Message, exceptionType = exception.GetType().FullName });
+            return null;
+        }
+    }
+
+    public static double? TryReadColumnWidth(
+        Column column,
+        List<object> diagnostics,
+        string scope)
+    {
+        try
+        {
+            return column.Width;
+        }
+        catch (Exception exception)
+        {
+            diagnostics.Add(new { scope, message = exception.Message, exceptionType = exception.GetType().FullName });
+            return null;
+        }
+    }
+
+    public static object ReadCustomTableIdentity(
+        CustomTable customTable,
+        int customTableIndex,
+        List<object> diagnostics)
+    {
+        _ =
+            TryReadStructure(
+                customTable,
+                diagnostics,
+                out int? rowCount,
+                out int? columnCount);
+
+        return new
+        {
+            customTableIndex,
+            title =
+                TryReadTitle(
+                    customTable,
+                    diagnostics),
+            rowCount,
+            columnCount
+        };
     }
 
     private static bool TryGetColumnTitles(
