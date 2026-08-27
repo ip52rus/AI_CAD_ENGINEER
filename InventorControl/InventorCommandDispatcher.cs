@@ -70,6 +70,12 @@ public class InventorCommandDispatcher
     private readonly SetDrawingViewAlignmentCommand
         _setDrawingViewAlignmentCommand;
 
+    private readonly SetDrawingViewOccurrenceVisibilityCommand
+        _setDrawingViewOccurrenceVisibilityCommand;
+
+    private readonly GetDrawingViewOccurrenceVisibilityCommand
+        _getDrawingViewOccurrenceVisibilityCommand;
+
     private readonly GetOpenDocumentsCommand
         _getOpenDocumentsCommand;
 
@@ -739,6 +745,14 @@ public class InventorCommandDispatcher
 
         _setDrawingViewAlignmentCommand =
             new SetDrawingViewAlignmentCommand(
+                inventor);
+
+        _setDrawingViewOccurrenceVisibilityCommand =
+            new SetDrawingViewOccurrenceVisibilityCommand(
+                inventor);
+
+        _getDrawingViewOccurrenceVisibilityCommand =
+            new GetDrawingViewOccurrenceVisibilityCommand(
                 inventor);
 
         _getOpenDocumentsCommand =
@@ -1636,6 +1650,14 @@ public class InventorCommandDispatcher
 
                 "set_drawing_view_alignment" =>
                     _setDrawingViewAlignmentCommand.Execute(
+                        root),
+
+                "set_drawing_view_occurrence_visibility" =>
+                    _setDrawingViewOccurrenceVisibilityCommand.Execute(
+                        root),
+
+                "get_drawing_view_occurrence_visibility" =>
+                    _getDrawingViewOccurrenceVisibilityCommand.Execute(
                         root),
 
                 "get_open_documents" =>
