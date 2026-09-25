@@ -1,227 +1,115 @@
 # Project History
 
-## 1. Исходная идея
+## 1. Initial hypothesis
 
-AI CAD ENGINEER начался как попытка ответить на практический вопрос:
+The project began with a practical question:
 
-> Можно ли по готовой 3D-модели Autodesk Inventor автоматически создать комплект конструкторской документации по ЕСКД, максимально приблизившись к логике инженера-конструктора?
+> Can software analyze an Autodesk Inventor 3D model and automatically create an ESKD-style engineering drawing?
 
-Первый подход был детерминированным: код сам анализирует модель, выбирает главный вид, масштаб, дополнительные виды и размеры.
+## 2. v0.1–v0.12 — embedded engineering pipeline
 
-## 2. v0.1–v0.3: доступ к Inventor
+Early versions implemented:
 
-Были решены базовые интеграционные задачи:
+- Inventor COM connectivity;
+- active-document detection;
+- drawing creation;
+- standard projected views;
+- view scoring/main-view selection;
+- model and hole analysis;
+- drawing-curve research;
+- dimension candidates and decisions;
+- Engineering Feature Graph;
+- hole grouping.
 
-- COM connection;
-- подключение к уже запущенному Inventor;
-- предотвращение лишнего второго экземпляра;
-- active document;
-- document type;
-- создание DrawingDocument;
-- base DrawingView.
+This proved Inventor control, but hard-coded engineering judgement became increasingly brittle.
 
-На этом этапе был доказан фундаментальный факт: внешняя программа может надёжно управлять Inventor.
+## 3. v0.15 — architecture reset
 
-## 3. v0.4–v0.6: генерация листа
+The old path was preserved at `v0.15-before-cleanup`, then removed:
 
-Добавлены:
+```text
+CommandProcessor
+→ DrawingManager
+→ EngineeringBrain
+→ Analysis / Decision / Planning
+```
 
-- несколько стандартных проекций;
-- центровые;
-- автоматическое размещение;
-- стандартные масштабы;
-- оценка информативности;
-- automatic main-view selection.
+New rule:
 
-## 4. v0.7–v0.11: размерная логика
+> Runtime reads and acts; the external LLM reasons.
 
-Проект перешёл от «нарисовать несколько видов» к попытке формализовать инженерное решение.
+## 4. v0.16–v0.52 — Eyes/Hands expansion
 
-Появились:
+The runtime systematically added drawing/data capabilities: tables, text, symbols, drawing creation, section/detail/auxiliary views, exports, dimensions/tolerances, notes, center annotations, balloons, PartsLists, revision objects and manufacturing annotations.
 
-- DrawingCurve research;
-- DimensionCandidate;
-- physical axis mapping;
-- Length / Width / Height roles;
-- Duplicate filtering;
-- Dimension Decision Engine;
-- отчёты решений.
+## 5. v0.53–v0.62 — agent-oriented runtime
 
-Этот этап показал, что даже простая размерная логика быстро выходит за пределы набора универсальных эвристик.
+Added:
 
-## 5. v0.12: Engineering Feature Graph
+- active-part Eyes;
+- deterministic single-command mode;
+- drawing/model previews;
+- read-only sketch hardening;
+- modal-safe save/export;
+- drawing layout map;
+- detail annotation text movement.
 
-Чтобы перестать рассуждать только по линиям чертежа, был добавлен feature-level graph:
+## 6. v0.63–v0.64 — external ESKD policy
 
-- feature nodes;
-- relationships;
-- hole features;
-- hole groups;
-- metadata/reporting.
+Drawing rules were formalized for the external reasoning layer rather than embedded into Runtime.
 
-Это последний этап, полностью представленный текущим public source snapshot.
+## 7. Benchmark #1 — turned shaft
 
-## 6. Архитектурный поворот
+A real shaft with steps, thread, holes, countersink, recess, chamfers and radius was used for reference-aided planning.
 
-Дальнейшие эксперименты показали, что жёстко кодировать «инженера» внутри программы неэффективно.
+Real drawings from the same part class improved the plan and content. The best result still needed human visual layout correction.
 
-Архитектура была изменена:
+## 8. v0.65–v0.66 — referenced-part targeting
 
-- Runtime = Eyes + Hands;
-- внешняя LLM = analysis/planning/decision;
-- пользователь = владелец design intent и финальный контролёр.
+Benchmark #2 required reading nested part geometry without activating referenced documents.
 
-Это позволило резко расширять Inventor capability без связывания API-кода с конкретным изделием.
+Existing Part Eyes gained `target.occurrencePath` support through the active assembly.
 
-## 7. Atomic runtime
+## 9. Benchmark #2 — welded chair frame
 
-В поздней R&D-фазе Runtime был расширен большим количеством атомарных операций чтения и действия.
+The assembly contained profile-tube welded units connected by M8 bolts/rivnuts.
 
-К исследованным категориям относились:
+The system recovered:
 
-- documents;
-- parts;
-- assemblies;
-- occurrences;
-- referenced documents;
-- BRep bodies/faces/edges;
-- features/parameters;
-- drawing sheets/views;
-- drawing curves/model references;
-- dimensions;
-- sections/details;
-- notes;
-- balloons;
-- tables;
-- title blocks;
-- borders;
-- welding/surface symbols;
-- center annotations;
-- layout map;
-- export.
-
-К v0.68 registry достиг 219 операций.
-
-## 8. Benchmark #1 — вал
-
-Целью было проверить не отдельный API call, а полный reasoning workflow.
-
-Модель содержала:
-
-- ступенчатую геометрию;
-- резьбу;
-- отверстия;
-- выборку;
-- фаски;
-- радиусы.
-
-Был применён reference-aided planning:
-
-- реальные производственные чертежи того же класса;
-- factual model dossier;
-- manufacturing requirements;
-- несколько candidate plans;
-- выбор;
-- execution;
-- render;
-- visual correction.
-
-Результат:
-
-- содержание чертежа стало существенно лучше;
-- выбранная структура видов была разумной;
-- после ручной перестановки нескольких элементов был получен лучший результат эксперимента;
-- layout всё ещё требовал human visual judgement.
-
-## 9. Benchmark #2 — сварной каркас кресла
-
-Второй benchmark специально выбрал другой класс изделия: assembly из профильной трубы.
-
-Design intent:
-
-- две сварные боковины;
-- сварное сиденье;
-- сварная спинка;
-- между четырьмя узлами болтовые соединения M8;
-- Ø9 through holes;
-- Ø11,1 one-wall holes под threaded rivnut M8;
-- Ст3.
-
-### Geometry audit
-
-Runtime восстановил:
-
-- 32 assembly occurrences;
-- 26 конструктивных металлических occurrences;
-- 24 трубы;
-- 2 пластины;
-- профили 50×25×2 и 25×25×2;
-- final BRep lengths;
-- 5° / 10° / 45° / square cuts.
+- 32 total assembly occurrences;
+- 26 structural metal occurrences;
+- 24 tubes + 2 plates;
+- 50×25×2 and 25×25×2 profiles;
+- square, 5°, 10° and 45° end conditions.
 
 ### Hole discrepancy
 
-Первичный анализ ошибочно решил, что отверстий нет, потому что они не являлись HoleFeature.
+The first sweep missed connection holes because they were not HoleFeatures. They were circular sketch + Extrude Cut features.
 
-После targeted audit было доказано:
+A targeted BRep audit recovered:
 
-- отверстия сделаны sketch + extrusion cut;
-- 12 осей Ø9 проходят через профиль;
-- 12 осей Ø11,1 проходят только одну стенку;
-- BRep позволяет отличить отверстия от corner radii профиля.
+- 12 × Ø9 through-profile axes;
+- 12 × Ø11.1 one-wall axes;
+- axis/location facts;
+- distinction from profile corner radii.
 
-Это стало важным R&D результатом.
+### Manufacturing equivalence
 
-### Fabrication content freeze
+26 structural occurrences were reduced to 14 detail types using final BRep, end geometry, hole patterns, through/one-wall state, handedness and rotation/mirror equivalence.
 
-26 structural occurrences были сведены к 14 manufacturing detail types D01…D14 с учётом:
+The audit also showed that Frame Generator `B_L` is not always final fabrication length.
 
-- profile;
-- final BRep;
-- end geometry;
-- holes;
-- handedness;
-- mirror equivalence.
+## 10. v0.67 — DrawingView-local isolation
 
-Также выяснилось, что Frame Generator parameter `B_L` нельзя автоматически принимать за final fabrication length.
+Added generic per-view occurrence visibility, allowing conceptual welded groups to be isolated without mutating source assembly visibility.
 
-### Runtime packages
+## 11. v0.68 — CustomTable editing
 
-Для execution были доказаны и добавлены минимальные generic capabilities.
+Added atomic cell value and column width writes to support externally planned schedules/specification experiments.
 
-#### v0.65
+## 12. Documentation planning experiment
 
-Referenced Part targeting для assembly Eyes.
-
-#### v0.66
-
-Расширение referenced targeting на geometry detail Eyes.
-
-#### v0.67
-
-DrawingView occurrence visibility:
-
-- per-view hide/show;
-- прямой GetVisibility readback;
-- возможность изолировать conceptual welded unit без изменения source assembly.
-
-#### v0.68
-
-Atomic CustomTable editing:
-
-- set one cell value;
-- set one column width;
-- readback/layout verification.
-
-Последний registry count: 219 / 219 unique.
-
-## 10. Reference-aided planning
-
-Для Benchmark #2 было изучено 20 reference sources по сварным/профильным конструкциям.
-
-Планировщик предложил три архитектуры документации.
-
-Выбран modular hybrid:
+Twenty real welded/profile-frame references were studied. A modular documentation architecture was selected:
 
 - top assembly;
 - four welded-unit drawings;
@@ -230,64 +118,18 @@ Atomic CustomTable editing:
 - M8/rivnut interface sheet;
 - specifications.
 
-Архитектура документации была логичной и производственно объяснимой.
+## 13. Real execution and stop criterion
 
-## 11. Initial execution
+The runtime technically created the planned sheets and data structures, but the rendered result still showed:
 
-Runtime технически смог:
-
-- создать листы;
-- изолировать occurrence sets;
-- создать таблицы;
-- заполнить specification data;
-- создать interface views;
-- сохранить source assembly неизменной.
-
-Но visual critic обнаружил системные проблемы:
-
-- слабый выбор/ориентация некоторых видов;
-- отсутствие достаточного набора manufacturing dimensions;
+- weak view orientation in places;
+- incomplete manufacturing dimensioning;
 - overlaps;
-- плохое использование площади листа;
-- необходимость повторного layout pass;
-- formal spec form требовал дополнительного внимания.
+- uneven use of sheet space;
+- need for substantial visual correction.
 
-## 12. Stop criterion
+These were not primarily missing API capabilities.
 
-После двух разных классов изделий стало ясно:
+The project therefore concluded that the Inventor control layer was successful, while the fully autonomous drawing-engineer hypothesis had not generalized sufficiently.
 
-- API integration работает;
-- geometry extraction работает;
-- generic CAD actions работают;
-- planning иногда даёт хорошую структуру;
-- качество полного листа не обобщается достаточно стабильно.
-
-Для каждого нового класса изделия снова требовались:
-
-- отдельный reference study;
-- prompt tuning;
-- multiple render/review loops;
-- substantial human visual judgement.
-
-Поэтому исходная продуктовая гипотеза — полностью автономный human-quality drawing engineer — была остановлена.
-
-## 13. Что считается успешным результатом
-
-Проект нельзя сводить к результату генератора чертежей.
-
-Подтверждены:
-
-- работающий Inventor integration layer;
-- управляемый CAD runtime;
-- separation of reasoning from execution;
-- atomic read/write model;
-- safe referenced-document reading;
-- BRep-centric geometry analysis;
-- source integrity discipline;
-- practical LLM-controlled CAD workflows.
-
-## 14. Текущее состояние
-
-Активное развитие исходной autonomous-drafting цели прекращено.
-
-Код и документация опубликованы как foundation для дальнейших экспериментов и более узких CAD-assistant сценариев.
+The project was frozen at v0.68 as a reusable CAD automation / AI-agent research foundation.

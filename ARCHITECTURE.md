@@ -1,290 +1,183 @@
 # Architecture
 
-## 1. Назначение
+## Purpose
 
-AI CAD ENGINEER исследует архитектуру внешнего программного управления Autodesk Inventor и применение LLM к инженерным CAD workflow.
+AI CAD ENGINEER is a local bridge between an external reasoning agent and Autodesk Inventor.
 
-Архитектура менялась по мере экспериментов. Важно различать:
-
-1. архитектуру опубликованного v0.12 snapshot;
-2. позднюю исследовательскую архитектуру External LLM + atomic Eyes/Hands.
-
-## 2. Опубликованный snapshot: layered engineering pipeline
-
-Текущий public source содержит классическую многоуровневую схему:
+The final architecture separates reasoning, facts, actions and CAD state.
 
 ```text
-Autodesk Inventor
-      │
-      ▼
-Core / Import
-      │
-      ▼
-Engineering
- ├─ Analysis
- ├─ Geometry
- ├─ Research
- └─ Decision
-      │
-      ▼
-Drawing
-      │
-      ▼
-Infrastructure / Reporting
+External LLM / caller
+        │ JSON
+        ▼
+Program.cs
+        ▼
+Core/Application.cs
+        ▼
+InventorControl/InventorCommandDispatcher.cs
+        ▼
+IInventorCommand
+        ▼
+CommandSupport / ReadSupport
+        ▼
+Autodesk Inventor COM/API
 ```
 
-### Core
+The v0.68 dispatcher registers **219 unique JSON command names**.
 
-Отвечает за жизненный цикл приложения и соединение с Inventor.
+## Eyes
 
-Ключевые задачи:
+An Eye is an atomic read operation.
 
-- подключиться к уже запущенному Inventor через COM;
-- при необходимости запустить Inventor;
-- получить активный документ;
-- определить тип документа;
-- принять пользовательскую команду.
+Requirements:
 
-### Import / Inventor
+- no document mutation;
+- no engineering decision;
+- factual structured output;
+- traceability to the source object where practical;
+- native Inventor values/enums preserved when useful;
+- unavailable facts reported instead of invented.
 
-Получает факты из Inventor.
+Typical domains: documents, sheets, views, drawing curves, dimensions, title blocks, annotations, tables, model features, parameters, sketches, BRep, assembly occurrences, referenced documents, BOM, previews and layout facts.
 
-В опубликованном snapshot сюда входят:
+## Hands
 
-- ModelAnalyzer;
-- HoleAnalyzer;
-- ViewCandidateGenerator.
+A Hand performs one explicit action.
 
-Import layer не должен принимать решения об оформлении.
+Requirements:
 
-### Engineering / Analysis
+- caller chooses the target;
+- caller supplies requested value/position/geometry;
+- no hidden optimization;
+- no automatic engineering choice;
+- no fallback that changes source-model intent;
+- direct factual readback where practical.
 
-Преобразует CAD-данные в инженерные метрики и кандидаты:
+Examples:
 
-- анализ видов;
-- статистика геометрии;
-- кандидаты размеров;
-- габаритные размеры;
-- необходимость вида.
+- move one DrawingView;
+- create one section view;
+- set one title-block field;
+- create one dimension;
+- change one tolerance mode;
+- hide one occurrence in one DrawingView;
+- set one CustomTable cell.
 
-### Engineering / Geometry
+## Legacy architecture
 
-В v0.12 появился Engineering Feature Graph:
-
-- FeatureNode;
-- FeatureRelationship;
-- FeatureGraph;
-- HoleFeatureGraphExtractor;
-- HoleGroupBuilder.
-
-Цель слоя — уйти от рассуждения только по линиям DrawingView и работать с инженерными объектами модели.
-
-### Engineering / Decision
-
-Содержит ранний встроенный Engineering Brain:
-
-- выбор главного вида;
-- выбор дополнительных видов;
-- Dimension Decision Engine;
-- определение ролей Length / Width / Height;
-- классификация Required / Duplicate / Optional и др.
-
-### Engineering / Research
-
-Исследует уже созданную DrawingView-геометрию:
-
-- DrawingCurve;
-- линии;
-- дуги;
-- окружности;
-- реальные границы вида;
-- связи с физическими осями.
-
-### Drawing
-
-Исполняет готовые решения:
-
-- создаёт DrawingDocument;
-- создаёт виды;
-- рассчитывает масштаб;
-- размещает виды;
-- добавляет центровые;
-- создаёт размеры.
-
-### Infrastructure
-
-Вспомогательные сервисы:
-
-- отчёты;
-- файловые пути;
-- console/file reporting.
-
-## 3. Почему архитектура была изменена
-
-Эксперименты показали, что инженерная логика быстро становится слишком сложной для набора жёстко зашитых правил.
-
-Главные проблемы:
-
-- выбор вида зависит от design intent, а не только от числа линий;
-- один и тот же BRep может требовать разной документации в разных производственных контекстах;
-- assembly hierarchy не всегда совпадает с технологической;
-- важные элементы могут быть созданы не «правильным» feature типом;
-- layout и размерная архитектура плохо обобщаются между классами изделий.
-
-Поэтому поздняя R&D-фаза перенесла reasoning из Runtime во внешнюю LLM.
-
-## 4. Поздняя архитектура: External LLM + Eyes/Hands
+Before v0.15 the project used:
 
 ```text
-                 External LLM
-        engineering interpretation
-         planning / validation
-                  │
-        ┌─────────┴─────────┐
-        ▼                   ▼
-      Eyes                Hands
- atomic reads        atomic actions
-        │                   │
-        └─────────┬─────────┘
-                  ▼
-           Autodesk Inventor
+CommandProcessor
+→ DrawingManager
+→ EngineeringBrain
+→ Analysis / Decision / Planning
+→ Drawing
 ```
 
-### Eyes
+That code attempted to choose views, dimensions and layout inside C#.
 
-Eye должен отвечать на один фактический вопрос.
+It was removed at v0.15. The tag `v0.15-before-cleanup` preserves the old phase.
 
-Примеры исследованных категорий:
+## Why the architecture changed
 
-- active document;
-- occurrences;
-- referenced documents;
-- surface bodies;
-- BRep faces/edges;
-- feature tree/details;
-- model parameters;
-- drawing views and curves;
-- model references;
-- dimensions;
-- notes;
-- balloons;
-- tables;
-- title block;
-- layout map.
+CAD facts are not the same thing as engineering intent.
 
-Eye не должен интерпретировать геометрию как «правильную деталь кресла» или принимать технологическое решение.
+Observed examples:
 
-### Hands
+- real holes may be `ExtrudeFeature`, not `HoleFeature`;
+- native assembly hierarchy may not match manufacturing hierarchy;
+- Frame Generator `B_L` may differ from final cut geometry;
+- mirrored parts may or may not be manufacturing-equivalent;
+- the most line-dense projection may not be the best main view.
 
-Hand выполняет одно однозначное действие Inventor API.
+Therefore Runtime exposes facts rather than semantic conclusions.
 
-Примеры исследованных категорий:
+## Geometry evidence hierarchy
 
-- create/move drawing view;
-- section/detail views;
-- dimensions;
-- center marks/centerlines;
-- notes;
-- balloons;
-- welding/surface symbols;
-- sheet/border/title block;
-- table operations;
-- per-view occurrence visibility;
-- export.
+For final manufacturing geometry:
 
-Один Hand не должен реализовывать «создать чертёж боковины» или «построить спецификацию кресла». Семантика остаётся снаружи.
+1. final BRep;
+2. explicit parameters / feature details;
+3. feature taxonomy/name;
+4. filename conventions.
 
-## 5. Архитектурные инварианты
+Feature history remains useful, but cannot override the final body shape.
 
-### Runtime is not the engineer
+## Referenced-part targeting
 
-Runtime читает и действует. Он не решает design intent.
+v0.65/v0.66 introduced reusable nested-part resolution:
 
-### One atomic action
+```text
+active AssemblyDocument
+→ occurrencePath
+→ ComponentOccurrence
+→ Definition.Document
+→ PartDocument
+→ existing Eye logic
+```
 
-Каждый Hand должен менять минимально возможную единицу состояния.
+This avoided document switching and preserved source assembly state.
 
-### Read before write
+## DrawingView-local occurrence control
 
-Перед любым write workflow внешний агент обязан собрать достаточные факты.
+v0.67 added per-view visibility through `DrawingView.SetVisibility` / `GetVisibility`.
 
-### Source-model integrity
+This allows an external agent to represent a conceptual manufacturing group without suppressing/hiding occurrences in the source assembly.
 
-Drawing workflow не должен неожиданно изменять исходную деталь/сборку.
+## CustomTable editing
 
-### No silent fallback
+v0.68 added atomic:
 
-Если Inventor API не позволяет выполнить действие в заданном контексте, Runtime должен вернуть ошибку, а не изменять source model альтернативным способом.
+- cell value write;
+- column width write.
 
-### Final BRep over feature naming
+A semantic command such as “create fabrication schedule” was intentionally not added.
 
-Для фактической конечной геометрии BRep важнее имени feature. Это особенно критично для:
+## Visual QA loop
 
-- mirrored/generated parts;
-- imported geometry;
-- extrusion-cut holes;
-- Frame Generator members после split/trim.
+API success is not drawing quality.
 
-### External uncertainty
+```text
+create
+→ factual readback
+→ get_drawing_layout_map
+→ capture_drawing_sheet_preview
+→ external visual review
+→ atomic correction
+→ render again
+```
 
-Если нужное значение отсутствует в модели и не задано пользователем, оно остаётся unresolved.
+## Source-model integrity
 
-## 6. Пример: почему это важно
+Drawing workflows repeatedly verified:
 
-В Benchmark #2 отверстия под крепёж были созданы не HoleFeature, а обычным sketch + extrusion cut.
+- source assembly/part dirty state;
+- referenced document dirty state;
+- modal-dialog behaviour;
+- absence of unintended saves;
+- drawing-local rather than model-global mutations.
 
-Feature-oriented проверка сначала пропустила их.
+## Experimental exceptions
 
-BRep-аудит восстановил:
+Legacy commands that go beyond strict Eyes/Hands remain for compatibility:
 
-- 12 × Ø9 through-profile;
-- 12 × Ø11.1 one-wall;
-- направление осей;
-- положение;
-- принадлежность к profile member;
-- функциональное различие.
+- `analyze_dimension_layout`
+- `auto_arrange_dimensions`
+- `check_annotation_collisions`
+- `auto_resolve_annotation_collisions`
+- `analyze_view_dimension_candidates`
 
-Это стало важным архитектурным уроком: инженерное чтение CAD не должно зависеть только от feature taxonomy.
+They are not the pattern for new Runtime development.
 
-## 7. Контроль качества runtime package
+## Embedded OpenAI client
 
-Каждый новый capability package проходил:
+`AI/OpenAiClient.cs` is an experimental adapter. The active Runtime boundary is JSON and does not depend on an embedded model client, keeping orchestration provider-agnostic.
 
-1. Capability Audit.
-2. Решение: нужен ли код.
-3. Минимальная реализация.
-4. classic MSBuild.
-5. registry uniqueness check.
-6. live Inventor E2E.
-7. source-model dirty-state check.
-8. Git checkpoint/tag.
+## Conclusion
 
-Если шаг 2 давал «существующего capability достаточно», реализация запрещалась.
+The Inventor control layer generalized well.
 
-## 8. Что оказалось за пределами Runtime
+The fully autonomous drawing-decision layer did not.
 
-Runtime успешно решал API/automation часть.
-
-Хуже всего обобщались:
-
-- выбор оптимального набора видов;
-- выбор полного, но неизбыточного набора размеров;
-- композиция листа;
-- визуальная иерархия;
-- нормоконтроль, требующий design intent;
-- переход между разными классами изделий.
-
-Эти задачи нельзя считать решёнными одной только богатой Inventor API surface.
-
-## 9. Практический вывод
-
-Архитектура Eyes/Hands остаётся полезной как foundation для:
-
-- supervised CAD assistants;
-- model interrogation;
-- drawing audit;
-- batch automation;
-- fabrication-data extraction;
-- LLM-controlled deterministic workflows.
-
-Полностью автономный drawing engineer не следует считать доказанной возможностью этой кодовой базы.
+Future development should strengthen factual CAD access and supervised workflows rather than rebuild a hidden engineering brain inside Runtime.

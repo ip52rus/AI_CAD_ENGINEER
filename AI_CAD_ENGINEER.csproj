@@ -19,4 +19,8 @@
     </COMReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="InventorControl\Commands\Diagnostics\" />
+  </ItemGroup>
+
 </Project>

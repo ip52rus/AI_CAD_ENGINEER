@@ -1,160 +1,79 @@
 # Research Findings
 
-## Краткий вывод
+## Main result
 
-Эксперимент разделился на два разных вопроса.
+The project answered two separate questions.
 
-### Вопрос 1
+### Can an external AI/automation process control Autodesk Inventor deeply enough for useful CAD workflows?
 
-Можно ли дать внешней программе/LLM глубокий управляемый доступ к Autodesk Inventor?
+**Yes.**
 
-**Да.**
+### Does broad API access automatically make an LLM a reliable autonomous engineering drafter?
 
-### Вопрос 2
+**No.**
 
-Достаточно ли этого, чтобы LLM стабильно и автономно выпускала чертежи человеческого качества для разных классов изделий?
+## Strong results
 
-**Эксперименты этого не подтвердили.**
+- deterministic JSON-to-Inventor automation;
+- scalable Eyes/Hands model;
+- factual geometry extraction from features, sketches and BRep;
+- assembly-context part reading;
+- source-model integrity discipline;
+- useful external reasoning for factual dossiers, contradictions and manufacturing equivalence.
 
-## Что работало хорошо
+## Negative findings
 
-### CAD connectivity
+### Feature taxonomy is not geometry
 
-COM/API integration оказалась надёжной и управляемой.
+Real bolt holes in Benchmark #2 were Extrude Cuts, not HoleFeatures.
 
-### Factual model reading
+### Model parameter is not always manufacturing dimension
 
-Система хорошо извлекала:
-
-- document structure;
-- geometry;
-- parameters;
-- BRep;
-- feature history;
-- assembly occurrences;
-- drawing objects.
-
-### Targeted capability development
-
-Capability Audit → minimum implementation → E2E оказался эффективным способом развивать CAD runtime.
-
-### BRep reasoning
-
-BRep помогал там, где feature history была неполной или вводила в заблуждение.
-
-Примеры:
-
-- mirrored generated parts;
-- extrusion-cut holes;
-- Frame Generator members после trim/split.
-
-### External reasoning
-
-LLM неплохо:
-
-- строила factual dossier;
-- сравнивала manufacturing-equivalent детали;
-- классифицировала geometry;
-- формировала document hierarchy;
-- находила противоречия.
-
-## Что работало нестабильно
-
-### Main-view selection
-
-«Информативность» вида не равна инженерной пригодности.
-
-### Dimension completeness
-
-Размер может быть геометрически корректным, но производственно бессмысленным; обратное тоже верно.
-
-### Layout
-
-Наличие координат и bounding boxes не заменяет визуальную композицию.
-
-### Generalization
-
-Хороший результат на валу не переносился автоматически на сварную сборку.
-
-### Normal control
-
-Формальная проверка ЕСКД зависит не только от геометрии, но и от design intent, назначения документа и производственного процесса.
-
-## Важные конкретные наблюдения
-
-### HoleFeature is not the hole
-
-В Benchmark #2 реальные болтовые отверстия были сделаны Extrude Cut.
-
-Вывод:
-
-> semantic interpretation нельзя строить только по feature type.
-
-### B_L is not final cut length
-
-Для Frame Generator элементов параметр `B_L` в ряде случаев отличался от final BRep extent из-за miter/split/cut.
-
-Вывод:
-
-> manufacturing dimensions должны выводиться из конечной геометрии, а не из одного параметра.
+Frame Generator `B_L` could differ from final BRep geometry after trim/split/cut.
 
 ### Assembly tree is not manufacturing hierarchy
 
-Четыре реальные сварные единицы кресла не совпадали с native assembly tree.
+Native assembly structure did not directly match four welded manufacturing units.
 
-Вывод:
+### More commands do not solve visual judgement
 
-> технологическая иерархия — engineering knowledge, а не гарантированное свойство CAD structure.
+At 219 commands the main remaining issues were still:
 
-### More API does not equal better drawing
+- view selection;
+- dimension architecture;
+- sheet composition;
+- readability.
 
-К концу эксперимента capability surface была уже очень широкой.
+### Reference drawings improve planning, not full automation
 
-Ограничение оставалось в reasoning/visual judgement.
+Reference-aided planning produced better document structures but did not eliminate human visual review.
 
-## Почему reference-aided planning был полезен
+## Why the original track stopped
 
-Reference drawings заметно улучшили:
+The limiting loop became:
 
-- hierarchy;
-- выбор локальных деталей;
-- распределение информации по документам;
-- понимание manufacturing conventions.
+```text
+new product class
+→ new interpretation/reference study
+→ new plan
+→ render
+→ human critique
+→ repeated corrections
+```
 
-Но reference set не решил автоматически:
+Adding more Inventor commands no longer addressed the core bottleneck.
 
-- конкретную размерную архитектуру;
-- layout;
-- production intent;
-- visual cleanliness.
+## Valuable future uses
 
-## Почему проект остановлен
+- model interrogation;
+- drawing/model audit;
+- fabrication extraction;
+- batch Inventor work;
+- supervised CAD execution;
+- agent tool-layer research.
 
-Продолжение было технически возможно.
+## Scope
 
-Stop decision был экономическим и исследовательским:
+The experiment does not prove autonomous CAD drafting is impossible. It shows that the investigated approach did not reach reliable human-quality generalization at acceptable interaction cost.
 
-- каждый новый класс изделия требовал нового глубокого цикла;
-- качество зависело от prompt/review усилий;
-- human review оставался обязательным;
-- выигрыш относительно работы опытного конструктора не был доказан.
-
-## Что можно использовать дальше
-
-Самые перспективные сценарии на базе результатов:
-
-1. **Ask the model** — natural-language interrogation модели/сборки.
-2. **Drawing review** — factual checks уже сделанного человеком чертежа.
-3. **Fabrication extraction** — профили, длины, cuts, holes.
-4. **Batch CAD** — repetitive Inventor operations.
-5. **Supervised assistant** — пользователь принимает решение, AI исполняет локальную операцию.
-
-## Что нельзя утверждать
-
-Результаты проекта не доказывают, что:
-
-- autonomous drafting невозможно в принципе;
-- другая модель/подход не сможет решить задачу;
-- Autodesk API является ограничивающим фактором.
-
-Они показывают только то, что исследованный подход не обеспечил требуемое качество и обобщение в разумном workflow.
+The Autodesk Inventor API was not the primary limiting factor.

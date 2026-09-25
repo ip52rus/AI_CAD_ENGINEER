@@ -1,280 +1,289 @@
 # AI CAD ENGINEER
 
-Экспериментальная платформа автоматизации Autodesk Inventor и исследовательский проект по применению LLM к инженерной CAD-работе.
+**Experimental Autodesk Inventor automation runtime for AI-assisted CAD workflows.**
 
-> Главный практический результат проекта — рабочая интеграция с Autodesk Inventor через COM/API, анализ геометрии и чертежей, программное создание и изменение CAD-объектов и формализованный слой инженерных операций.  
-> Исследовательская гипотеза о полностью автономном выпуске чертежей человеческого качества для произвольных деталей и сборок не была подтверждена.
+AI CAD ENGINEER is a C#/.NET project that exposes Autodesk Inventor through a structured JSON command layer. The main technical result is a working external control surface for reading Inventor state and performing deterministic CAD actions from an AI agent or another automation client.
 
-## Статус
+The project also investigated a harder question: whether an LLM could use that control layer to autonomously produce production-quality engineering drawings. The automation layer proved viable; the fully autonomous drawing-engineer hypothesis did not generalize reliably across different classes of parts and assemblies.
 
-Активная разработка исходной идеи завершена после серии практических benchmark-экспериментов.
+## Status
 
-Проект не закрыт из-за проблем интеграции с Inventor. Напротив, программная часть доказала, что Inventor можно уверенно читать и управлять им извне. Ограничение оказалось выше уровнем: современная LLM недостаточно стабильно принимает визуально-инженерные решения, необходимые для качественной компоновки чертёжных листов, выбора видов, размеров, разрезов и оформления без многократной человеческой коррекции.
+**Final research checkpoint: v0.68**
 
-Текущий публичный snapshot исходного кода в `main` соответствует раннему рабочему прототипу v0.12. Последующие исследовательские итерации до v0.68 описаны в документации проекта; они расширили подход до атомарного runtime уровня Eyes/Hands и были проверены на реальных моделях Autodesk Inventor.
+- **219** registered JSON commands
+- **219** unique command names
+- live Autodesk Inventor 2027 E2E validation throughout development
+- architecture: external reasoning + atomic **Eyes** and **Hands**
+- source-model integrity checks built into the development process
+- autonomous-drafting research track concluded after real benchmarks
 
-## Что удалось реализовать
+The project was not stopped because Inventor could not be controlled. The opposite was demonstrated: the runtime can inspect and manipulate a broad set of Inventor objects. The limiting factor was the consistency of higher-level AI judgement for view selection, dimension completeness, drawing composition and visual drafting quality.
 
-В опубликованном коде:
-
-- подключение к запущенному Autodesk Inventor и запуск нового экземпляра при необходимости;
-- определение активного документа и его типа;
-- анализ детали;
-- анализ отверстий;
-- анализ листового металла и базовых геометрических характеристик;
-- генерация и оценка шести стандартных проекций;
-- автоматический выбор главного вида;
-- автоматический выбор стандартного масштаба;
-- создание чертёжного документа и трёх видов;
-- автоматическое размещение видов;
-- центровые линии и центровые метки;
-- анализ DrawingCurve;
-- генерация кандидатов размеров;
-- определение физических осей видов;
-- классификация размеров и исключение дублей;
-- Engineering Feature Graph;
-- группировка отверстий;
-- отчётность по этапам анализа и принятия решений.
-
-На позднем экспериментальном этапе архитектура была перестроена в универсальный CAD-runtime: внешняя LLM принимает инженерные решения, а Runtime предоставляет только атомарные операции чтения и действия. В этой архитектуре были доказаны сценарии чтения сборок, BRep-геометрии, feature history, drawing views, размеров, таблиц, title block, примечаний, символов, per-view visibility и других объектов Inventor.
-
-Подробнее: [PROJECT_HISTORY](docs/PROJECT_HISTORY.md) и [RESEARCH_FINDINGS](docs/RESEARCH_FINDINGS.md).
-
-## Ключевое инженерное разделение
-
-Проект прошёл две архитектурные фазы.
-
-### 1. Встроенный Engineering Brain
-
-Ранние версии пытались принимать инженерные решения внутри программы:
+## Architecture
 
 ```text
-Inventor
-   ↓
-Import / Analysis
-   ↓
-Engineering Brain
-   ↓
-Drawing Plan
-   ↓
-Drawing Generator
+External LLM / automation client
+            │ JSON
+            ▼
+        Program.cs
+            ▼
+    Core/Application.cs
+            ▼
+InventorCommandDispatcher
+            ▼
+     IInventorCommand
+            ▼
+ CommandSupport / ReadSupport
+            ▼
+    Autodesk Inventor API
 ```
 
-Эта архитектура реализована в текущем публичном snapshot.
+### Eyes
 
-### 2. External LLM + atomic Eyes/Hands
+Read-only factual operations for documents, sheets, views, dimensions, title blocks, notes, symbols, tables, model features, parameters, sketches, BRep, assemblies, previews and layout data.
 
-Позднее проект был переведён к более универсальной модели:
+### Hands
 
-```text
-                External LLM
-            reasoning / planning
-                    │
-          ┌─────────┴─────────┐
-          ▼                   ▼
-        Eyes                Hands
-  atomic CAD reads    atomic CAD actions
-          │                   │
-          └─────────┬─────────┘
-                    ▼
-             Autodesk Inventor
+One explicit Inventor action per command: create/move/delete views, create/edit dimensions, notes and symbols, edit title-block fields, tables, per-view occurrence visibility, save/export and other deterministic operations.
+
+The external caller decides **what should be done**. Runtime decides only **how to perform the requested Inventor API operation safely**.
+
+## Why the architecture changed
+
+Versions before v0.15 contained an internal `EngineeringBrain`, `DrawingManager`, view scoring and dimension-decision logic.
+
+That path was intentionally removed at v0.15. Decisions such as “best view”, “required dimension” and “correct sheet layout” depend heavily on design intent, manufacturing context and visual judgement. The project therefore moved reasoning outside Runtime.
+
+The tag `v0.15-before-cleanup` preserves the earlier architecture.
+
+## Implemented capability areas
+
+At v0.68 the dispatcher contains 219 unique JSON commands covering:
+
+- Inventor connectivity and document lifecycle
+- drawing sheets, borders and GOST title blocks
+- base/projected/section/detail/auxiliary views and view breaks
+- drawing curves and model references
+- linear, diameter, radius, angular, ordinate, baseline and chain dimensions
+- dimension formatting, styles, layers and tolerance modes
+- center marks and centerlines
+- hole/thread, general and leader notes
+- feature control frames
+- surface texture and welding symbols
+- sketched symbols
+- revision clouds and revision tables
+- edge, transition, bend, chamfer and punch annotations
+- balloons and parts lists
+- CustomTables and HoleTables
+- PDF/DWG/DXF export
+- drawing-sheet and model PNG previews
+- normalized drawing layout map
+- model feature/parameter/sketch/BRep Eyes
+- assembly occurrence/BOM/reference Eyes
+- referenced-part targeting from assembly context
+- DrawingView-local occurrence visibility
+- atomic CustomTable cell and column-width editing
+
+Exact dispatcher inventory: [docs/COMMAND_REFERENCE.md](docs/COMMAND_REFERENCE.md)
+
+Verification map: [CAPABILITY_MAP.md](CAPABILITY_MAP.md)
+
+## Example commands
+
+```json
+{"command":"get_active_document"}
 ```
 
-Runtime не должен решать, какой вид «лучше», какой размер «нужен» или как оформить изделие. Он должен надёжно читать факты и выполнять одно однозначное действие. Инженерная интерпретация остаётся снаружи.
-
-Это стало главным архитектурным результатом проекта.
-
-## Что показали реальные эксперименты
-
-### Benchmark #1 — вал
-
-Для токарной детали был проверен reference-aided подход:
-
-1. анализ реальной 3D-модели;
-2. изучение набора реальных ЕСКД-чертежей того же класса;
-3. построение Manufacturing Requirement Matrix;
-4. выбор нескольких вариантов Drawing Plan;
-5. выполнение плана;
-6. render → visual QA → correction.
-
-Содержательная структура чертежа заметно улучшилась, но качественная компоновка по-прежнему требовала человеческой коррекции.
-
-### Benchmark #2 — сварной каркас кресла
-
-Система анализировала реальную сборку из профильной трубы.
-
-В ходе аудита были восстановлены:
-
-- 26 конструктивных металлических occurrence;
-- 24 соединительных отверстия;
-- 12 сквозных отверстий Ø9 под болты M8;
-- 12 отверстий Ø11,1 только в одной стенке под резьбовые заклёпочные гайки M8;
-- различия между исходной Frame Generator длиной и финальной BRep-геометрией;
-- 14 изготовительных типов деталей;
-- четыре отдельные сварные единицы: две боковины, сиденье и спинка.
-
-Система смогла построить многоуровневый план КД и технически создать листы, таблицы и спецификационные данные. Однако первый фактический комплект снова потребовал значительной ручной коррекции выбора видов, размеров и layout.
-
-Именно масштабируемость этой визуально-инженерной части стала stop-criterion исследования.
-
-## Что проект доказал
-
-Проект успешно подтвердил, что можно построить внешний программный слой над Autodesk Inventor, который:
-
-- получает структурированные факты из CAD-модели;
-- работает с Inventor без ручного переключения документов в типовых сценариях;
-- управляет чертёжными объектами через API;
-- безопасно разделяет чтение и изменение;
-- позволяет LLM строить многошаговые CAD workflow;
-- пригоден как основа для AI-assisted CAD инструментов.
-
-Проект **не подтвердил**, что текущая LLM способна без устойчивого человеческого контроля выпускать для произвольного изделия красивую и производственно грамотную КД уровня опытного конструктора.
-
-Это два разных результата, и первый остаётся технически ценным.
-
-## Потенциальные направления продолжения
-
-Кодовая база и результаты экспериментов могут быть полезны для более узких задач:
-
-- AI-помощник для чтения модели: «спросить сборку»;
-- проверка уже созданных чертежей;
-- поиск пропущенных размеров и несоответствий;
-- массовая работа с iProperties и документами;
-- batch export PDF/DWG/DXF;
-- анализ BOM и состава сборки;
-- извлечение fabrication data из BRep;
-- cut-list для профильных конструкций;
-- поиск одинаковых/зеркальных/отличающихся деталей;
-- полуавтоматические CAD-команды под контролем инженера;
-- supervised drawing assistant вместо полностью автономного генератора.
-
-## Структура опубликованного snapshot
-
-```text
-Core/
-    InventorManager.cs
-    Application.cs
-    CommandProcessor.cs
-
-Import/
-    Inventor/
-        ModelAnalyzer.cs
-        HoleAnalyzer.cs
-        ViewCandidateGenerator.cs
-
-Engineering/
-    Analysis/
-    Decision/
-    Geometry/
-    Models/
-    Research/
-
-Drawing/
-    DrawingManager.cs
-    CenterAnnotationGenerator.cs
-    OverallDimensionGenerator.cs
-
-Infrastructure/
-    Reporting/
+```json
+{"command":"get_assembly_occurrences"}
 ```
 
-Подробно: [ARCHITECTURE.md](ARCHITECTURE.md).
+```json
+{
+  "command":"set_drawing_view_occurrence_visibility",
+  "sheetName":"Лист:1",
+  "viewName":"ВИД1",
+  "occurrencePath":"Frame:1/Profile:3",
+  "visible":false
+}
+```
 
-## Технологии
+```json
+{
+  "command":"set_custom_table_cell_value",
+  "sheetName":"Лист:1",
+  "customTableIndex":1,
+  "row":1,
+  "column":1,
+  "value":"D01"
+}
+```
 
-- C#
-- .NET 10
-- Autodesk Inventor API
-- COM Automation
-- Windows
-- Visual Studio / MSBuild
-- Git
+## Build and run
 
-Основная среда экспериментов:
+Tested environment:
 
-- Autodesk Inventor Professional 2027
 - Windows 10
-- .NET SDK 10
+- Autodesk Inventor Professional 2027
+- .NET 10
+- Visual Studio / classic MSBuild
+- Autodesk Inventor COM reference
 
-## Сборка
-
-Требуется установленный Autodesk Inventor с зарегистрированной COM type library.
+Validated build path:
 
 ```powershell
-MSBuild.exe AI_CAD_ENGINEER.csproj /p:Configuration=Debug /p:Platform="Any CPU"
+MSBuild.exe AI_CAD_ENGINEER.csproj /p:Configuration=Debug /p:Platform="Any CPU" /v:minimal
 ```
 
-или сборка проекта из Visual Studio.
+Interactive mode:
 
-## Запуск опубликованного прототипа
-
-1. Открыть Autodesk Inventor.
-2. Открыть сохранённую деталь `.ipt`.
-3. Запустить AI CAD ENGINEER.
-4. Выполнить команду:
-
-```text
-Создай чертежи
+```powershell
+AI_CAD_ENGINEER.exe
 ```
 
-Опубликованный snapshot рассчитан прежде всего на детали. Он анализирует активную модель и создаёт рабочий чертёжный прототип с выбранными видами и базовой размерной логикой.
+Single-command automation:
 
-## Инженерный процесс разработки
+```powershell
+AI_CAD_ENGINEER.exe --json-file ".\command.json"
+```
 
-Для поздней R&D-фазы был принят жёсткий цикл:
+or:
+
+```powershell
+AI_CAD_ENGINEER.exe --json "{\"command\":\"ping\"}"
+```
+
+Single-command mode is attach-only: it connects to an already running Inventor instance and emits one JSON response with a deterministic exit code.
+
+## Development method
 
 ```text
 Capability Audit
       ↓
-Нужен ли вообще новый код?
+Is new code actually required?
       ↓
-минимальный Eyes/Hands package
+minimal generic Eye / Hand
       ↓
 classic MSBuild
       ↓
 live Inventor E2E
+      ↓
+direct readback
       ↓
 source-model integrity check
       ↓
 checkpoint / tag
 ```
 
-Если Capability Audit показывал, что нужная возможность уже существует, новый код не писался.
+If existing capabilities were sufficient, no new code was added.
 
-Подробнее: [DEVELOPMENT_PROCESS.md](docs/DEVELOPMENT_PROCESS.md).
+See [docs/DEVELOPMENT_PROCESS.md](docs/DEVELOPMENT_PROCESS.md).
 
-## Правила для AI-агентов
+## Research benchmarks
 
-Правила работы AI-агента с проектом вынесены в [AGENTS.md](AGENTS.md). Основные принципы:
+### Benchmark #1 — turned shaft
 
-- не придумывать инженерные данные;
-- не менять source model во время аудита;
-- один Hand = одно атомарное действие;
-- сначала проверять существующие возможности;
-- BRep считать более надёжным источником конечной геометрии, чем имя feature;
-- после каждого изменения проводить live E2E;
-- drawing generation обязательно проходит render/visual QA.
+Reference-aided planning combined real drawings of the same part class, a factual model dossier, manufacturing requirements, candidate plans, execution and visual QA. The content architecture improved substantially, but good final composition still depended on human correction.
 
-## Документация
+### Benchmark #2 — welded chair frame
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — архитектура и её эволюция;
-- [ROADMAP.md](ROADMAP.md) — завершённые этапы и возможные направления;
-- [CHANGELOG.md](CHANGELOG.md) — изменения опубликованного snapshot;
-- [PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md) — полная история исследования;
-- [RESEARCH_FINDINGS.md](docs/RESEARCH_FINDINGS.md) — выводы benchmark-экспериментов;
-- [DEVELOPMENT_PROCESS.md](docs/DEVELOPMENT_PROCESS.md) — процесс разработки и go/no-go gates;
-- [CAPABILITIES.md](docs/CAPABILITIES.md) — реализованные и исследованные возможности;
-- [AGENTS.md](AGENTS.md) — правила для AI coding / CAD agents;
-- [CONTRIBUTING.md](CONTRIBUTING.md) — правила изменений.
+A real profile-tube assembly tested generalization to a multi-level welded/bolted product. The runtime recovered:
 
-## Ограничения
+- 26 structural metal occurrences
+- 24 tube members + 2 plates
+- 14 manufacturing-equivalent detail types
+- 12 × Ø9 through-profile holes for M8 bolts
+- 12 × Ø11.1 one-wall holes for M8 threaded rivet nuts
+- 5°, 10°, 45° and square end conditions
+- differences between Frame Generator `B_L` and final BRep geometry
+- four manufacturing units: left side, right side, seat and backrest
 
-- Autodesk Inventor обязателен: это не standalone CAD kernel.
-- Проект ориентирован на Windows и COM Automation.
-- Не все поздние экспериментальные runtime-пакеты представлены в текущем public source snapshot.
-- Не следует считать автоматически созданный чертёж production-ready без инженерной проверки.
-- Организационные обозначения, допуски, сварочные требования и другие design-intent данные нельзя надёжно выводить только из геометрии.
+A multi-sheet documentation architecture was planned and technically executable. The first real rendered set still required substantial correction in view choice, dimension completeness and layout. That result triggered the stop criterion for the original autonomous-drafting goal.
 
-## Лицензирование
+Full findings: [docs/RESEARCH_FINDINGS.md](docs/RESEARCH_FINDINGS.md)
 
-Отдельная open-source лицензия в репозитории пока не задана. Если проект будет использоваться или развиваться третьими лицами за пределами стандартных возможностей GitHub, владельцу репозитория следует явно выбрать и добавить лицензию.
+## What the project demonstrated
+
+The project **did** demonstrate that an external agent can be given a substantial, structured and testable control layer over Autodesk Inventor.
+
+It **did not** demonstrate that a current LLM can reliably replace an experienced drafter/constructor for arbitrary production drawings without significant review.
+
+The runtime remains useful as a foundation for:
+
+- CAD copilots
+- model interrogation
+- drawing/model review
+- fabrication-data extraction
+- batch Inventor automation
+- supervised drawing assistance
+- agent-controlled repetitive CAD workflows
+
+## Repository map
+
+```text
+AI/
+Core/
+InventorControl/
+  Commands/
+  InventorCommandDispatcher.cs
+
+AGENTS.md
+ARCHITECTURE.md
+CAPABILITY_MAP.md
+CURRENT_STATE.md
+ESKD_DRAWING_POLICY.md
+PROJECT_REVIEW.md
+ROADMAP.md
+CHANGELOG.md
+CONTRIBUTING.md
+
+docs/
+  COMMAND_REFERENCE.md
+  DEVELOPMENT_PROCESS.md
+  PROJECT_HISTORY.md
+  RESEARCH_FINDINGS.md
+  MILESTONES.md
+```
+
+## AI-agent rules
+
+[AGENTS.md](AGENTS.md) is the binding guide for coding/CAD agents.
+
+Key rules:
+
+- Runtime = factual Eyes + atomic Hands
+- audit existing capability before adding code
+- do not invent missing design intent
+- final BRep is the primary source of final geometric truth
+- never mutate source-model state as a drawing fallback
+- live Inventor E2E is required before a capability is called verified
+- API success is not proof of drawing quality
+
+## ESKD policy
+
+[ESKD_DRAWING_POLICY.md](ESKD_DRAWING_POLICY.md) contains the external reasoning policy used during the drawing experiments. It is deliberately not embedded as automatic Runtime behaviour.
+
+## Version history
+
+- v0.1–v0.12 — embedded analysis / Engineering Brain experiments
+- `v0.15-before-cleanup` — checkpoint before architectural cleanup
+- v0.15 — legacy decision layer removed
+- v0.16–v0.64 — systematic Eyes/Hands expansion
+- v0.65–v0.66 — referenced-part targeting from assemblies
+- v0.67 — DrawingView occurrence visibility
+- v0.68 — atomic CustomTable editing
+
+See [CHANGELOG.md](CHANGELOG.md), [docs/PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md) and [docs/MILESTONES.md](docs/MILESTONES.md).
+
+## Limitations
+
+- Autodesk Inventor is required; this is not a standalone CAD kernel.
+- Windows/COM is part of the architecture.
+- Some commands are verified only for specific Inventor object/context combinations.
+- A small number of legacy analysis commands remain for compatibility.
+- Engineering intent such as tolerances, exact weld requirements, fastener specification and official designations cannot safely be inferred from geometry alone.
+- Drawing quality still requires engineering and visual review.
+
+## License
+
+No explicit open-source license has been selected yet. Public visibility alone does not define reuse rights.

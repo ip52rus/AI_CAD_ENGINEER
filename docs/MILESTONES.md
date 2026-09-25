@@ -1,0 +1,74 @@
+# Milestone Log
+
+Chronological milestone commits from repository history.
+
+- `2026-08-02` — `8e1e13e` — v0.1.0 Initial working Inventor integration
+- `2026-08-02` — `3213820` — v0.2.0 Create empty drawing
+- `2026-08-02` — `64bab13` — v0.3.0 Add base drawing view
+- `2026-08-02` — `625f548` — v0.5.0 Three-view drawing layout
+- `2026-08-02` — `0646369` — v0.6.0 Automatic main view selection
+- `2026-08-03` — `3fd2427` — v0.7.0 Refactor drawing analysis architecture
+- `2026-08-03` — `33d485c` — v0.8.0 Add model and hole analysis
+- `2026-08-03` — `9020fe2` — v0.8.1 Improve sheet metal through-hole detection
+- `2026-08-03` — `4640235` — v0.9.0 Architecture refactoring
+- `2026-08-03` — `3a594e0` — v0.10.1 Add engineering pipeline and center annotations
+- `2026-08-03` — `8e10abe` — v0.10.2 Separate reporting from analysis
+- `2026-08-03` — `a62fb8c` — v0.11.0 Dimension Decision Engine
+- `2026-08-03` — `4104dea` — v0.12.0 Feature Graph and Hole Groups
+- `2026-08-06` — `b225c39` — v0.15 before legacy cleanup
+- `2026-08-06` — `3b4b05a` — v0.15 remove legacy architecture
+- `2026-08-06` — `059e57c` — v0.16 complete typed drawing table Eyes and diagnostics
+- `2026-08-06` — `8980bf8` — v0.17 complete CustomTables Eye
+- `2026-08-06` — `4fd8b75` — v0.18 complete Drawing Text Objects Eye
+- `2026-08-06` — `13c02c9` — v0.19 complete Feature Control Frames Eye
+- `2026-08-07` — `fee707a` — v0.20 complete Surface Texture Symbols Eye
+- `2026-08-07` — `a3a6a38` — v0.21 complete Welding Symbols Eye
+- `2026-08-07` — `fddfeb2` — v0.22 complete Drawing Symbol Layer
+- `2026-08-07` — `428c4cf` — v0.23 complete create_drawing_document Hand
+- `2026-08-07` — `c46c0c4` — v0.24 complete section view pipeline
+- `2026-08-07` — `bfc6ce2` — v0.25 complete detail view pipeline
+- `2026-08-07` — `05f648c` — v0.26 complete auxiliary view pipeline
+- `2026-08-10` — `3e0a87e` — v0.27 complete drawing view break Hand
+- `2026-08-10` — `6be4a26` — v0.28 complete PDF export pipeline
+- `2026-08-10` — `6fea56e` — v0.29 complete DWG/DXF export pipeline
+- `2026-08-10` — `98930df` — v0.30 complete parts list and balloon pipeline
+- `2026-08-10` — `9092ba8` — v0.31 complete drawing dimensions creation and editing pipeline
+- `2026-08-10` — `804b062` — v0.32 complete general dimension tolerance pipeline
+- `2026-08-10` — `95e8840` — v0.33 complete center mark and centerline pipeline
+- `2026-08-10` — `cbf571a` — v0.34 complete hole and thread annotation pipeline
+- `2026-08-11` — `99927fd` — v0.35 complete general and leader note primitives
+- `2026-08-11` — `ec357bf` — v0.36 complete feature control frame primitives
+- `2026-08-11` — `efa18f3` — v0.37 complete surface texture symbol primitives
+- `2026-08-11` — `8c3140e` — v0.38 complete welding symbol primitives
+- `2026-08-11` — `c490e83` — v0.39 complete sketched symbol primitives
+- `2026-08-11` — `446589d` — v0.40 complete balloon lifecycle
+- `2026-08-12` — `c2c0bd8` — v0.41 complete parts list lifecycle
+- `2026-08-12` — `f7cde39` — v0.42 complete hole table eye
+- `2026-08-12` — `17f2196` — v0.43 complete hole table lifecycle
+- `2026-08-14` — `9a2da44` — v0.44 complete custom table lifecycle
+- `2026-08-14` — `fc04489` — v0.45 complete revision table lifecycle
+- `2026-08-14` — `962bc11` — v0.46 complete revision cloud lifecycle
+- `2026-08-15` — `74afdbf` — v0.47 complete edge symbol lifecycle
+- `2026-08-15` — `0195002` — v0.48 complete transition symbol lifecycle
+- `2026-08-15` — `b37c6cd` — v0.49 complete bend note lifecycle
+- `2026-08-16` — `a4f045d` — v0.50 complete chamfer note lifecycle
+- `2026-08-16` — `955f31e` — v0.51 complete punch note lifecycle
+- `2026-08-16` — `808024c` — v0.52 complete center mark and centerline delete lifecycle
+- `2026-08-16` — `3b65eab` — v0.53 support active part feature tree
+- `2026-08-16` — `8f290f4` — v0.54 support active part model parameters
+- `2026-08-16` — `42d3ca4` — v0.55 support active part model eyes
+- `2026-08-16` — `55aa8d1` — v0.56 add autonomous single-command runtime mode
+- `2026-08-16` — `fe849cf` — v0.57 add drawing sheet preview eye
+- `2026-08-16` — `2a5c970` — v0.58 add model visual preview eye
+- `2026-08-25` — `0d12464` — v0.59 keep sketch eyes read-only
+- `2026-08-25` — `a4d27e6` — v0.60 make save and export modal-safe
+- `2026-08-25` — `e20b474` — v0.61 add drawing layout map eye
+- `2026-08-25` — `8487bfa` — v0.62 add detail view annotation text control
+- `2026-08-25` — `08897f1` — v0.63 add ESKD drawing engineering policy
+- `2026-08-25` — `d33d8b2` — v0.64 harden ESKD feature coverage policy
+- `2026-08-26` — `3c92735` — v0.65 Referenced part targeting for assembly Eyes
+- `2026-08-26` — `c772895` — v0.66 Extend referenced part targeting to geometry detail Eyes
+- `2026-08-27` — `f145b9d` — v0.67 Add DrawingView occurrence visibility control
+- `2026-08-27` — `30ba86d` — v0.68 Add atomic CustomTable cell and width editing
+
+The history preserves both the original embedded-decision phase and the later Eyes/Hands runtime phase.

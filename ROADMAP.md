@@ -1,138 +1,90 @@
 # Roadmap
 
-## Статус
+## Status
 
-Исходная исследовательская программа завершена.
+The original R&D program is complete at **v0.68**.
 
-Главная цель раннего roadmap — полностью автономный выпуск КД по ЕСКД из произвольной модели Inventor — была доведена до реальных benchmark-экспериментов, но не показала требуемой устойчивости качества между разными классами изделий.
+The software goal — expose a broad Autodesk Inventor control surface to an external agent — was achieved.
 
-При этом программная интеграция с Inventor и automation foundation были подтверждены.
+The higher-level goal — reliable fully autonomous human-quality production drawings across different product classes — did not meet the required generalization threshold.
 
-## Завершённый публичный этап
+## Phase A — embedded engineering logic
 
-### v0.1 — Inventor integration
+### v0.1–v0.12
 
-- COM connection;
-- active document detection;
-- базовый command routing.
+- Inventor COM integration
+- drawing creation
+- view generation/scoring
+- dimension candidates and decision logic
+- Engineering Feature Graph
+- hole grouping
 
-### v0.2 — Drawing creation
+### v0.15-before-cleanup
 
-- создание DrawingDocument.
+Checkpoint preserving the original embedded decision architecture.
 
-### v0.3 — Base view
+## Phase B — atomic Inventor runtime
 
-- создание базового DrawingView.
+### v0.15
 
-### v0.4–v0.6 — View generation and layout
+Removed `CommandProcessor → DrawingManager → EngineeringBrain`.
 
-- три вида;
-- layout;
-- automatic main-view selection.
+### v0.16–v0.22
 
-### v0.7–v0.10 — Dimension research
+Typed table/text/symbol Eyes and drawing symbol coverage.
 
-- DrawingCurve research;
-- dimension candidates;
-- physical axes;
-- dimension roles;
-- reporting.
+### v0.23–v0.30
 
-### v0.11 — Dimension Decision Engine
+Drawing creation, section/detail/auxiliary/break pipelines, PDF/DWG/DXF, parts lists and balloons.
 
-- классификация dimension candidates;
-- Required / Duplicate / Optional и связанные статусы;
-- передача выбранных размеров в Drawing layer.
+### v0.31–v0.40
 
-### v0.12 — Engineering Feature Graph
+Dimension creation/editing/tolerance pipelines, hole/thread notes, center annotations, notes, FCF, surface texture, welding, symbols and balloon lifecycle.
 
-- FeatureGraph;
-- FeatureNode;
-- relationships;
-- HoleFeature extraction;
-- HoleGroup construction.
+### v0.41–v0.52
 
-## Поздний исследовательский этап
+PartsList/HoleTable/CustomTable/RevisionTable lifecycles, revision clouds, edge/transition symbols, bend/chamfer/punch notes, center annotation deletes.
 
-После v0.12 проект сменил архитектуру с встроенного Engineering Brain на внешний LLM + atomic Eyes/Hands.
+### v0.53–v0.62
 
-Ключевые подтверждённые этапы:
+Active-part Eyes, single-command runtime, model/sheet previews, read-only sketch hardening, modal-safe save/export, layout map and detail annotation movement.
 
-- чтение assembly hierarchy и BRep;
-- работа с nested referenced parts без переключения активного документа;
-- drawing-view occurrence isolation;
-- atomic CustomTable editing;
-- specification proof;
-- model/drawing integrity checks;
-- reference-aided planning;
-- реальные benchmarks на детали и сварной сборке.
+### v0.63–v0.64
 
-Последний исследовательский checkpoint: v0.68, 219 зарегистрированных runtime operations.
+External ESKD policy and feature-coverage hardening.
 
-Эти поздние исходники пока не отражены полностью в public `main`; история и результаты сохранены в документации.
+### v0.65–v0.66
 
-## Исследовательский stop-criterion
+Referenced-part targeting from assembly context.
 
-Разработка исходной идеи остановлена не из-за Inventor API.
+### v0.67
 
-Причина остановки:
+DrawingView-local occurrence visibility.
 
-- автономный выбор видов не обобщается достаточно надёжно;
-- размерная полнота требует производственного контекста;
-- layout требует многократного visual feedback;
-- на новом классе изделия снова нужен существенный prompt/review цикл;
-- стоимость доведения одного комплекта до хорошего состояния не подтверждает ценность полностью автономного режима.
+### v0.68
 
-## Если проект продолжать
+Atomic CustomTable cell/column editing.
 
-Наиболее рациональные направления:
+## Stop criterion
 
-### 1. Model interrogation
+Two product-class benchmarks showed that the remaining bottleneck was not missing Inventor API access.
 
-Natural-language запросы к реальной модели/сборке:
+The unstable layer remained:
 
-- какие профили используются;
-- какие детали имеют заданные отверстия;
-- какие элементы отличаются только зеркальностью;
-- какие материалы не заполнены;
-- какие детали геометрически одинаковы.
+- choosing the best representation;
+- complete/non-redundant dimension strategy;
+- readable sheet composition;
+- generalization to a new product class.
 
-### 2. Drawing audit
+## Potential future directions
 
-Проверка уже созданного человеком чертежа:
+- model interrogation;
+- drawing/model audit;
+- fabrication-data extraction;
+- batch Inventor automation;
+- supervised CAD assistant;
+- JSON tool layer for other agent frameworks.
 
-- пропущенные dimensions;
-- duplicate dimensions;
-- title block;
-- collisions;
-- missing hole/thread notes;
-- cross-check model ↔ drawing.
+## Not an active goal
 
-### 3. Fabrication extraction
-
-- cut list;
-- final BRep lengths;
-- end cuts;
-- hole patterns;
-- per-member operations;
-- CSV/XLSX/PDF export.
-
-### 4. Batch automation
-
-- document properties;
-- export;
-- renaming;
-- title-block population;
-- repetitive drawing operations.
-
-### 5. Supervised drawing assistant
-
-Человек определяет engineering intent и layout, AI выполняет локальные CAD-команды.
-
-## Что не рекомендуется считать ближайшей целью
-
-Без нового фундаментального подхода не следует возвращаться к формулировке:
-
-> «полностью автоматически выпускать красивый и производственно полный комплект КД для любой модели Inventor».
-
-Benchmark-результаты не подтверждают устойчивость такого режима.
+Without a substantially different reasoning/visual approach, the project should not return to fully autonomous production-quality drawing generation for arbitrary models.

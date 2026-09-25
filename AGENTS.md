@@ -1,179 +1,185 @@
-# AGENTS.md
+# AGENTS.md — AI CAD ENGINEER
 
-Правила для AI coding/CAD agents, работающих с AI CAD ENGINEER.
+Binding instructions for AI coding/CAD agents.
 
-## 1. Роль агента
+## Project model
 
-Агент может:
+```text
+External LLM
+→ JSON
+→ InventorCommandDispatcher
+→ atomic Eye / Hand
+→ Autodesk Inventor API
+```
 
-- исследовать текущие capabilities;
-- проектировать минимальное расширение;
-- писать код;
-- собирать проект;
-- выполнять контролируемые Inventor E2E tests;
-- создавать отчёты.
+Runtime exposes facts and explicit actions. Engineering reasoning stays outside Runtime.
 
-Агент не должен подменять отсутствующий engineering intent догадкой.
+## Capability Audit before code
 
-## 2. Eyes / Hands contract
+Before adding anything:
 
-### Eye
+1. inspect `InventorControl/InventorCommandDispatcher.cs`;
+2. search the proposed command name;
+3. search equivalent commands/support helpers;
+4. read `CURRENT_STATE.md` and `CAPABILITY_MAP.md`;
+5. inspect real Inventor API/interops;
+6. classify: already implemented / partial / genuinely missing / external reasoning;
+7. decide whether code is required.
 
-Одна атомарная операция чтения.
+If existing capability is sufficient, **do not write code**.
 
-Eye:
+## Eye contract
 
-- не меняет Inventor document;
-- не принимает решение «как правильно»;
-- возвращает факты и traceability.
+An Eye:
 
-### Hand
+- reads one factual domain;
+- does not mutate Inventor;
+- does not infer engineering intent;
+- returns structured JSON and useful traceability;
+- preserves native values where useful;
+- reports unavailable data explicitly.
 
-Одно атомарное действие.
+## Hand contract
 
-Hand:
+A Hand:
 
-- не объединяет несколько engineering decisions;
-- не скрывает побочные изменения;
-- возвращает factual readback результата.
+- executes one explicit Inventor action;
+- receives target and requested value from caller;
+- does not auto-select by engineering meaning;
+- does not optimize;
+- does not silently alter another object as fallback;
+- returns direct factual readback where practical.
 
-Плохо:
+Good examples:
 
-`create_correct_chair_drawing`
+- `move_drawing_view`
+- `set_general_dimension_precision`
+- `set_drawing_view_occurrence_visibility`
+- `set_custom_table_cell_value`
 
-Хорошо:
+Bad examples:
 
-`create_base_view`
+- `create_correct_drawing`
+- `isolate_welded_unit`
+- `fix_eskd_automatically`
 
-`set_drawing_view_occurrence_visibility`
+## Do not restore the legacy brain
 
-`set_custom_table_cell_value`
+Do not recreate:
 
-## 3. Capability Audit before code
+- `EngineeringBrain`
+- `DrawingManager`
+- embedded Planning/Decision systems
+- product-specific “make the whole drawing” commands
 
-Перед реализацией нового capability:
+The pre-v0.15 architecture remains in Git history.
 
-1. проверить registry;
-2. изучить существующие Eyes/Hands;
-3. проверить Inventor API;
-4. решить, нужен ли код вообще.
+## Design intent
 
-Если capability уже достаточен:
+Never invent absent:
 
-**не писать новый код**.
+- material specification;
+- tolerances/fits;
+- weld size/process;
+- fastener specification;
+- coating;
+- official designation;
+- manufacturing sequence.
 
-## 4. Design intent
+Unknown engineering content remains unresolved.
 
-Нельзя самостоятельно придумывать:
+## Geometry evidence
 
-- материал;
-- точную марку/ГОСТ;
-- допуски;
-- покрытия;
-- сварочные размеры;
-- крепёж;
-- технологию;
-- designation;
-- manufacturing rule.
-
-Неизвестное значение должно быть помечено как unresolved и вынесено пользователю.
-
-## 5. Геометрия
-
-При конфликте источников:
+For final geometry prefer:
 
 1. final BRep;
-2. параметры/feature details;
-3. feature names;
+2. explicit parameters / feature details;
+3. feature taxonomy/name;
 4. filename conventions.
 
-Имя feature не является доказательством геометрического смысла.
+Do not equate “not a HoleFeature” with “not a hole”.
 
-Пример из benchmark: реальные отверстия были сделаны Extrude Cut, а не HoleFeature.
+## Referenced documents
 
-## 6. Referenced parts
+Prefer occurrence/reference-context reads over activating referenced documents. Do not dirty/save a referenced part just to inspect it.
 
-Не активировать и не сохранять referenced part только ради чтения, если факт можно получить через occurrence/reference context.
+## Drawing safety
 
-Source assembly должна оставаться неизменной.
+Audit/read mode:
 
-## 7. Drawing safety
-
-Read/audit mode:
-
-- no drawing edits;
-- no save;
-- no model edits.
+- no drawing mutation;
+- no model mutation;
+- no save.
 
 Write mode:
 
-- менять только явно разрешённый DrawingDocument;
-- не изменять source model как fallback;
-- после каждого значимого шага проверять dirty state.
+- mutate only the explicitly authorized document;
+- never change source assembly visibility/suppression as a fallback for DrawingView-local behaviour;
+- verify dirty states after E2E.
 
-## 8. Visual QA
+## Visual QA
 
-CAD API success не означает качественный чертёж.
-
-Для drawing workflow обязателен цикл:
+A successful API call is not proof of a good drawing.
 
 ```text
 create
 → factual readback
-→ render
-→ visual review
-→ correction
-→ render
+→ layout map
+→ preview
+→ external visual review
+→ atomic correction
+→ preview
 ```
 
-Нельзя объявлять лист готовым только потому, что API вызовы завершились без исключений.
+## Build
 
-## 9. Build
+Validated path:
 
-Использовать classic Visual Studio MSBuild, если это соответствует текущей среде проекта.
+```powershell
+MSBuild.exe AI_CAD_ENGINEER.csproj /p:Configuration=Debug /p:Platform="Any CPU" /v:minimal
+```
 
-После build:
+Do not treat `dotnet build` as the authoritative validation path for this COM project.
 
-- PASS;
-- command registry unique;
-- no unintended warnings introduced.
+## Verification
 
-## 10. E2E
+A new capability is not VERIFIED until:
 
-Новый Inventor capability считается готовым только после live E2E.
+- build passes;
+- registry remains unique;
+- live Inventor execution passes;
+- direct readback confirms effect;
+- source-model integrity is checked.
 
-Отчёт должен включать:
+## Git
 
-- input;
-- command;
-- direct readback;
-- document dirty state;
-- source integrity;
-- error cases.
+- inspect `git status` first;
+- one coherent capability per checkpoint;
+- no unrelated cleanup in capability commits;
+- no temporary Inventor files/previews/payloads in Git;
+- no destructive Git operation without explicit approval;
+- no `git push` without explicit approval.
 
-## 11. Git
+## Legacy experimental helpers
 
-- один capability package = один логичный checkpoint;
-- не коммитить temp Inventor files/PNGs/payloads;
-- не использовать force push без отдельного разрешения;
-- не смешивать unrelated cleanup с capability commit.
+The following remain but are not architectural examples:
 
-## 12. Scope discipline
+- `analyze_dimension_layout`
+- `auto_arrange_dimensions`
+- `check_annotation_collisions`
+- `auto_resolve_annotation_collisions`
+- `analyze_view_dimension_candidates`
 
-Не добавлять «полезные на будущее» возможности.
+## Research conclusion
 
-Каждое изменение должно отвечать на доказанный blocker.
+Do not infer from “219 commands” that autonomous drafting is solved.
 
-## 13. Research conclusion
+The project validated Inventor automation much more strongly than autonomous view/dimension/layout judgement.
 
-Не предполагать, что большая command surface автоматически решает autonomous drafting.
+Preferred future uses:
 
-Проект показал, что Inventor automation layer масштабируется лучше, чем визуально-инженерная логика полного чертежа.
-
-Предпочтительные новые сценарии:
-
-- interrogation;
-- audit;
-- extraction;
+- model interrogation;
+- drawing audit;
+- fabrication extraction;
 - batch automation;
-- supervised CAD actions.
+- supervised CAD assistance.

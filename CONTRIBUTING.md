@@ -1,69 +1,65 @@
 # Contributing
 
-Спасибо за интерес к AI CAD ENGINEER.
+AI CAD ENGINEER is an experimental Autodesk Inventor automation runtime.
 
-Проект опубликован как инженерная и исследовательская кодовая база. Наиболее полезны изменения, которые улучшают надёжность Inventor automation, атомарные CAD capabilities, factual readback или supervised workflows.
+Useful contributions strengthen factual CAD access, deterministic atomic actions, safety, diagnostics or supervised workflows.
 
-## Перед изменением
+## Before code
 
-Для существенной новой возможности сначала сформулируйте Capability Audit:
+Run a Capability Audit:
 
-1. Какой реальный workflow заблокирован?
-2. Почему существующие команды не решают задачу?
-3. Какой минимальный API capability отсутствует?
-4. Можно ли обойтись без нового кода?
+1. identify the blocked workflow;
+2. search dispatcher/repository;
+3. confirm no equivalent command exists;
+4. inspect Inventor API;
+5. decide whether code is actually needed.
 
-Если существующего capability достаточно, предпочтителен workflow/documentation fix вместо новой команды.
+## Rules
 
-## Принципы
-
-- минимальный scope;
-- один Hand = одно атомарное действие;
-- Eye не принимает инженерных решений;
-- не добавлять предметно-специфичные команды вида `create_chair_frame_drawing`;
-- не придумывать отсутствующий design intent;
-- source model не должен неожиданно изменяться;
-- BRep является источником конечной геометрии;
-- ошибки должны быть явными, без опасных fallback;
-- live Inventor E2E обязателен для API changes.
+- Runtime contains Eyes and atomic Hands.
+- Engineering judgement stays outside Runtime.
+- One command performs one explicit read or action.
+- Do not hide fallbacks that change engineering meaning.
+- Do not infer absent design intent.
+- Prefer reusable generic commands over product-specific workflows.
 
 ## Build
 
-Проект рассчитан на Windows с установленным Autodesk Inventor.
-
 ```powershell
-MSBuild.exe AI_CAD_ENGINEER.csproj /p:Configuration=Debug /p:Platform="Any CPU"
+MSBuild.exe AI_CAD_ENGINEER.csproj /p:Configuration=Debug /p:Platform="Any CPU" /v:minimal
 ```
 
-## Проверка изменений
+## Verification
 
-Минимальный набор:
+Call a capability VERIFIED only after:
 
 - build PASS;
-- отсутствие новых duplicate registrations, если меняется command registry;
-- live Inventor smoke/E2E test;
-- исходная модель после read-only / drawing-local workflow остаётся неизменной;
-- Git diff содержит только относящиеся к задаче изменения.
+- unique command registration;
+- real Inventor execution PASS;
+- direct readback;
+- source/reference integrity check where relevant.
 
-## Pull request
+## Pull requests
 
-В описании PR желательно указать:
+Describe:
 
-- problem / blocker;
-- API capability;
-- files changed;
-- E2E scenario;
-- source-model integrity result;
-- known limitations.
+- blocker;
+- why existing capability is insufficient;
+- Inventor API path;
+- changed files;
+- JSON test;
+- E2E result;
+- source-model integrity;
+- limitations.
 
-## CAD test files
+## Test data
 
-Не добавляйте в репозиторий чужие производственные модели, коммерческие чертежи, секретные данные или файлы с неподтверждёнными правами.
+Do not commit proprietary CAD files, confidential drawings, credentials or API keys.
 
-## AI-assisted changes
+## AI agents
 
-Если код создаётся AI-агентом, агент должен следовать [AGENTS.md](AGENTS.md).
+Follow [AGENTS.md](AGENTS.md).
 
-## Лицензия
+## License
 
-На момент публикации отдельная лицензия ещё не выбрана. До её добавления не следует интерпретировать публичную доступность репозитория как автоматически предоставленную лицензию на любое внешнее распространение или коммерческое использование.
+No explicit repository license has been selected yet.

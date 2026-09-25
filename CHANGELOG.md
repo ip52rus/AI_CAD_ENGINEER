@@ -1,82 +1,88 @@
 # Changelog
 
-Все значимые изменения опубликованного source snapshot.
+## v0.68 — Atomic CustomTable editing
 
-Формат близок к Keep a Changelog. Версии после v0.12, относящиеся к поздней экспериментальной Eyes/Hands-архитектуре, описаны в [docs/PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md), поскольку их исходники пока не полностью представлены в public `main`.
+- `set_custom_table_cell_value`
+- `set_custom_table_column_width`
+- live create/write/repair/readback/layout proof
 
-## v0.12.0 — Feature Graph and Hole Groups
+## v0.67 — DrawingView occurrence visibility
 
-- добавлен Engineering Feature Graph;
-- FeatureNode / FeatureRelationship;
-- metadata и отчёт графа;
-- извлечение HoleFeature;
-- HoleGroupBuilder;
-- группировка отверстий;
-- интеграция feature graph в drawing pipeline.
+- nested per-view occurrence hide/show
+- direct visibility readback
+- source assembly preserved
 
-## v0.11.0 — Dimension Decision Engine
+## v0.66 — Referenced geometry-detail targeting
 
-- DimensionDecisionCoordinator;
-- DimensionDecisionResult;
-- DimensionClassificationEngine;
-- DimensionRuleEngine;
-- OverallDimensionRoleResolver;
-- ViewAxisMappingResolver;
-- классификация размерных кандидатов;
-- исключение дублей;
-- отчёт решений.
+- occurrence-path targeting extended to geometry-detail Eyes
 
-## v0.10.x — Reporting
+## v0.65 — Referenced Part targeting
 
-- отчёты исследования геометрии;
-- отчёты решений;
-- console/file reporting.
+- nested PartDocuments readable through active assembly occurrence paths
 
-## v0.9.0 — Dimension classification
+## v0.63–v0.64 — External ESKD policy
 
-- статусы dimension candidates;
-- Required / Duplicate / Optional;
-- подготовка к отдельному Decision layer.
+- drawing engineering policy and feature-coverage hardening
 
-## v0.8.x — Role resolver
+## v0.60–v0.62
 
-- физические X/Y/Z;
-- роли Length / Width / Height;
-- связь размеров с view axis mapping.
+- modal-safe save/export
+- drawing layout map
+- detail view annotation text control
 
-## v0.7.0 — Dimension candidates
+## v0.53–v0.59
 
-- поиск кандидатов размеров;
-- geometry-driven dimension research.
+- active-part feature/model Eyes
+- single-command mode
+- model/drawing previews
+- sketch read-only hardening
 
-## v0.6.0 — Main view selection
+## v0.41–v0.52
 
-- оценка стандартных проекций;
-- автоматический выбор основного вида.
+- PartsList/HoleTable/CustomTable/RevisionTable lifecycles
+- revision cloud
+- edge/transition/bend/chamfer/punch note lifecycles
+- center annotation deletes
 
-## v0.5.0 — Three-view layout
+## v0.31–v0.40
 
-- генерация трёх проекций;
-- размещение на листе;
-- масштабирование.
+- dimension creation/editing and tolerances
+- hole/thread notes
+- center annotations
+- general/leader notes
+- FCF/surface/welding/sketched symbols
+- balloon lifecycle
 
-## v0.4.0 — Center annotations
+## v0.23–v0.30
 
-- центровые линии;
-- центровые метки.
+- drawing document creation
+- section/detail/auxiliary views
+- view breaks
+- PDF/DWG/DXF
+- parts list / balloon pipeline
 
-## v0.3.0 — Base drawing view
+## v0.16–v0.22
 
-- создание базового вида детали.
+- typed drawing tables
+- drawing text objects
+- symbol Eyes/layers
 
-## v0.2.0 — Empty drawing
+## v0.15
 
-- создание DrawingDocument.
+Removed embedded legacy engineering-decision architecture.
 
-## v0.1.0 — Initial Inventor integration
+Tag `v0.15-before-cleanup` preserves it.
 
-- подключение к Autodesk Inventor через COM;
-- подключение к уже запущенному экземпляру;
-- запуск Inventor при необходимости;
-- active document readback;
-- базовый command routing.
+## v0.12
+
+Engineering Feature Graph and Hole Groups.
+
+## v0.11
+
+Dimension Decision Engine.
+
+## v0.1–v0.10
+
+Initial Inventor integration, drawing creation, three-view layout, main-view selection, model/hole analysis and early engineering pipeline.
+
+See [docs/MILESTONES.md](docs/MILESTONES.md) for the exact chronological commit list.
