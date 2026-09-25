@@ -1,155 +1,88 @@
-# CHANGELOG
+# Changelog
 
-Все значимые изменения проекта фиксируются в этом документе.
+## v0.68 — Atomic CustomTable editing
 
-Формат основан на принципах Keep a Changelog.
+- `set_custom_table_cell_value`
+- `set_custom_table_column_width`
+- live create/write/repair/readback/layout proof
 
----
+## v0.67 — DrawingView occurrence visibility
 
-# v0.11.0 — Dimension Decision Engine
+- nested per-view occurrence hide/show
+- direct visibility readback
+- source assembly preserved
 
-Дата: 03.08.2026
+## v0.66 — Referenced geometry-detail targeting
 
----
+- occurrence-path targeting extended to geometry-detail Eyes
 
-## Added
+## v0.65 — Referenced Part targeting
 
-### Engineering Decision Layer
+- nested PartDocuments readable through active assembly occurrence paths
 
-- DimensionDecisionCoordinator
-- DimensionDecisionResult
-- DimensionClassificationEngine
-- DimensionRuleEngine
-- OverallDimensionRoleResolver
-- ViewAxisMappingResolver
+## v0.63–v0.64 — External ESKD policy
 
----
+- drawing engineering policy and feature-coverage hardening
 
-### Dimension Analysis
+## v0.60–v0.62
 
-Добавлены:
+- modal-safe save/export
+- drawing layout map
+- detail view annotation text control
 
-- генерация кандидатов размеров;
-- определение физических осей видов;
-- определение ролей размеров;
-- классификация размеров;
-- поиск дублирующих размеров.
+## v0.53–v0.59
 
----
+- active-part feature/model Eyes
+- single-command mode
+- model/drawing previews
+- sketch read-only hardening
 
-### Drawing Research
+## v0.41–v0.52
 
-Добавлен модуль:
+- PartsList/HoleTable/CustomTable/RevisionTable lifecycles
+- revision cloud
+- edge/transition/bend/chamfer/punch note lifecycles
+- center annotation deletes
 
-DrawingGeometryResearch
+## v0.31–v0.40
 
-Возможности:
+- dimension creation/editing and tolerances
+- hole/thread notes
+- center annotations
+- general/leader notes
+- FCF/surface/welding/sketched symbols
+- balloon lifecycle
 
-- анализ DrawingCurve;
-- анализ геометрии вида;
-- поиск габаритов;
-- исследование реальных размеров вида.
+## v0.23–v0.30
 
----
+- drawing document creation
+- section/detail/auxiliary views
+- view breaks
+- PDF/DWG/DXF
+- parts list / balloon pipeline
 
-### Reporting
+## v0.16–v0.22
 
-Добавлена универсальная система отчётов.
+- typed drawing tables
+- drawing text objects
+- symbol Eyes/layers
 
-Поддерживаются:
+## v0.15
 
-- Drawing Geometry Research Report
-- Dimension Decision Report
+Removed embedded legacy engineering-decision architecture.
 
-Все отчёты автоматически сохраняются в папку Reports.
+Tag `v0.15-before-cleanup` preserves it.
 
----
+## v0.12
 
-## Changed
+Engineering Feature Graph and Hole Groups.
 
-Полностью переработан процесс нанесения размеров.
+## v0.11
 
-Ранее:
+Dimension Decision Engine.
 
-```
-Поиск размеров
+## v0.1–v0.10
 
-↓
+Initial Inventor integration, drawing creation, three-view layout, main-view selection, model/hole analysis and early engineering pipeline.
 
-Нанесение
-```
-
-Теперь:
-
-```
-Поиск размеров
-
-↓
-
-Role Resolver
-
-↓
-
-Dimension Classification
-
-↓
-
-Decision Result
-
-↓
-
-Нанесение
-```
-
----
-
-Drawing Layer теперь получает только размеры со статусом Required.
-
----
-
-## Architecture
-
-Добавлены новые подсистемы:
-
-```
-Engineering
-    Decision
-
-Engineering
-    Research
-
-Infrastructure
-    Reporting
-```
-
-Архитектура стала многоуровневой.
-
-Принятие инженерных решений полностью отделено от построения чертежей.
-
----
-
-## Fixed
-
-Исправлено:
-
-- определение физических осей видов;
-- выбор размеров для кубических деталей;
-- определение ролей Length / Width / Height;
-- исключение дублирующих размеров;
-- стабильность исследований DrawingView.
-
----
-
-## Result
-
-Проект перешёл от генерации размеров к инженерной системе принятия решений.
-
-Dimension Decision Engine стал самостоятельной подсистемой архитектуры AI CAD ENGINEER.
-
----
-
-# Следующая версия
-
-v0.12.0
-
-Engineering Feature Graph
+See [docs/MILESTONES.md](docs/MILESTONES.md) for the exact chronological commit list.

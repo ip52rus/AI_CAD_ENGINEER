@@ -1,251 +1,90 @@
-# AI CAD ENGINEER
+# Roadmap
 
-# ROADMAP
+## Status
 
----
+The original R&D program is complete at **v0.68**.
 
-# Статус проекта
+The software goal — expose a broad Autodesk Inventor control surface to an external agent — was achieved.
 
-Текущая версия:
+The higher-level goal — reliable fully autonomous human-quality production drawings across different product classes — did not meet the required generalization threshold.
 
-```
-v0.11.0
-```
+## Phase A — embedded engineering logic
 
----
+### v0.1–v0.12
 
-# Завершённые версии
+- Inventor COM integration
+- drawing creation
+- view generation/scoring
+- dimension candidates and decision logic
+- Engineering Feature Graph
+- hole grouping
 
-## ✅ v0.1
+### v0.15-before-cleanup
 
-Основа проекта
+Checkpoint preserving the original embedded decision architecture.
 
-- подключение к Inventor
-- создание первого чертежа
-- анализ модели
-- выбор главного вида
+## Phase B — atomic Inventor runtime
 
----
+### v0.15
 
-## ✅ v0.2
+Removed `CommandProcessor → DrawingManager → EngineeringBrain`.
 
-View Analyzer
+### v0.16–v0.22
 
-- анализ шести стандартных видов
-- оценка информативности
-- автоматический выбор главного вида
+Typed table/text/symbol Eyes and drawing symbol coverage.
 
----
+### v0.23–v0.30
 
-## ✅ v0.3
+Drawing creation, section/detail/auxiliary/break pipelines, PDF/DWG/DXF, parts lists and balloons.
 
-Drawing Generator
+### v0.31–v0.40
 
-- создание трёх видов
-- автоматический масштаб
-- автоматическое размещение
+Dimension creation/editing/tolerance pipelines, hole/thread notes, center annotations, notes, FCF, surface texture, welding, symbols and balloon lifecycle.
 
----
+### v0.41–v0.52
 
-## ✅ v0.4
+PartsList/HoleTable/CustomTable/RevisionTable lifecycles, revision clouds, edge/transition symbols, bend/chamfer/punch notes, center annotation deletes.
 
-Center Annotation
+### v0.53–v0.62
 
-- центровые линии
-- центровые метки
+Active-part Eyes, single-command runtime, model/sheet previews, read-only sketch hardening, modal-safe save/export, layout map and detail annotation movement.
 
----
+### v0.63–v0.64
 
-## ✅ v0.5
+External ESKD policy and feature-coverage hardening.
 
-Hole Analysis
+### v0.65–v0.66
 
-- анализ отверстий
-- анализ листового металла
+Referenced-part targeting from assembly context.
 
----
+### v0.67
 
-## ✅ v0.6
+DrawingView-local occurrence visibility.
 
-Geometry Research
+### v0.68
 
-- исследование DrawingView
-- анализ DrawingCurve
-- поиск габаритов
+Atomic CustomTable cell/column editing.
 
----
+## Stop criterion
 
-## ✅ v0.7
+Two product-class benchmarks showed that the remaining bottleneck was not missing Inventor API access.
 
-Dimension Candidates
+The unstable layer remained:
 
-- поиск кандидатов размеров
-- анализ физических осей
+- choosing the best representation;
+- complete/non-redundant dimension strategy;
+- readable sheet composition;
+- generalization to a new product class.
 
----
+## Potential future directions
 
-## ✅ v0.8
+- model interrogation;
+- drawing/model audit;
+- fabrication-data extraction;
+- batch Inventor automation;
+- supervised CAD assistant;
+- JSON tool layer for other agent frameworks.
 
-Role Resolver
+## Not an active goal
 
-- Length
-- Width
-- Height
-
----
-
-## ✅ v0.9
-
-Dimension Classification
-
-- Required
-- Duplicate
-- Optional
-
----
-
-## ✅ v0.10
-
-Reporting
-
-- отчёты исследований
-- отчёты решений
-
----
-
-## ✅ v0.11
-
-Dimension Decision Engine
-
-- DimensionDecisionCoordinator
-- DimensionDecisionResult
-- классификация размеров
-- исключение дублей
-- передача только Required размеров
-- физические оси видов
-- инженерная архитектура Decision Layer
-
----
-
-# Текущая разработка
-
-## 🚧 v0.12
-
-Engineering Feature Graph
-
-Планируется:
-
-- FeatureNode
-- FeatureGraph
-- FeatureExtractor
-- GeometryAnalyzer
-
-Поддержка:
-
-- Hole
-- Pocket
-- Boss
-- Slot
-- Chamfer
-- Fillet
-- Bend
-- Flange
-
-Результат:
-
-полное инженерное описание детали.
-
----
-
-## 🔵 v0.13
-
-Engineering Dimension Graph
-
-Будут реализованы:
-
-- полный поиск всех размерных кандидатов
-- граф зависимостей размеров
-- инженерные базы
-- размерные цепочки
-
----
-
-## 🔵 v0.14
-
-Dimension Decision Engine 2.0
-
-Добавится:
-
-- Redundant
-- Reference
-- Recommended
-- Grouped
-
-Инженерные правила ЕСКД.
-
----
-
-## 🔵 v0.15
-
-Automatic Dimensioning
-
-Автоматическое нанесение:
-
-- отверстий
-- радиусов
-- фасок
-- пазов
-- вырезов
-- гибов
-
----
-
-## 🔵 v0.16
-
-Automatic Sections
-
-Автоматическое построение:
-
-- разрезов
-- сечений
-- местных разрезов
-
----
-
-## 🔵 v0.17
-
-Assembly Drawings
-
-Поддержка сборок.
-
----
-
-## 🔵 v0.18
-
-Specification Generator
-
-Автоматическое создание спецификаций.
-
----
-
-## 🔵 v0.19
-
-Sheet Metal
-
-Полная поддержка листового металла.
-
----
-
-## 🔵 v1.0
-
-AI CAD ENGINEER
-
-Первая стабильная версия.
-
-Полностью автоматическое создание конструкторской документации по ЕСКД.
-
----
-
-# Главная цель проекта
-
-Создать интеллектуальную инженерную систему, которая принимает инженерные решения аналогично опытному инженеру-конструктору и автоматически выпускает комплект конструкторской документации.
+Without a substantially different reasoning/visual approach, the project should not return to fully autonomous production-quality drawing generation for arbitrary models.

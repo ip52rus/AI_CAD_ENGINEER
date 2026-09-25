@@ -1,361 +1,183 @@
-# AI CAD ENGINEER
+# Architecture
 
-# ARCHITECTURE
+## Purpose
 
-Версия документа:
+AI CAD ENGINEER is a local bridge between an external reasoning agent and Autodesk Inventor.
 
-```
-v0.11.0
-```
+The final architecture separates reasoning, facts, actions and CAD state.
 
----
-
-# Общая архитектура
-
-AI CAD ENGINEER строится как многоуровневая инженерная система.
-
-Главный принцип:
-
-> Каждый модуль отвечает только за одну инженерную задачу.
-
-Модули не должны смешивать анализ модели, принятие решений и построение чертежа.
-
----
-
-# Общая схема
-
-```
-                    Autodesk Inventor
-                           │
-                           ▼
-                     Import Layer
-                           │
-                           ▼
-                   Engineering Layer
-                           │
-      ┌────────────────────┼────────────────────┐
-      ▼                    ▼                    ▼
-  Analysis             Research             Decision
-      │                    │                    │
-      └────────────────────┼────────────────────┘
-                           ▼
-                     Drawing Layer
-                           │
-                           ▼
-                  Infrastructure Layer
-                           │
-                           ▼
-                         Reports
-```
-
----
-
-# Import Layer
-
-Назначение:
-
-получение информации из Autodesk Inventor.
-
-Содержит:
-
-- подключение к Inventor
-- создание DrawingDocument
-- получение геометрии
-- получение Feature
-- получение Face
-- получение Edge
-- получение HoleFeature
-- создание DrawingView
-
-Import Layer не принимает инженерных решений.
-
----
-
-# Engineering Layer
-
-Основная подсистема проекта.
-
-Именно здесь программа становится "инженером".
-
-Включает несколько независимых направлений.
-
----
-
-# Analysis
-
-Отвечает за анализ модели.
-
-Выполняет:
-
-- анализ отверстий
-- анализ листового металла
-- анализ фасок
-- анализ скруглений
-- анализ объёма
-- анализ площади
-- анализ центра масс
-- анализ габаритов
-- анализ видов
-- вычисление информативности вида
-
-Результат:
-
-инженерское описание модели.
-
----
-
-# Research
-
-Исследование уже построенного чертежа.
-
-Используется после создания DrawingView.
-
-Определяет:
-
-- DrawingCurve
-- линии
-- окружности
-- дуги
-- реальные размеры вида
-- кандидатов размеров
-- физические оси вида
-
-Создаёт инженерные отчёты.
-
----
-
-# Decision
-
-Самая важная подсистема проекта.
-
-Здесь принимаются инженерные решения.
-
-На сегодняшний день реализованы:
-
-## Engineering Brain
-
-Принимает решения:
-
-- главный вид
-- необходимость размеров
-- необходимость центровых линий
-- необходимость разрезов
-
----
-
-## Dimension Decision Engine
-
-Работает полностью независимо от Drawing.
-
-Этапы:
-
-```
-Dimension Candidates
-        │
+```text
+External LLM / caller
+        │ JSON
         ▼
-Role Resolver
-        │
+Program.cs
         ▼
-Classification Engine
-        │
+Core/Application.cs
         ▼
-Decision Result
+InventorControl/InventorCommandDispatcher.cs
+        ▼
+IInventorCommand
+        ▼
+CommandSupport / ReadSupport
+        ▼
+Autodesk Inventor COM/API
 ```
 
-Результат:
+The v0.68 dispatcher registers **219 unique JSON command names**.
 
-готовый набор размеров для построения.
+## Eyes
 
----
+An Eye is an atomic read operation.
 
-# Drawing Layer
+Requirements:
 
-Не принимает решений.
+- no document mutation;
+- no engineering decision;
+- factual structured output;
+- traceability to the source object where practical;
+- native Inventor values/enums preserved when useful;
+- unavailable facts reported instead of invented.
 
-Получает готовый план.
+Typical domains: documents, sheets, views, drawing curves, dimensions, title blocks, annotations, tables, model features, parameters, sketches, BRep, assembly occurrences, referenced documents, BOM, previews and layout facts.
 
-Выполняет:
+## Hands
 
-- создание видов
-- выбор масштаба
-- размещение видов
-- создание центровых
-- нанесение размеров
+A Hand performs one explicit action.
 
-Drawing Layer ничего не анализирует.
+Requirements:
 
-Он только строит.
+- caller chooses the target;
+- caller supplies requested value/position/geometry;
+- no hidden optimization;
+- no automatic engineering choice;
+- no fallback that changes source-model intent;
+- direct factual readback where practical.
 
----
+Examples:
 
-# Infrastructure
+- move one DrawingView;
+- create one section view;
+- set one title-block field;
+- create one dimension;
+- change one tolerance mode;
+- hide one occurrence in one DrawingView;
+- set one CustomTable cell.
 
-Сервисная подсистема.
+## Legacy architecture
 
-Включает:
+Before v0.15 the project used:
 
-- Reporting
-- File System
-- сохранение отчётов
-
----
-
-# Поток данных
-
-Полный путь обработки модели.
-
-```
-3D Model
-
-↓
-
-Import
-
-↓
-
-Part Analysis
-
-↓
-
-Engineering Brain
-
-↓
-
-Drawing Plan
-
-↓
-
-Drawing Views
-
-↓
-
-Geometry Research
-
-↓
-
-Dimension Candidates
-
-↓
-
-Decision Engine
-
-↓
-
-Required Dimensions
-
-↓
-
-Drawing Generator
-
-↓
-
-Drawing
+```text
+CommandProcessor
+→ DrawingManager
+→ EngineeringBrain
+→ Analysis / Decision / Planning
+→ Drawing
 ```
 
----
+That code attempted to choose views, dimensions and layout inside C#.
 
-# Основные инженерные объекты
+It was removed at v0.15. The tag `v0.15-before-cleanup` preserves the old phase.
 
-На текущий момент.
+## Why the architecture changed
 
-## Analysis
+CAD facts are not the same thing as engineering intent.
 
-- PartAnalysis
-- HoleAnalysis
-- ViewStatistics
+Observed examples:
 
----
+- real holes may be `ExtrudeFeature`, not `HoleFeature`;
+- native assembly hierarchy may not match manufacturing hierarchy;
+- Frame Generator `B_L` may differ from final cut geometry;
+- mirrored parts may or may not be manufacturing-equivalent;
+- the most line-dense projection may not be the best main view.
 
-## Decision
+Therefore Runtime exposes facts rather than semantic conclusions.
 
-- DrawingPlan
-- DimensionCandidate
-- DimensionDecisionResult
-- ViewAxisMapping
+## Geometry evidence hierarchy
 
----
+For final manufacturing geometry:
 
-## Drawing
+1. final BRep;
+2. explicit parameters / feature details;
+3. feature taxonomy/name;
+4. filename conventions.
 
-- OverallDimensionGenerator
-- CenterAnnotationGenerator
+Feature history remains useful, but cannot override the final body shape.
 
----
+## Referenced-part targeting
 
-# Основные принципы
+v0.65/v0.66 introduced reusable nested-part resolution:
 
-## Single Responsibility
-
-Каждый модуль отвечает только за одну задачу.
-
----
-
-## Engineering First
-
-Сначала принимается инженерное решение.
-
-Только потом строится чертёж.
-
----
-
-## Reporting First
-
-Каждый этап должен иметь собственный отчёт.
-
-Это позволяет анализировать работу системы.
-
----
-
-## Масштабируемость
-
-Новая инженерная логика должна добавляться через новые модули Decision.
-
-Без изменения существующего Drawing Layer.
-
----
-
-# План развития архитектуры
-
-Следующий крупный слой:
-
-```
-Geometry
+```text
+active AssemblyDocument
+→ occurrencePath
+→ ComponentOccurrence
+→ Definition.Document
+→ PartDocument
+→ existing Eye logic
 ```
 
-После v0.12 структура станет:
+This avoided document switching and preserved source assembly state.
 
+## DrawingView-local occurrence control
+
+v0.67 added per-view visibility through `DrawingView.SetVisibility` / `GetVisibility`.
+
+This allows an external agent to represent a conceptual manufacturing group without suppressing/hiding occurrences in the source assembly.
+
+## CustomTable editing
+
+v0.68 added atomic:
+
+- cell value write;
+- column width write.
+
+A semantic command such as “create fabrication schedule” was intentionally not added.
+
+## Visual QA loop
+
+API success is not drawing quality.
+
+```text
+create
+→ factual readback
+→ get_drawing_layout_map
+→ capture_drawing_sheet_preview
+→ external visual review
+→ atomic correction
+→ render again
 ```
-Import
 
-↓
+## Source-model integrity
 
-Geometry
+Drawing workflows repeatedly verified:
 
-↓
+- source assembly/part dirty state;
+- referenced document dirty state;
+- modal-dialog behaviour;
+- absence of unintended saves;
+- drawing-local rather than model-global mutations.
 
-Analysis
+## Experimental exceptions
 
-↓
+Legacy commands that go beyond strict Eyes/Hands remain for compatibility:
 
-Research
+- `analyze_dimension_layout`
+- `auto_arrange_dimensions`
+- `check_annotation_collisions`
+- `auto_resolve_annotation_collisions`
+- `analyze_view_dimension_candidates`
 
-↓
+They are not the pattern for new Runtime development.
 
-Decision
+## Embedded OpenAI client
 
-↓
+`AI/OpenAiClient.cs` is an experimental adapter. The active Runtime boundary is JSON and does not depend on an embedded model client, keeping orchestration provider-agnostic.
 
-Drawing
+## Conclusion
 
-↓
+The Inventor control layer generalized well.
 
-Infrastructure
-```
+The fully autonomous drawing-decision layer did not.
 
-Geometry станет источником инженерных объектов для всей системы.
-
----
-
-# Цель архитектуры
-
-Создать масштабируемую инженерную платформу, способную автоматически выпускать конструкторскую документацию уровня опытного инженера-конструктора по требованиям ЕСКД.
+Future development should strengthen factual CAD access and supervised workflows rather than rebuild a hidden engineering brain inside Runtime.

@@ -1,275 +1,289 @@
 # AI CAD ENGINEER
 
-> Инженерная CAD-платформа нового поколения для автоматического создания чертежей по ЕСКД на основе 3D-моделей Autodesk Inventor.
-
----
-
-# О проекте
-
-AI CAD ENGINEER — это система, которая анализирует 3D-модель изделия, принимает инженерные решения и автоматически создаёт профессиональные чертежи по требованиям ЕСКД.
-
-Цель проекта — не просто автоматизировать оформление чертежей, а воспроизвести логику работы опытного инженера-конструктора.
-
-В отличие от классических CAD-макросов, система сначала анализирует геометрию модели, затем принимает инженерные решения, после чего строит чертёж.
-
----
-
-# Основные цели проекта
-
-- автоматическое создание чертежей деталей;
-- автоматическое создание сборочных чертежей;
-- соответствие требованиям ЕСКД и ГОСТ;
-- минимальное участие пользователя;
-- интеллектуальное принятие инженерных решений;
-- масштабируемая архитектура.
-
----
-
-# Текущие возможности (v0.11.0)
-
-## Анализ модели
-
-✔ анализ габаритов модели
-
-✔ анализ отверстий
-
-✔ анализ листового металла
-
-✔ определение толщины
-
-✔ анализ фасок
-
-✔ анализ скруглений
-
-✔ определение центра масс
-
-✔ вычисление площади поверхности
-
-✔ вычисление объёма
-
----
-
-## Анализ видов
-
-✔ построение всех шести стандартных проекций
-
-- Front
-- Back
-- Top
-- Bottom
-- Left
-- Right
-
-Для каждого вида вычисляются:
-
-- количество линий;
-- количество дуг;
-- количество окружностей;
-- площадь проекции;
-- оценка информативности.
-
----
-
-## Выбор главного вида
-
-Engineering Brain автоматически выбирает наиболее информативный главный вид.
-
-При выборе учитываются:
-
-- сложность геометрии;
-- площадь проекции;
-- количество инженерных элементов;
-- информативность вида.
-
----
-
-## Автоматический выбор масштаба
-
-Масштаб выбирается автоматически по ГОСТ.
-
-Поддерживаются стандартные масштабы:
-
-- 100:1
-- 50:1
-- 20:1
-- 10:1
-- 5:1
-- 2:1
-- 1:1
-- 1:2
-- 1:2.5
-- 1:4
-- 1:5
-- 1:10
-- ...
-
----
-
-## Автоматическое построение видов
-
-На текущий момент система автоматически:
-
-- создаёт главный вид;
-- строит две проекции;
-- размещает виды на листе;
-- выбирает масштаб;
-- создаёт центровые линии;
-- создаёт центровые метки.
-
----
-
-## Анализ геометрии чертежа
-
-После построения вида производится исследование его геометрии.
-
-Определяются:
-
-- реальные габариты вида;
-- все DrawingCurve;
-- линии;
-- окружности;
-- дуги;
-- видимость объектов;
-- кандидаты на построение размеров.
-
-Для каждого исследования автоматически создаётся подробный отчёт.
-
----
-
-## Dimension Decision Engine
-
-Главная инженерная подсистема проекта.
-
-На текущий момент реализованы:
-
-✔ определение физических осей X/Y/Z
-
-✔ определение ролей
-
-- Length
-- Width
-- Height
-
-✔ генерация кандидатов размеров
-
-✔ классификация размеров
-
-- Required
-- Duplicate
-- Optional
-
-✔ исключение дублирующих размеров
-
-✔ формирование инженерного отчёта
-
----
-
-## Reporting System
-
-Автоматически создаются отчёты:
-
-- Drawing Geometry Research
-- Dimension Decision Report
-
-Все отчёты сохраняются в отдельную папку Reports.
-
----
-
-# Архитектура проекта
-
-Проект разделён на независимые подсистемы.
-
-```
-Import
-      │
-      ▼
-Analysis
-      │
-      ▼
-Research
-      │
-      ▼
-Decision
-      │
-      ▼
-Drawing
-      │
-      ▼
-Infrastructure
+**Experimental Autodesk Inventor automation runtime for AI-assisted CAD workflows.**
+
+AI CAD ENGINEER is a C#/.NET project that exposes Autodesk Inventor through a structured JSON command layer. The main technical result is a working external control surface for reading Inventor state and performing deterministic CAD actions from an AI agent or another automation client.
+
+The project also investigated a harder question: whether an LLM could use that control layer to autonomously produce production-quality engineering drawings. The automation layer proved viable; the fully autonomous drawing-engineer hypothesis did not generalize reliably across different classes of parts and assemblies.
+
+## Status
+
+**Final research checkpoint: v0.68**
+
+- **219** registered JSON commands
+- **219** unique command names
+- live Autodesk Inventor 2027 E2E validation throughout development
+- architecture: external reasoning + atomic **Eyes** and **Hands**
+- source-model integrity checks built into the development process
+- autonomous-drafting research track concluded after real benchmarks
+
+The project was not stopped because Inventor could not be controlled. The opposite was demonstrated: the runtime can inspect and manipulate a broad set of Inventor objects. The limiting factor was the consistency of higher-level AI judgement for view selection, dimension completeness, drawing composition and visual drafting quality.
+
+## Architecture
+
+```text
+External LLM / automation client
+            │ JSON
+            ▼
+        Program.cs
+            ▼
+    Core/Application.cs
+            ▼
+InventorCommandDispatcher
+            ▼
+     IInventorCommand
+            ▼
+ CommandSupport / ReadSupport
+            ▼
+    Autodesk Inventor API
 ```
 
-Такое разделение позволяет независимо развивать каждый модуль.
+### Eyes
 
----
+Read-only factual operations for documents, sheets, views, dimensions, title blocks, notes, symbols, tables, model features, parameters, sketches, BRep, assemblies, previews and layout data.
 
-# Используемые технологии
+### Hands
 
-- C#
+One explicit Inventor action per command: create/move/delete views, create/edit dimensions, notes and symbols, edit title-block fields, tables, per-view occurrence visibility, save/export and other deterministic operations.
+
+The external caller decides **what should be done**. Runtime decides only **how to perform the requested Inventor API operation safely**.
+
+## Why the architecture changed
+
+Versions before v0.15 contained an internal `EngineeringBrain`, `DrawingManager`, view scoring and dimension-decision logic.
+
+That path was intentionally removed at v0.15. Decisions such as “best view”, “required dimension” and “correct sheet layout” depend heavily on design intent, manufacturing context and visual judgement. The project therefore moved reasoning outside Runtime.
+
+The tag `v0.15-before-cleanup` preserves the earlier architecture.
+
+## Implemented capability areas
+
+At v0.68 the dispatcher contains 219 unique JSON commands covering:
+
+- Inventor connectivity and document lifecycle
+- drawing sheets, borders and GOST title blocks
+- base/projected/section/detail/auxiliary views and view breaks
+- drawing curves and model references
+- linear, diameter, radius, angular, ordinate, baseline and chain dimensions
+- dimension formatting, styles, layers and tolerance modes
+- center marks and centerlines
+- hole/thread, general and leader notes
+- feature control frames
+- surface texture and welding symbols
+- sketched symbols
+- revision clouds and revision tables
+- edge, transition, bend, chamfer and punch annotations
+- balloons and parts lists
+- CustomTables and HoleTables
+- PDF/DWG/DXF export
+- drawing-sheet and model PNG previews
+- normalized drawing layout map
+- model feature/parameter/sketch/BRep Eyes
+- assembly occurrence/BOM/reference Eyes
+- referenced-part targeting from assembly context
+- DrawingView-local occurrence visibility
+- atomic CustomTable cell and column-width editing
+
+Exact dispatcher inventory: [docs/COMMAND_REFERENCE.md](docs/COMMAND_REFERENCE.md)
+
+Verification map: [CAPABILITY_MAP.md](CAPABILITY_MAP.md)
+
+## Example commands
+
+```json
+{"command":"get_active_document"}
+```
+
+```json
+{"command":"get_assembly_occurrences"}
+```
+
+```json
+{
+  "command":"set_drawing_view_occurrence_visibility",
+  "sheetName":"Лист:1",
+  "viewName":"ВИД1",
+  "occurrencePath":"Frame:1/Profile:3",
+  "visible":false
+}
+```
+
+```json
+{
+  "command":"set_custom_table_cell_value",
+  "sheetName":"Лист:1",
+  "customTableIndex":1,
+  "row":1,
+  "column":1,
+  "value":"D01"
+}
+```
+
+## Build and run
+
+Tested environment:
+
+- Windows 10
+- Autodesk Inventor Professional 2027
 - .NET 10
-- Autodesk Inventor API
-- COM Automation
-- Git
-- Visual Studio 2022
+- Visual Studio / classic MSBuild
+- Autodesk Inventor COM reference
 
----
+Validated build path:
 
-# Структура проекта
-
-```
-Drawing/
-Engineering/
-Import/
-Infrastructure/
+```powershell
+MSBuild.exe AI_CAD_ENGINEER.csproj /p:Configuration=Debug /p:Platform="Any CPU" /v:minimal
 ```
 
-Подсистема Engineering содержит основную инженерную логику проекта.
+Interactive mode:
 
----
-
-# Ближайшие планы
-
-Следующая версия — v0.12.0
-
-Основная задача:
-
-**Engineering Feature Graph**
-
-Будут реализованы:
-
-- Feature Graph
-- Feature Node
-- Geometry Analyzer
-- Hole Graph
-- Pocket Graph
-- Boss Graph
-- интеллектуальный поиск всех инженерных элементов модели
-
-После этого система сможет принимать инженерные решения уже не по линиям чертежа, а по элементам конструкции изделия.
-
----
-
-# Долгосрочная цель
-
-Создать инженерную систему, способную автоматически выпускать полный комплект конструкторской документации по ЕСКД:
-
-- деталировка;
-- сборочные чертежи;
-- спецификации;
-- КМ;
-- КМД;
-- листовой металл;
-- сварные конструкции.
-
----
-
-# Текущая версия
-
-```
-v0.11.0
+```powershell
+AI_CAD_ENGINEER.exe
 ```
 
----
+Single-command automation:
 
-# Автор
+```powershell
+AI_CAD_ENGINEER.exe --json-file ".\command.json"
+```
 
-Проект разрабатывается как исследовательская инженерная платформа нового поколения для автоматизации конструкторской деятельности.
+or:
+
+```powershell
+AI_CAD_ENGINEER.exe --json "{\"command\":\"ping\"}"
+```
+
+Single-command mode is attach-only: it connects to an already running Inventor instance and emits one JSON response with a deterministic exit code.
+
+## Development method
+
+```text
+Capability Audit
+      ↓
+Is new code actually required?
+      ↓
+minimal generic Eye / Hand
+      ↓
+classic MSBuild
+      ↓
+live Inventor E2E
+      ↓
+direct readback
+      ↓
+source-model integrity check
+      ↓
+checkpoint / tag
+```
+
+If existing capabilities were sufficient, no new code was added.
+
+See [docs/DEVELOPMENT_PROCESS.md](docs/DEVELOPMENT_PROCESS.md).
+
+## Research benchmarks
+
+### Benchmark #1 — turned shaft
+
+Reference-aided planning combined real drawings of the same part class, a factual model dossier, manufacturing requirements, candidate plans, execution and visual QA. The content architecture improved substantially, but good final composition still depended on human correction.
+
+### Benchmark #2 — welded chair frame
+
+A real profile-tube assembly tested generalization to a multi-level welded/bolted product. The runtime recovered:
+
+- 26 structural metal occurrences
+- 24 tube members + 2 plates
+- 14 manufacturing-equivalent detail types
+- 12 × Ø9 through-profile holes for M8 bolts
+- 12 × Ø11.1 one-wall holes for M8 threaded rivet nuts
+- 5°, 10°, 45° and square end conditions
+- differences between Frame Generator `B_L` and final BRep geometry
+- four manufacturing units: left side, right side, seat and backrest
+
+A multi-sheet documentation architecture was planned and technically executable. The first real rendered set still required substantial correction in view choice, dimension completeness and layout. That result triggered the stop criterion for the original autonomous-drafting goal.
+
+Full findings: [docs/RESEARCH_FINDINGS.md](docs/RESEARCH_FINDINGS.md)
+
+## What the project demonstrated
+
+The project **did** demonstrate that an external agent can be given a substantial, structured and testable control layer over Autodesk Inventor.
+
+It **did not** demonstrate that a current LLM can reliably replace an experienced drafter/constructor for arbitrary production drawings without significant review.
+
+The runtime remains useful as a foundation for:
+
+- CAD copilots
+- model interrogation
+- drawing/model review
+- fabrication-data extraction
+- batch Inventor automation
+- supervised drawing assistance
+- agent-controlled repetitive CAD workflows
+
+## Repository map
+
+```text
+AI/
+Core/
+InventorControl/
+  Commands/
+  InventorCommandDispatcher.cs
+
+AGENTS.md
+ARCHITECTURE.md
+CAPABILITY_MAP.md
+CURRENT_STATE.md
+ESKD_DRAWING_POLICY.md
+PROJECT_REVIEW.md
+ROADMAP.md
+CHANGELOG.md
+CONTRIBUTING.md
+
+docs/
+  COMMAND_REFERENCE.md
+  DEVELOPMENT_PROCESS.md
+  PROJECT_HISTORY.md
+  RESEARCH_FINDINGS.md
+  MILESTONES.md
+```
+
+## AI-agent rules
+
+[AGENTS.md](AGENTS.md) is the binding guide for coding/CAD agents.
+
+Key rules:
+
+- Runtime = factual Eyes + atomic Hands
+- audit existing capability before adding code
+- do not invent missing design intent
+- final BRep is the primary source of final geometric truth
+- never mutate source-model state as a drawing fallback
+- live Inventor E2E is required before a capability is called verified
+- API success is not proof of drawing quality
+
+## ESKD policy
+
+[ESKD_DRAWING_POLICY.md](ESKD_DRAWING_POLICY.md) contains the external reasoning policy used during the drawing experiments. It is deliberately not embedded as automatic Runtime behaviour.
+
+## Version history
+
+- v0.1–v0.12 — embedded analysis / Engineering Brain experiments
+- `v0.15-before-cleanup` — checkpoint before architectural cleanup
+- v0.15 — legacy decision layer removed
+- v0.16–v0.64 — systematic Eyes/Hands expansion
+- v0.65–v0.66 — referenced-part targeting from assemblies
+- v0.67 — DrawingView occurrence visibility
+- v0.68 — atomic CustomTable editing
+
+See [CHANGELOG.md](CHANGELOG.md), [docs/PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md) and [docs/MILESTONES.md](docs/MILESTONES.md).
+
+## Limitations
+
+- Autodesk Inventor is required; this is not a standalone CAD kernel.
+- Windows/COM is part of the architecture.
+- Some commands are verified only for specific Inventor object/context combinations.
+- A small number of legacy analysis commands remain for compatibility.
+- Engineering intent such as tolerances, exact weld requirements, fastener specification and official designations cannot safely be inferred from geometry alone.
+- Drawing quality still requires engineering and visual review.
+
+## License
+
+No explicit open-source license has been selected yet. Public visibility alone does not define reuse rights.

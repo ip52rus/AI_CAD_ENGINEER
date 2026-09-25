@@ -394,7 +394,7 @@ public class Application
             "=================================");
 
         Console.WriteLine(
-            "      AI CAD ENGINEER v0.14");
+            "      AI CAD ENGINEER v0.68");
 
         Console.WriteLine(
             "=================================");

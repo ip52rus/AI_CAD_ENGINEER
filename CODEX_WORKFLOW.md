@@ -1,73 +1,34 @@
-# CODEX_WORKFLOW.md
+# AI Agent Workflow
 
-## Starting a session
+Read first:
 
-From the repository root:
+1. `AGENTS.md`
+2. `CURRENT_STATE.md`
+3. `CAPABILITY_MAP.md`
 
-```cmd
-codex
-```
+Then inspect the live repository.
 
-First prompt:
-
-```text
-Read AGENTS.md and CURRENT_STATE.md.
-Follow them as binding repository instructions.
-Inspect the live repository before proposing changes.
-```
-
-## Standard feature workflow
+## Standard workflow
 
 ```text
 1. Audit repository.
-2. Confirm no duplicate exists.
-3. Classify as eye, atomic hand, or forbidden embedded reasoning.
-4. Propose minimal files.
-5. Wait for approval.
+2. Confirm no equivalent command exists.
+3. Classify Eye / atomic Hand / external reasoning.
+4. Decide whether code is required.
+5. Propose minimal change.
 6. Edit.
-7. Show git diff.
-8. Rebuild in Visual Studio.
-9. Run exact JSON test in Inventor.
-10. Update documentation after verification.
-11. Commit only after explicit approval.
+7. Show diff.
+8. Build with classic Visual Studio MSBuild.
+9. Run exact JSON test against real Inventor.
+10. Verify direct readback and source-model integrity.
+11. Update documentation.
+12. Commit/push only with explicit authorization.
 ```
 
-## Returning to a session
+Preferred automation entrypoint:
 
-Use:
-
-```cmd
-codex resume
+```powershell
+AI_CAD_ENGINEER.exe --json-file ".\command.json"
 ```
 
-Repository state and `AGENTS.md` remain the source of truth. Do not rely solely on remembered conversation context.
-
-## Model and reasoning
-
-For repository audits, COM interop problems, architecture changes, and cross-file implementation work, use a stronger reasoning setting than `low`.
-
-Inside Codex:
-
-```text
-/model
-```
-
-Choose an available GPT-5.6 coding model with medium or high reasoning when the task is nontrivial.
-
-## Permissions
-
-Use:
-
-```text
-/permissions
-```
-
-Recommended initial policy:
-
-- read the repository freely;
-- allow edits only inside the repository;
-- ask before network access;
-- ask before commands outside the workspace;
-- ask before destructive commands;
-- never allow automatic `git push`;
-- commit only after explicit instruction.
+Never move engineering judgement into C# merely because an external LLM workflow is difficult.
