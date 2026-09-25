@@ -1,5 +1,14 @@
 # AI CAD ENGINEER
 
+![Autodesk Inventor 2027](https://img.shields.io/badge/Autodesk%20Inventor-2027-0696D7?style=for-the-badge&logo=autodesk&logoColor=white)
+![Visual Studio Community 2026](https://img.shields.io/badge/Visual%20Studio%20Community-2026-5C2D91?style=for-the-badge&logo=visualstudio&logoColor=white)
+![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![C%23](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp&logoColor=white)
+![Windows 10](https://img.shields.io/badge/Windows-10-0078D4?style=for-the-badge&logo=windows&logoColor=white)
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+![OpenAI](https://img.shields.io/badge/ChatGPT%20%2F%20Codex-OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
+
 **Experimental Autodesk Inventor automation runtime for AI-assisted CAD workflows.**
 
 AI CAD ENGINEER is a C#/.NET project that exposes Autodesk Inventor through a structured JSON command layer. The main technical result is a working external control surface for reading Inventor state and performing deterministic CAD actions from an AI agent or another automation client.
