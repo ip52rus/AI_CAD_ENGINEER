@@ -119,6 +119,38 @@ Verification map: [CAPABILITY_MAP.md](CAPABILITY_MAP.md)
 }
 ```
 
+## Development stack
+
+### Products and tools
+
+The project was developed and tested with:
+
+- **Autodesk Inventor Professional 2027** — target CAD system and live E2E environment
+- **Autodesk Inventor API / COM Automation** — programmatic integration layer
+- **Visual Studio Community 2026** — primary C# development environment
+- **.NET SDK 10.0.302** — application runtime/toolchain
+- **MSBuild 18.6.11** — validated build system
+- **Windows 10 (10.0.19045)** — development and Inventor host OS
+- **Git / GitHub** — version control, milestones and public project history
+- **ChatGPT / Codex / Codex CLI** — AI-assisted architecture, research, code iteration and Inventor workflow experiments
+
+The AI tools were used during development and research; they are not required as an embedded runtime dependency. The stable integration boundary of the application is the JSON command interface.
+
+### Languages and formats
+
+- **C#** — primary implementation language
+- **JSON** — command/response protocol between the external agent and Runtime
+- **PowerShell** — build, test and automation scripts used during development
+- **Markdown** — architecture, research and project documentation
+
+### Main technologies
+
+- **.NET 10**
+- **Autodesk Inventor COM interop**
+- **Autodesk Inventor object model / API**
+- **Windows COM / Running Object Table**
+- **OpenAI Responses API** — experimental client adapter present in the repository, not required by the active Runtime architecture
+
 ## Build and run
 
 Tested environment:
