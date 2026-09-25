@@ -1,155 +1,82 @@
-# CHANGELOG
+# Changelog
 
-Все значимые изменения проекта фиксируются в этом документе.
+Все значимые изменения опубликованного source snapshot.
 
-Формат основан на принципах Keep a Changelog.
+Формат близок к Keep a Changelog. Версии после v0.12, относящиеся к поздней экспериментальной Eyes/Hands-архитектуре, описаны в [docs/PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md), поскольку их исходники пока не полностью представлены в public `main`.
 
----
+## v0.12.0 — Feature Graph and Hole Groups
 
-# v0.11.0 — Dimension Decision Engine
+- добавлен Engineering Feature Graph;
+- FeatureNode / FeatureRelationship;
+- metadata и отчёт графа;
+- извлечение HoleFeature;
+- HoleGroupBuilder;
+- группировка отверстий;
+- интеграция feature graph в drawing pipeline.
 
-Дата: 03.08.2026
+## v0.11.0 — Dimension Decision Engine
 
----
+- DimensionDecisionCoordinator;
+- DimensionDecisionResult;
+- DimensionClassificationEngine;
+- DimensionRuleEngine;
+- OverallDimensionRoleResolver;
+- ViewAxisMappingResolver;
+- классификация размерных кандидатов;
+- исключение дублей;
+- отчёт решений.
 
-## Added
+## v0.10.x — Reporting
 
-### Engineering Decision Layer
+- отчёты исследования геометрии;
+- отчёты решений;
+- console/file reporting.
 
-- DimensionDecisionCoordinator
-- DimensionDecisionResult
-- DimensionClassificationEngine
-- DimensionRuleEngine
-- OverallDimensionRoleResolver
-- ViewAxisMappingResolver
+## v0.9.0 — Dimension classification
 
----
+- статусы dimension candidates;
+- Required / Duplicate / Optional;
+- подготовка к отдельному Decision layer.
 
-### Dimension Analysis
+## v0.8.x — Role resolver
 
-Добавлены:
+- физические X/Y/Z;
+- роли Length / Width / Height;
+- связь размеров с view axis mapping.
 
-- генерация кандидатов размеров;
-- определение физических осей видов;
-- определение ролей размеров;
-- классификация размеров;
-- поиск дублирующих размеров.
+## v0.7.0 — Dimension candidates
 
----
+- поиск кандидатов размеров;
+- geometry-driven dimension research.
 
-### Drawing Research
+## v0.6.0 — Main view selection
 
-Добавлен модуль:
+- оценка стандартных проекций;
+- автоматический выбор основного вида.
 
-DrawingGeometryResearch
+## v0.5.0 — Three-view layout
 
-Возможности:
+- генерация трёх проекций;
+- размещение на листе;
+- масштабирование.
 
-- анализ DrawingCurve;
-- анализ геометрии вида;
-- поиск габаритов;
-- исследование реальных размеров вида.
+## v0.4.0 — Center annotations
 
----
+- центровые линии;
+- центровые метки.
 
-### Reporting
+## v0.3.0 — Base drawing view
 
-Добавлена универсальная система отчётов.
+- создание базового вида детали.
 
-Поддерживаются:
+## v0.2.0 — Empty drawing
 
-- Drawing Geometry Research Report
-- Dimension Decision Report
+- создание DrawingDocument.
 
-Все отчёты автоматически сохраняются в папку Reports.
+## v0.1.0 — Initial Inventor integration
 
----
-
-## Changed
-
-Полностью переработан процесс нанесения размеров.
-
-Ранее:
-
-```
-Поиск размеров
-
-↓
-
-Нанесение
-```
-
-Теперь:
-
-```
-Поиск размеров
-
-↓
-
-Role Resolver
-
-↓
-
-Dimension Classification
-
-↓
-
-Decision Result
-
-↓
-
-Нанесение
-```
-
----
-
-Drawing Layer теперь получает только размеры со статусом Required.
-
----
-
-## Architecture
-
-Добавлены новые подсистемы:
-
-```
-Engineering
-    Decision
-
-Engineering
-    Research
-
-Infrastructure
-    Reporting
-```
-
-Архитектура стала многоуровневой.
-
-Принятие инженерных решений полностью отделено от построения чертежей.
-
----
-
-## Fixed
-
-Исправлено:
-
-- определение физических осей видов;
-- выбор размеров для кубических деталей;
-- определение ролей Length / Width / Height;
-- исключение дублирующих размеров;
-- стабильность исследований DrawingView.
-
----
-
-## Result
-
-Проект перешёл от генерации размеров к инженерной системе принятия решений.
-
-Dimension Decision Engine стал самостоятельной подсистемой архитектуры AI CAD ENGINEER.
-
----
-
-# Следующая версия
-
-v0.12.0
-
-Engineering Feature Graph
+- подключение к Autodesk Inventor через COM;
+- подключение к уже запущенному экземпляру;
+- запуск Inventor при необходимости;
+- active document readback;
+- базовый command routing.

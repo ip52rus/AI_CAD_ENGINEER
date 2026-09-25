@@ -1,251 +1,138 @@
-# AI CAD ENGINEER
+# Roadmap
 
-# ROADMAP
+## Статус
 
----
+Исходная исследовательская программа завершена.
 
-# Статус проекта
+Главная цель раннего roadmap — полностью автономный выпуск КД по ЕСКД из произвольной модели Inventor — была доведена до реальных benchmark-экспериментов, но не показала требуемой устойчивости качества между разными классами изделий.
 
-Текущая версия:
+При этом программная интеграция с Inventor и automation foundation были подтверждены.
 
-```
-v0.11.0
-```
+## Завершённый публичный этап
 
----
+### v0.1 — Inventor integration
 
-# Завершённые версии
+- COM connection;
+- active document detection;
+- базовый command routing.
 
-## ✅ v0.1
+### v0.2 — Drawing creation
 
-Основа проекта
+- создание DrawingDocument.
 
-- подключение к Inventor
-- создание первого чертежа
-- анализ модели
-- выбор главного вида
+### v0.3 — Base view
 
----
+- создание базового DrawingView.
 
-## ✅ v0.2
+### v0.4–v0.6 — View generation and layout
 
-View Analyzer
+- три вида;
+- layout;
+- automatic main-view selection.
 
-- анализ шести стандартных видов
-- оценка информативности
-- автоматический выбор главного вида
+### v0.7–v0.10 — Dimension research
 
----
+- DrawingCurve research;
+- dimension candidates;
+- physical axes;
+- dimension roles;
+- reporting.
 
-## ✅ v0.3
+### v0.11 — Dimension Decision Engine
 
-Drawing Generator
+- классификация dimension candidates;
+- Required / Duplicate / Optional и связанные статусы;
+- передача выбранных размеров в Drawing layer.
 
-- создание трёх видов
-- автоматический масштаб
-- автоматическое размещение
+### v0.12 — Engineering Feature Graph
 
----
+- FeatureGraph;
+- FeatureNode;
+- relationships;
+- HoleFeature extraction;
+- HoleGroup construction.
 
-## ✅ v0.4
+## Поздний исследовательский этап
 
-Center Annotation
+После v0.12 проект сменил архитектуру с встроенного Engineering Brain на внешний LLM + atomic Eyes/Hands.
 
-- центровые линии
-- центровые метки
+Ключевые подтверждённые этапы:
 
----
+- чтение assembly hierarchy и BRep;
+- работа с nested referenced parts без переключения активного документа;
+- drawing-view occurrence isolation;
+- atomic CustomTable editing;
+- specification proof;
+- model/drawing integrity checks;
+- reference-aided planning;
+- реальные benchmarks на детали и сварной сборке.
 
-## ✅ v0.5
+Последний исследовательский checkpoint: v0.68, 219 зарегистрированных runtime operations.
 
-Hole Analysis
+Эти поздние исходники пока не отражены полностью в public `main`; история и результаты сохранены в документации.
 
-- анализ отверстий
-- анализ листового металла
+## Исследовательский stop-criterion
 
----
+Разработка исходной идеи остановлена не из-за Inventor API.
 
-## ✅ v0.6
+Причина остановки:
 
-Geometry Research
+- автономный выбор видов не обобщается достаточно надёжно;
+- размерная полнота требует производственного контекста;
+- layout требует многократного visual feedback;
+- на новом классе изделия снова нужен существенный prompt/review цикл;
+- стоимость доведения одного комплекта до хорошего состояния не подтверждает ценность полностью автономного режима.
 
-- исследование DrawingView
-- анализ DrawingCurve
-- поиск габаритов
+## Если проект продолжать
 
----
+Наиболее рациональные направления:
 
-## ✅ v0.7
+### 1. Model interrogation
 
-Dimension Candidates
+Natural-language запросы к реальной модели/сборке:
 
-- поиск кандидатов размеров
-- анализ физических осей
+- какие профили используются;
+- какие детали имеют заданные отверстия;
+- какие элементы отличаются только зеркальностью;
+- какие материалы не заполнены;
+- какие детали геометрически одинаковы.
 
----
+### 2. Drawing audit
 
-## ✅ v0.8
+Проверка уже созданного человеком чертежа:
 
-Role Resolver
+- пропущенные dimensions;
+- duplicate dimensions;
+- title block;
+- collisions;
+- missing hole/thread notes;
+- cross-check model ↔ drawing.
 
-- Length
-- Width
-- Height
+### 3. Fabrication extraction
 
----
+- cut list;
+- final BRep lengths;
+- end cuts;
+- hole patterns;
+- per-member operations;
+- CSV/XLSX/PDF export.
 
-## ✅ v0.9
+### 4. Batch automation
 
-Dimension Classification
+- document properties;
+- export;
+- renaming;
+- title-block population;
+- repetitive drawing operations.
 
-- Required
-- Duplicate
-- Optional
+### 5. Supervised drawing assistant
 
----
+Человек определяет engineering intent и layout, AI выполняет локальные CAD-команды.
 
-## ✅ v0.10
+## Что не рекомендуется считать ближайшей целью
 
-Reporting
+Без нового фундаментального подхода не следует возвращаться к формулировке:
 
-- отчёты исследований
-- отчёты решений
+> «полностью автоматически выпускать красивый и производственно полный комплект КД для любой модели Inventor».
 
----
-
-## ✅ v0.11
-
-Dimension Decision Engine
-
-- DimensionDecisionCoordinator
-- DimensionDecisionResult
-- классификация размеров
-- исключение дублей
-- передача только Required размеров
-- физические оси видов
-- инженерная архитектура Decision Layer
-
----
-
-# Текущая разработка
-
-## 🚧 v0.12
-
-Engineering Feature Graph
-
-Планируется:
-
-- FeatureNode
-- FeatureGraph
-- FeatureExtractor
-- GeometryAnalyzer
-
-Поддержка:
-
-- Hole
-- Pocket
-- Boss
-- Slot
-- Chamfer
-- Fillet
-- Bend
-- Flange
-
-Результат:
-
-полное инженерное описание детали.
-
----
-
-## 🔵 v0.13
-
-Engineering Dimension Graph
-
-Будут реализованы:
-
-- полный поиск всех размерных кандидатов
-- граф зависимостей размеров
-- инженерные базы
-- размерные цепочки
-
----
-
-## 🔵 v0.14
-
-Dimension Decision Engine 2.0
-
-Добавится:
-
-- Redundant
-- Reference
-- Recommended
-- Grouped
-
-Инженерные правила ЕСКД.
-
----
-
-## 🔵 v0.15
-
-Automatic Dimensioning
-
-Автоматическое нанесение:
-
-- отверстий
-- радиусов
-- фасок
-- пазов
-- вырезов
-- гибов
-
----
-
-## 🔵 v0.16
-
-Automatic Sections
-
-Автоматическое построение:
-
-- разрезов
-- сечений
-- местных разрезов
-
----
-
-## 🔵 v0.17
-
-Assembly Drawings
-
-Поддержка сборок.
-
----
-
-## 🔵 v0.18
-
-Specification Generator
-
-Автоматическое создание спецификаций.
-
----
-
-## 🔵 v0.19
-
-Sheet Metal
-
-Полная поддержка листового металла.
-
----
-
-## 🔵 v1.0
-
-AI CAD ENGINEER
-
-Первая стабильная версия.
-
-Полностью автоматическое создание конструкторской документации по ЕСКД.
-
----
-
-# Главная цель проекта
-
-Создать интеллектуальную инженерную систему, которая принимает инженерные решения аналогично опытному инженеру-конструктору и автоматически выпускает комплект конструкторской документации.
+Benchmark-результаты не подтверждают устойчивость такого режима.

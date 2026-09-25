@@ -1,361 +1,290 @@
-# AI CAD ENGINEER
-
-# ARCHITECTURE
-
-Версия документа:
-
-```
-v0.11.0
-```
-
----
-
-# Общая архитектура
-
-AI CAD ENGINEER строится как многоуровневая инженерная система.
-
-Главный принцип:
-
-> Каждый модуль отвечает только за одну инженерную задачу.
-
-Модули не должны смешивать анализ модели, принятие решений и построение чертежа.
-
----
-
-# Общая схема
-
-```
-                    Autodesk Inventor
-                           │
-                           ▼
-                     Import Layer
-                           │
-                           ▼
-                   Engineering Layer
-                           │
-      ┌────────────────────┼────────────────────┐
-      ▼                    ▼                    ▼
-  Analysis             Research             Decision
-      │                    │                    │
-      └────────────────────┼────────────────────┘
-                           ▼
-                     Drawing Layer
-                           │
-                           ▼
-                  Infrastructure Layer
-                           │
-                           ▼
-                         Reports
-```
-
----
-
-# Import Layer
-
-Назначение:
-
-получение информации из Autodesk Inventor.
-
-Содержит:
-
-- подключение к Inventor
-- создание DrawingDocument
-- получение геометрии
-- получение Feature
-- получение Face
-- получение Edge
-- получение HoleFeature
-- создание DrawingView
-
-Import Layer не принимает инженерных решений.
-
----
-
-# Engineering Layer
-
-Основная подсистема проекта.
-
-Именно здесь программа становится "инженером".
-
-Включает несколько независимых направлений.
-
----
-
-# Analysis
-
-Отвечает за анализ модели.
-
-Выполняет:
-
-- анализ отверстий
-- анализ листового металла
-- анализ фасок
-- анализ скруглений
-- анализ объёма
-- анализ площади
-- анализ центра масс
-- анализ габаритов
-- анализ видов
-- вычисление информативности вида
-
-Результат:
-
-инженерское описание модели.
-
----
-
-# Research
-
-Исследование уже построенного чертежа.
-
-Используется после создания DrawingView.
-
-Определяет:
-
-- DrawingCurve
-- линии
-- окружности
-- дуги
-- реальные размеры вида
-- кандидатов размеров
-- физические оси вида
-
-Создаёт инженерные отчёты.
-
----
-
-# Decision
-
-Самая важная подсистема проекта.
-
-Здесь принимаются инженерные решения.
-
-На сегодняшний день реализованы:
-
-## Engineering Brain
-
-Принимает решения:
-
-- главный вид
-- необходимость размеров
-- необходимость центровых линий
-- необходимость разрезов
-
----
-
-## Dimension Decision Engine
-
-Работает полностью независимо от Drawing.
-
-Этапы:
-
-```
-Dimension Candidates
-        │
-        ▼
-Role Resolver
-        │
-        ▼
-Classification Engine
-        │
-        ▼
-Decision Result
-```
-
-Результат:
-
-готовый набор размеров для построения.
-
----
-
-# Drawing Layer
-
-Не принимает решений.
-
-Получает готовый план.
-
-Выполняет:
-
-- создание видов
-- выбор масштаба
-- размещение видов
-- создание центровых
-- нанесение размеров
-
-Drawing Layer ничего не анализирует.
-
-Он только строит.
-
----
-
-# Infrastructure
-
-Сервисная подсистема.
-
-Включает:
-
-- Reporting
-- File System
-- сохранение отчётов
-
----
-
-# Поток данных
-
-Полный путь обработки модели.
-
-```
-3D Model
-
-↓
-
-Import
-
-↓
-
-Part Analysis
-
-↓
-
-Engineering Brain
-
-↓
-
-Drawing Plan
-
-↓
-
-Drawing Views
-
-↓
-
-Geometry Research
-
-↓
-
-Dimension Candidates
-
-↓
-
-Decision Engine
-
-↓
-
-Required Dimensions
-
-↓
-
-Drawing Generator
-
-↓
-
+# Architecture
+
+## 1. Назначение
+
+AI CAD ENGINEER исследует архитектуру внешнего программного управления Autodesk Inventor и применение LLM к инженерным CAD workflow.
+
+Архитектура менялась по мере экспериментов. Важно различать:
+
+1. архитектуру опубликованного v0.12 snapshot;
+2. позднюю исследовательскую архитектуру External LLM + atomic Eyes/Hands.
+
+## 2. Опубликованный snapshot: layered engineering pipeline
+
+Текущий public source содержит классическую многоуровневую схему:
+
+```text
+Autodesk Inventor
+      │
+      ▼
+Core / Import
+      │
+      ▼
+Engineering
+ ├─ Analysis
+ ├─ Geometry
+ ├─ Research
+ └─ Decision
+      │
+      ▼
 Drawing
+      │
+      ▼
+Infrastructure / Reporting
 ```
 
----
+### Core
 
-# Основные инженерные объекты
+Отвечает за жизненный цикл приложения и соединение с Inventor.
 
-На текущий момент.
+Ключевые задачи:
 
-## Analysis
+- подключиться к уже запущенному Inventor через COM;
+- при необходимости запустить Inventor;
+- получить активный документ;
+- определить тип документа;
+- принять пользовательскую команду.
 
-- PartAnalysis
-- HoleAnalysis
-- ViewStatistics
+### Import / Inventor
 
----
+Получает факты из Inventor.
 
-## Decision
+В опубликованном snapshot сюда входят:
 
-- DrawingPlan
-- DimensionCandidate
-- DimensionDecisionResult
-- ViewAxisMapping
+- ModelAnalyzer;
+- HoleAnalyzer;
+- ViewCandidateGenerator.
 
----
+Import layer не должен принимать решения об оформлении.
 
-## Drawing
+### Engineering / Analysis
 
-- OverallDimensionGenerator
-- CenterAnnotationGenerator
+Преобразует CAD-данные в инженерные метрики и кандидаты:
 
----
+- анализ видов;
+- статистика геометрии;
+- кандидаты размеров;
+- габаритные размеры;
+- необходимость вида.
 
-# Основные принципы
+### Engineering / Geometry
 
-## Single Responsibility
+В v0.12 появился Engineering Feature Graph:
 
-Каждый модуль отвечает только за одну задачу.
+- FeatureNode;
+- FeatureRelationship;
+- FeatureGraph;
+- HoleFeatureGraphExtractor;
+- HoleGroupBuilder.
 
----
+Цель слоя — уйти от рассуждения только по линиям DrawingView и работать с инженерными объектами модели.
 
-## Engineering First
+### Engineering / Decision
 
-Сначала принимается инженерное решение.
+Содержит ранний встроенный Engineering Brain:
 
-Только потом строится чертёж.
+- выбор главного вида;
+- выбор дополнительных видов;
+- Dimension Decision Engine;
+- определение ролей Length / Width / Height;
+- классификация Required / Duplicate / Optional и др.
 
----
+### Engineering / Research
 
-## Reporting First
+Исследует уже созданную DrawingView-геометрию:
 
-Каждый этап должен иметь собственный отчёт.
+- DrawingCurve;
+- линии;
+- дуги;
+- окружности;
+- реальные границы вида;
+- связи с физическими осями.
 
-Это позволяет анализировать работу системы.
+### Drawing
 
----
+Исполняет готовые решения:
 
-## Масштабируемость
+- создаёт DrawingDocument;
+- создаёт виды;
+- рассчитывает масштаб;
+- размещает виды;
+- добавляет центровые;
+- создаёт размеры.
 
-Новая инженерная логика должна добавляться через новые модули Decision.
+### Infrastructure
 
-Без изменения существующего Drawing Layer.
+Вспомогательные сервисы:
 
----
+- отчёты;
+- файловые пути;
+- console/file reporting.
 
-# План развития архитектуры
+## 3. Почему архитектура была изменена
 
-Следующий крупный слой:
+Эксперименты показали, что инженерная логика быстро становится слишком сложной для набора жёстко зашитых правил.
 
+Главные проблемы:
+
+- выбор вида зависит от design intent, а не только от числа линий;
+- один и тот же BRep может требовать разной документации в разных производственных контекстах;
+- assembly hierarchy не всегда совпадает с технологической;
+- важные элементы могут быть созданы не «правильным» feature типом;
+- layout и размерная архитектура плохо обобщаются между классами изделий.
+
+Поэтому поздняя R&D-фаза перенесла reasoning из Runtime во внешнюю LLM.
+
+## 4. Поздняя архитектура: External LLM + Eyes/Hands
+
+```text
+                 External LLM
+        engineering interpretation
+         planning / validation
+                  │
+        ┌─────────┴─────────┐
+        ▼                   ▼
+      Eyes                Hands
+ atomic reads        atomic actions
+        │                   │
+        └─────────┬─────────┘
+                  ▼
+           Autodesk Inventor
 ```
-Geometry
-```
 
-После v0.12 структура станет:
+### Eyes
 
-```
-Import
+Eye должен отвечать на один фактический вопрос.
 
-↓
+Примеры исследованных категорий:
 
-Geometry
+- active document;
+- occurrences;
+- referenced documents;
+- surface bodies;
+- BRep faces/edges;
+- feature tree/details;
+- model parameters;
+- drawing views and curves;
+- model references;
+- dimensions;
+- notes;
+- balloons;
+- tables;
+- title block;
+- layout map.
 
-↓
+Eye не должен интерпретировать геометрию как «правильную деталь кресла» или принимать технологическое решение.
 
-Analysis
+### Hands
 
-↓
+Hand выполняет одно однозначное действие Inventor API.
 
-Research
+Примеры исследованных категорий:
 
-↓
+- create/move drawing view;
+- section/detail views;
+- dimensions;
+- center marks/centerlines;
+- notes;
+- balloons;
+- welding/surface symbols;
+- sheet/border/title block;
+- table operations;
+- per-view occurrence visibility;
+- export.
 
-Decision
+Один Hand не должен реализовывать «создать чертёж боковины» или «построить спецификацию кресла». Семантика остаётся снаружи.
 
-↓
+## 5. Архитектурные инварианты
 
-Drawing
+### Runtime is not the engineer
 
-↓
+Runtime читает и действует. Он не решает design intent.
 
-Infrastructure
-```
+### One atomic action
 
-Geometry станет источником инженерных объектов для всей системы.
+Каждый Hand должен менять минимально возможную единицу состояния.
 
----
+### Read before write
 
-# Цель архитектуры
+Перед любым write workflow внешний агент обязан собрать достаточные факты.
 
-Создать масштабируемую инженерную платформу, способную автоматически выпускать конструкторскую документацию уровня опытного инженера-конструктора по требованиям ЕСКД.
+### Source-model integrity
+
+Drawing workflow не должен неожиданно изменять исходную деталь/сборку.
+
+### No silent fallback
+
+Если Inventor API не позволяет выполнить действие в заданном контексте, Runtime должен вернуть ошибку, а не изменять source model альтернативным способом.
+
+### Final BRep over feature naming
+
+Для фактической конечной геометрии BRep важнее имени feature. Это особенно критично для:
+
+- mirrored/generated parts;
+- imported geometry;
+- extrusion-cut holes;
+- Frame Generator members после split/trim.
+
+### External uncertainty
+
+Если нужное значение отсутствует в модели и не задано пользователем, оно остаётся unresolved.
+
+## 6. Пример: почему это важно
+
+В Benchmark #2 отверстия под крепёж были созданы не HoleFeature, а обычным sketch + extrusion cut.
+
+Feature-oriented проверка сначала пропустила их.
+
+BRep-аудит восстановил:
+
+- 12 × Ø9 through-profile;
+- 12 × Ø11.1 one-wall;
+- направление осей;
+- положение;
+- принадлежность к profile member;
+- функциональное различие.
+
+Это стало важным архитектурным уроком: инженерное чтение CAD не должно зависеть только от feature taxonomy.
+
+## 7. Контроль качества runtime package
+
+Каждый новый capability package проходил:
+
+1. Capability Audit.
+2. Решение: нужен ли код.
+3. Минимальная реализация.
+4. classic MSBuild.
+5. registry uniqueness check.
+6. live Inventor E2E.
+7. source-model dirty-state check.
+8. Git checkpoint/tag.
+
+Если шаг 2 давал «существующего capability достаточно», реализация запрещалась.
+
+## 8. Что оказалось за пределами Runtime
+
+Runtime успешно решал API/automation часть.
+
+Хуже всего обобщались:
+
+- выбор оптимального набора видов;
+- выбор полного, но неизбыточного набора размеров;
+- композиция листа;
+- визуальная иерархия;
+- нормоконтроль, требующий design intent;
+- переход между разными классами изделий.
+
+Эти задачи нельзя считать решёнными одной только богатой Inventor API surface.
+
+## 9. Практический вывод
+
+Архитектура Eyes/Hands остаётся полезной как foundation для:
+
+- supervised CAD assistants;
+- model interrogation;
+- drawing audit;
+- batch automation;
+- fabrication-data extraction;
+- LLM-controlled deterministic workflows.
+
+Полностью автономный drawing engineer не следует считать доказанной возможностью этой кодовой базы.
